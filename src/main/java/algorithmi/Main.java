@@ -15,11 +15,14 @@
  */
 package algorithmi;
 
+import java.net.URLDecoder;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static spark.Spark.delete;
+import static spark.Spark.externalStaticFileLocation;
 import static spark.Spark.get;
 import static spark.Spark.post;
 import static spark.Spark.put;
-import static spark.Spark.staticFileLocation;
 
 /**
  *
@@ -28,7 +31,12 @@ import static spark.Spark.staticFileLocation;
 public class Main {
 
   public static void main(String[] args) {
-    staticFileLocation("/public");
+    try {
+      //staticFileLocation("/public");
+      externalStaticFileLocation(URLDecoder.decode(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(), "UTF-8") + "/../../../algorithmi-web");
+    } catch (Exception ex) {
+      Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+    }
 
     get("/quiz/:id", (request, response) -> {
       return "Hello World";
@@ -45,8 +53,7 @@ public class Main {
     delete("/quiz/:id", (request, response) -> {
       return "Hello World";
     });
-    
-    
+
     get("/question/:id", (request, response) -> {
       return "Hello World";
     });
@@ -63,11 +70,10 @@ public class Main {
       return "Hello World";
     });
 
-    
     get("/user/:id", (request, response) -> {
       return "{\"username\": \"johndoe\", \"escola\":\"xpto\"}";
     });
-    
+
     post("/user", (request, response) -> {
       return "Hello World";
     });
