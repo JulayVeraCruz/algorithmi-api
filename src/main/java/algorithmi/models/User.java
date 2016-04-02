@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package algorithmi.models;
+package algorithmi.Models;
 
 /**
  *
  * @author Pedro Dias
  */
 public class User {
+
+    public String getInfo() {
+        return "{\"username\": \"4535fds345\", \"escola\":\"xpto\"}";
+    }
   
 }
