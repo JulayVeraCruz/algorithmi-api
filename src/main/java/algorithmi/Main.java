@@ -1,5 +1,6 @@
 package algorithmi;
 
+import algorithmi.Models.Question;
 import algorithmi.models.User;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -42,7 +43,10 @@ public class Main {
         });
 
         get("/question/:id", (request, response) -> {
-            return "Hello World";
+            Question questionExample = new Question("{'id_Pergunta':'1','titulo':'XPTO','categoria':'decisao','descricao':'xpto decide','imagem':'','algoritmo':''}");
+            return questionExample.toString();
+
+            //return "Hello World";
         });
 
         post("/question", (request, response) -> {
