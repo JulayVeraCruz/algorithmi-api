@@ -35,9 +35,9 @@ public class Question {
     public Question(String data) {
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
-        JsonObject question = (JsonObject) jsonParser.parse(data);
+        JsonObject Question = (JsonObject) jsonParser.parse(data);
         //Exibe os dados, em formato json
-        System.out.println(question.entrySet());
+        System.out.println(Question.entrySet());
         /**
          *
          * Revalidar TUDO, formatos, campos vazios, TUDO!!
@@ -49,8 +49,9 @@ public class Question {
         this.Titulo = Question.get("titulo").getAsString();
         this.Categoria = Question.get("categoria").getAsString();
         this.Descricao = Question.get("descricao").getAsString();
-        this.Imagem = Question.get("imagem");
-        this.Algoritmo = Question.get("algoritmo");
+        //NÃO SEI COMO É QUE VOU FAZER A CENA DAS IMAGENS NEM DO ALGORITMO PORQUE NÂO SEI TRABALHAR EM FORMATO DE VARIAVEL BYTE
+        this.Imagem = Question.get("imagem").getAsString();
+        this.Algoritmo = Question.get("algoritmo").getAsString();
     }
 
 
