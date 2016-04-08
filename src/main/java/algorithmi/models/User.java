@@ -29,9 +29,10 @@ import java.util.Date;
  */
 public class User {
 
-    private int id_User;
+    private int _id;
     private String name;
     private String password;
+    private String imgB64;
     private Date dateBirth;
     private String email;
     private int type;
@@ -50,9 +51,10 @@ public class User {
          */
         validateData();
         //Associa os dados ao objecto User
-        this.id_User = 123; //ir buscar o max id da bd + 1 
+        this._id = 123; //ir buscar o max id da bd + 1 
         this.name = user.get("name").getAsString();
         this.password = user.get("password").getAsString();
+        this.imgB64=user.get("imgB64").getAsString();
         DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
         df.setLenient(false);
         Date dt;
@@ -79,11 +81,11 @@ public class User {
 //    }
 
     public int getId_User() {
-        return id_User;
+        return _id;
     }
 
     public void setId_User(int id_User) {
-        this.id_User = id_User;
+        this._id = id_User;
     }
 
     public String getName() {
