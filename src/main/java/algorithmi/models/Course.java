@@ -19,30 +19,43 @@ package algorithmi.models;
  *
  * @author FilipeRosa
  */
-public class UserCurse {
-    private int user;
-    private int course;
+public class Course {
+    private int codCourse;
+    private String name;
+    private int school;
 
-    public UserCurse(int user, int curse) {
-        this.user = user;
-        this.course = curse;
+
+    public Course(int CodCurse, String name, int scholl) {
+        this.codCourse = codCourse;
+        this.name = name;
+        this.school = scholl;
+    }
+    public int getCodCourse() {
+        return codCourse;
     }
 
-    public int getUser() {
-        return user;
+    public void setCodCourse(int codCourse) {
+        this.codCourse = codCourse;
     }
 
-    public void setUser(int user) {
-        this.user = user;
+    public String getName() {
+        return name;
     }
 
-    public int getCourse() {
-        return course;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setCourse(int course) {
-        this.course = course;
+    public int getSchool() {
+        return school;
+    }
+
+    public void setSchool(int school) {
+        this.school = school;
     }
     
+    
+    
+            
     
 }

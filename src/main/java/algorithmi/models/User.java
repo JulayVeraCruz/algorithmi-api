@@ -15,83 +15,10 @@
  */
 package algorithmi.models;
 
-import java.util.Date;
-
 /**
  *
  * @author Pedro Dias
  */
 public class User {
-
-    private int id_User;
-    private String name;
-    private String password;
-    private Date dateBirth;
-    private String email;
-    private int type;
-
-    public User(int id_User, String name, String password, Date dateBirth, String email, int type) {
-        this.id_User = id_User;
-        this.name = name;
-        this.password = password;
-        this.dateBirth = dateBirth;
-        this.email = email;
-        this.type = type;
-    }
-
-//
-//    @Override
-//    public int hashCode() {
-//        int hash = 7;
-//        hash = 83 * hash + Objects.hashCode(this.name);
-//        hash = 83 * hash + Objects.hashCode(this.password);
-//        return hash;
-//    }
-    public int getId_User() {
-        return id_User;
-    }
-
-    public void setId_User(int id_User) {
-        this.id_User = id_User;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Date getDateBirth() {
-        return dateBirth;
-    }
-
-    public void setDateBirth(Date dateBirth) {
-        this.dateBirth = dateBirth;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
+  
 }
