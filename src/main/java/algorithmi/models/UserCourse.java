@@ -19,11 +19,11 @@ package algorithmi.models;
  *
  * @author FilipeRosa
  */
-public class UserCurse {
+public class UserCourse {
     private int user;
     private int course;
 
-    public UserCurse(int user, int curse) {
+    public UserCourse(int user, int curse) {
         this.user = user;
         this.course = curse;
     }
