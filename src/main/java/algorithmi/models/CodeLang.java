@@ -13,19 +13,19 @@ import com.google.gson.JsonParser;
  *
  * @author David
  */
-public class QuestionIO {
-
-    private int _id;
-    private int question;
-    private String in;
-    private String out;
-
-    public QuestionIO(String data) {
+public class CodeLang {
+	
+	private int questionID;
+	private int highLevelLandID;
+	private String programCode;
+    
+    
+public CodeLang(String data) {
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
-        JsonObject QuestionIO = (JsonObject) jsonParser.parse(data);
+        JsonObject CodeLang = (JsonObject) jsonParser.parse(data);
         //Exibe os dados, em formato json
-        System.out.println(QuestionIO.entrySet());
+        System.out.println(CodeLang.entrySet());
         /**
          *
          * Revalidar TUDO, formatos, campos vazios, TUDO!!
@@ -33,12 +33,12 @@ public class QuestionIO {
          */
         validateData();
         //Associa os dados ao objecto Question
-        this._id = 123; //ir buscar o max id da bd + 1 
-        this.question = QuestionIO.get("titulo").getAsInt();
-        this.in = QuestionIO.get("in").getAsString();
-        this.out = QuestionIO.get("out").getAsString();
+        this.questionID = CodeLang.get("questionID").getAsInt(); //ir buscar o max id da bd + 1 
+        this.highLevelLandID = CodeLang.get("highLevelLandID").getAsInt();
+        this.programCode = CodeLang.get("programCode").getAsString();
+        
+		}
 
-    }
 
     // converts a java object to JSON format,
     // and returned as JSON formatted string
@@ -55,6 +55,9 @@ public class QuestionIO {
         /**
          * Se estiver tudo OK, inserer na BD,
          */
-    }
+        }
 
+    
+    
+    
 }
