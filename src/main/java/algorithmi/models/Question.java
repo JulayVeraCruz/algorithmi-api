@@ -25,12 +25,12 @@ import com.google.gson.JsonParser;
  */
 public class Question {
 
-    private int ID_Pergunta;
-    private String Titulo;
-    private String Categoria;
-    private String Descricao;
-    private byte Imagem;
-    private byte Algoritmo;
+    private int _id;
+    private String title;
+    private int category;
+    private String description;
+    private String image;
+    private String algorithm;
 
     public Question(String data) {
         //Transforma a string recebida pelo pedido http para json
@@ -45,13 +45,12 @@ public class Question {
          */
         validateData();
         //Associa os dados ao objecto Question
-        this.ID_Pergunta = 123; //ir buscar o max id da bd + 1 
-        this.Titulo = Question.get("titulo").getAsString();
-        this.Categoria = Question.get("categoria").getAsString();
-        this.Descricao = Question.get("descricao").getAsString();
-        //NÃO SEI COMO É QUE VOU FAZER A CENA DAS IMAGENS NEM DO ALGORITMO PORQUE NÂO SEI TRABALHAR EM FORMATO DE VARIAVEL BYTE
-        this.Imagem = Question.get("imagem").getAsString();
-        this.Algoritmo = Question.get("algoritmo").getAsString();
+        this._id = 123; //ir buscar o max id da bd + 1 
+        this.title = Question.get("titulo").getAsString();
+        this.category = Question.get("categoria").getAsInt();
+        this.description = Question.get("descricao").getAsString();
+        this.image = Question.get("imagem").getAsString();
+        this.algorithm = Question.get("algoritmo").getAsString();
     }
 
 
@@ -70,97 +69,91 @@ public class Question {
         /**
          * Se estiver tudo OK, inserer na BD,
          */
-        regist();
-        /**
-         * Senão Devolve um erro (mas dos amigáveis :D)
-         */
-    }
-    public void regist() {
-        //Insere na BD
+        }
+
+    /**
+     * @return the _id
+     */
+    public int getId() {
+        return _id;
     }
 
     /**
-     * @return the ID_Pergunta
+     * @param _id the _id to set
      */
-    public int getID_Pergunta() {
-        return ID_Pergunta;
+    public void setId(int _id) {
+        this._id = _id;
     }
 
     /**
-     * @param ID_Pergunta the ID_Pergunta to set
+     * @return the title
      */
-    public void setID_Pergunta(int ID_Pergunta) {
-        this.ID_Pergunta = ID_Pergunta;
+    public String getTitle() {
+        return title;
     }
 
     /**
-     * @return the Titulo
+     * @param title the title to set
      */
-    public String getTitulo() {
-        return Titulo;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     /**
-     * @param Titulo the Titulo to set
+     * @return the category
      */
-    public void setTitulo(String Titulo) {
-        this.Titulo = Titulo;
+    public int getCategory() {
+        return category;
     }
 
     /**
-     * @return the Categoria
+     * @param category the category to set
      */
-    public String getCategoria() {
-        return Categoria;
+    public void setCategory(int category) {
+        this.category = category;
     }
 
     /**
-     * @param Categoria the Categoria to set
+     * @return the description
      */
-    public void setCategoria(String Categoria) {
-        this.Categoria = Categoria;
+    public String getDescription() {
+        return description;
     }
 
     /**
-     * @return the Descricao
+     * @param description the description to set
      */
-    public String getDescricao() {
-        return Descricao;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**
-     * @param Descricao the Descricao to set
+     * @return the image
      */
-    public void setDescricao(String Descricao) {
-        this.Descricao = Descricao;
+    public String getImage() {
+        return image;
     }
 
     /**
-     * @return the Imagem
+     * @param image the image to set
      */
-    public byte getImagem() {
-        return Imagem;
+    public void setImage(String image) {
+        this.image = image;
     }
 
     /**
-     * @param Imagem the Imagem to set
+     * @return the algorithm
      */
-    public void setImagem(byte Imagem) {
-        this.Imagem = Imagem;
+    public String getAlgorithm() {
+        return algorithm;
     }
 
     /**
-     * @return the Algoritmo
+     * @param algorithm the algorithm to set
      */
-    public byte getAlgoritmo() {
-        return Algoritmo;
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
     }
 
-    /**
-     * @param Algoritmo the Algoritmo to set
-     */
-    public void setAlgoritmo(byte Algoritmo) {
-        this.Algoritmo = Algoritmo;
-    }
 
 }
