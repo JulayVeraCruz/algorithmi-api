@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2016 FilipeRosa.
  *
@@ -15,13 +16,42 @@
  */
 package algorithmi.models;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 /**
  *
  * @author FilipeRosa
  */
 public class TypeUser {
+
     private int id_Type;
     private String name;
+
+    public TypeUser(String data) {
+
+        //Transforma a string recebida pelo pedido http para json
+        JsonParser jsonParser = new JsonParser();
+        JsonObject UserType = (JsonObject) jsonParser.parse(data);
+
+        //Exibe os dados, em formato json
+        System.out.println(UserType.entrySet());
+        /**
+         *
+         * Revalidar TUDO, formatos, campos vazios, TUDO!!
+         *
+         */
+        validateData();
+        //Associa os dados ao objecto UserType
+        this.id_Type = UserType.getAsInt(); //ir buscar o max id da bd + 1 
+        this.name = UserType.get("name").getAsString();
+//       
+    }
+
+    public void regist() {
+        //Insere na BD
+    }
 
     public TypeUser(int id_Type, String name) {
         this.id_Type = id_Type;
@@ -43,5 +73,25 @@ public class TypeUser {
     public void setName(String Name) {
         this.name = Name;
     }
-    
+
+    // converts a java object to JSON format,
+    // and returned as JSON formatted string
+    @Override
+    public String toString() {
+        Gson gson = new Gson();
+
+        String json = gson.toJson(this);
+        System.out.println("json \n" + json);
+        return json;
+    }
+
+    private void validateData() {
+        /**
+         * Se estiver tudo OK, inserer na BD,
+         */
+        regist();
+        /**
+         * Senão Devolve um erro (mas dos amigáveis :D)
+         */
+    }
 }

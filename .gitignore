@@ -13,3 +13,4 @@ reports
 .java-version
 src/main/java/algorithmi/Main.java
 src/test/resources/public/css/style.css
+/target/
