@@ -15,13 +15,41 @@
  */
 package algorithmi.models;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 /**
  *
  * @author FilipeRosa
  */
 public class UserCourse {
+
     private int user;
     private int course;
+
+    public UserCourse(String data) {
+
+        //Transforma a string recebida pelo pedido http para json
+        JsonParser jsonParser = new JsonParser();
+        JsonObject UserCourse = (JsonObject) jsonParser.parse(data);
+        //Exibe os dados, em formato json
+        System.out.println(UserCourse.entrySet());
+        /**
+         *
+         * Revalidar TUDO, formatos, campos vazios, TUDO!!
+         *
+         */
+        validateData();
+        //Associa os dados ao objecto UserCourse
+        this.user = UserCourse.get("_id").getAsInt();; //ir buscar o max id da bd + 1 
+        this.course = UserCourse.get("codCourse").getAsInt();
+
+    }
+
+    public void regist() {
+        //Insere na BD
+    }
 
     public UserCourse(int user, int curse) {
         this.user = user;
@@ -43,6 +71,25 @@ public class UserCourse {
     public void setCourse(int course) {
         this.course = course;
     }
-    
-    
+
+    // converts a java object to JSON format,
+    // and returned as JSON formatted string
+    @Override
+    public String toString() {
+        Gson gson = new Gson();
+
+        String json = gson.toJson(this);
+        System.out.println("json \n" + json);
+        return json;
+    }
+
+    private void validateData() {
+        /**
+         * Se estiver tudo OK, inserer na BD,
+         */
+        regist();
+        /**
+         * Senão Devolve um erro (mas dos amigáveis :D)
+         */
+    }
 }
