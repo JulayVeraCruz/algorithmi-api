@@ -13,14 +13,14 @@ import com.google.gson.JsonParser;
  *
  * @author David
  */
-public class QuestionIO {
+public class InputOutput {
 
     private int _id;
     private int question;
-    private String in;
-    private String out;
+    private String input;
+    private String output;
 
-    public QuestionIO(String data) {
+    public InputOutput(String data) {
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
         JsonObject QuestionIO = (JsonObject) jsonParser.parse(data);
@@ -35,8 +35,8 @@ public class QuestionIO {
         //Associa os dados ao objecto Question
         this._id = 123; //ir buscar o max id da bd + 1 
         this.question = QuestionIO.get("titulo").getAsInt();
-        this.in = QuestionIO.get("in").getAsString();
-        this.out = QuestionIO.get("out").getAsString();
+        this.input = QuestionIO.get("in").getAsString();
+        this.output = QuestionIO.get("out").getAsString();
 
     }
 
