@@ -23,11 +23,14 @@ public class utils {
             return false;
         }
         return true;
+
+        //ou simplesmente
+        //return Pattern.matches("[0-9]+", data));
     }
 
     public static boolean isString(String data) {
 
-        return true;
+        return Pattern.matches("[a-zA-Z0-9]+", data);
     }
 
     public boolean isThisDateValid(String dateToValidate, String dateFromat) {
@@ -55,12 +58,13 @@ public class utils {
         return true;
     }
 
-    public boolean isUsernameValid(String username){
-         if (username == null) {
-            return false;
-        }
-         //ver se tem espaços ou carateres especiais- se tiver devolve falso
-         return Pattern.matches("[a-zA-Z0-9]+", username);
+    public boolean isUsernameValid(String username) {
+
+        //ver se tem espaços ou carateres especiais- se tiver devolve falso
+        //X+	X occurs once or more times
+        //também funciona para valores nulos
+        return Pattern.matches("[a-zA-Z0-9]+", username);
 
     }
+
 }
