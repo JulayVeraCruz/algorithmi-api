@@ -17,6 +17,7 @@ public class Institutions {
     private int _id;
     private String name;
     private String address;
+    private String image;
 
     public Institutions(String data) {
         
@@ -32,6 +33,7 @@ public class Institutions {
         this._id = 123;
         this.name = institutions.get("name").getAsString();
         this.address = institutions.get("address").getAsString();
+        this.image = institutions.get("image").getAsString();
     }
 
     
@@ -59,6 +61,14 @@ public class Institutions {
         this.address = address;
     }
     
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+    
     public void regist() {
         //Insere na BD
     }
@@ -78,6 +88,8 @@ public class Institutions {
         //Se estiver tudo OK, inserer na BD
         regist();
     }
+
+    
   
 }
 

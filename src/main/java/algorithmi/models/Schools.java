@@ -17,6 +17,7 @@ public class Schools {
     private int _id;
     private String name;
     private int institution;
+    private String image;
 
     public Schools(String data) {
         
@@ -32,6 +33,7 @@ public class Schools {
         this._id = 123;
         this.name = schools.get("name").getAsString();
         this.institution = schools.get("institution").getAsInt();
+        this.image = schools.get("image").getAsString();
     }
 
     public int getId() {
@@ -58,6 +60,14 @@ public class Schools {
         this.institution = institution;
     }
     
+     public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+    
     public void regist() {
         //Insere na BD
     }
@@ -77,11 +87,4 @@ public class Schools {
         //Se estiver tudo OK, inserer na BD
         regist();
     }
-    
-    
-    
-    
-    
-    
-    
 }
