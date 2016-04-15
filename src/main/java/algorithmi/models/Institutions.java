@@ -8,6 +8,11 @@ package algorithmi.models;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -18,6 +23,9 @@ public class Institutions {
     private String name;
     private String address;
     private String image;
+    
+    private Connection connect = null;
+    PreparedStatement preparedStatement = null;
 
     public Institutions(String data) {
         
@@ -69,10 +77,6 @@ public class Institutions {
         this.image = image;
     }
     
-    public void regist() {
-        //Insere na BD
-    }
-    
     // converts a java object to JSON format,
     // and returned as JSON formatted string
     @Override
@@ -86,10 +90,34 @@ public class Institutions {
 
     private void validateData() {
         //Se estiver tudo OK, inserer na BD
-        regist();
+        insert();
     }
 
-    
+    public int insert() {
+        int status = 0;
+        try {
+            // Load the MySQL driver, each DB has its own driver
+            Class.forName("com.mysql.jdbc.Driver");
+            // DB connection setup 
+            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt" + "user=algo&password=algo");
+            // PreparedStatements 
+            preparedStatement = connect.prepareStatement("insert into user values (?, ?, ?, ? )");
+            // Parameters start with 1
+            preparedStatement.setString(1, _id + "");
+            preparedStatement.setString(2, name);
+            preparedStatement.setString(3, address);
+            preparedStatement.setString(4, image);
+            status = preparedStatement.executeUpdate();
+
+            if (connect != null) {
+                connect.close();
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return status;
+    }
   
 }
 
