@@ -31,7 +31,7 @@ public class User {
 
     private int _id;
     private String name;
-//    private String password;
+    private String password;
     private String imgB64;
     private Date dateBirth;
     private String email;
@@ -51,9 +51,9 @@ public class User {
          */
         validateData();
         //Associa os dados ao objecto User
-        this._id = 123; //ir buscar o max id da bd + 1 
+        this._id = user.get("_id").getAsInt(); //ir buscar o max id da bd + 1 
         this.name = user.get("name").getAsString();
-//        this.password = user.get("password").getAsString();
+        this.password = user.get("password").getAsString();
         this.imgB64=user.get("imgB64").getAsString();
         DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
         df.setLenient(false);
@@ -65,20 +65,13 @@ public class User {
         }
         this.dateBirth = dt;
         this.email = user.get("email").getAsString();
-        this.type = 3;//Definir o tipo de utilizador, como é registo, deverá ser do tipo aluno
+        this.type = user.get("type").getAsInt();//Definir o tipo de utilizador, como é registo, deverá ser do tipo aluno
     }
 
     public void regist() {
         //Insere na BD
     }
-//
-//    @Override
-//    public int hashCode() {
-//        int hash = 7;
-//        hash = 83 * hash + Objects.hashCode(this.name);
-//        hash = 83 * hash + Objects.hashCode(this.password);
-//        return hash;
-//    }
+
 
     public int getId_User() {
         return _id;
@@ -96,13 +89,13 @@ public class User {
         this.name = name;
     }
 
-//    public String getPassword() {
-//        return password;
-//    }
-//
-//    public void setPassword(String password) {
-//        this.password = password;
-//    }
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public Date getDateBirth() {
         return dateBirth;
