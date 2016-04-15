@@ -16,6 +16,7 @@
  */
 package algorithmi.models;
 
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -26,7 +27,7 @@ import com.google.gson.JsonParser;
  */
 public class TypeUser {
 
-    private int id_Type;
+    private int _id;
     private String name;
 
     public TypeUser(String data) {
@@ -42,9 +43,9 @@ public class TypeUser {
          * Revalidar TUDO, formatos, campos vazios, TUDO!!
          *
          */
-        validateData();
+        validateData(UserType);
         //Associa os dados ao objecto UserType
-        this.id_Type = UserType.getAsInt(); //ir buscar o max id da bd + 1 
+        this._id = UserType.getAsInt(); //ir buscar o max id da bd + 1 
         this.name = UserType.get("name").getAsString();
 //       
     }
@@ -54,16 +55,16 @@ public class TypeUser {
     }
 
     public TypeUser(int id_Type, String name) {
-        this.id_Type = id_Type;
+        this._id = id_Type;
         this.name = name;
     }
 
-    public int getId_Type() {
-        return id_Type;
+    public int getId() {
+        return _id;
     }
 
-    public void setId_Type(int id_Type) {
-        this.id_Type = id_Type;
+    public void setId(int _id) {
+        this._id = _id;
     }
 
     public String getName() {
@@ -85,13 +86,24 @@ public class TypeUser {
         return json;
     }
 
-    private void validateData() {
+    private void validateData(JsonObject UserType) {
         /**
          * Se estiver tudo OK, inserer na BD,
          */
-        regist();
-        /**
-         * Senão Devolve um erro (mas dos amigáveis :D)
-         */
+        boolean valid = false;
+
+        boolean nameValid = utils.isString(UserType.get("name").getAsString());
+        boolean idValid = utils.isNumber(UserType.get("_id").getAsString());
+       
+        valid = nameValid && idValid;
+       
+        if (valid) {
+            // regista na base de dados
+            regist();
+        } else {
+            /**
+             * Senão Devolve um erro (mas dos amigáveis :D)
+             */
+        }
     }
 }

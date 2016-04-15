@@ -15,6 +15,7 @@
  */
 package algorithmi.models;
 
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -35,16 +36,17 @@ import java.util.logging.Logger;
 public class User {
 
     private int _id;
+    private String username;
     private String name;
-    private String password;
-    private String imgB64;
-    private Date dateBirth;
+    private Date birthDate;
     private String email;
+    private String image;
+    private String password;
     private int type;
 
     private Connection connect = null;
     PreparedStatement preparedStatement = null;
-    
+
     public User(String data) {
 
         //Transforma a string recebida pelo pedido http para json
@@ -60,22 +62,22 @@ public class User {
         validateData();
         //Associa os dados ao objecto User
         this._id = user.get("_id").getAsInt(); //ir buscar o max id da bd + 1 
+        this.username = user.get("username").getAsString();
         this.name = user.get("name").getAsString();
-        this.password = user.get("password").getAsString();
-        this.imgB64=user.get("imgB64").getAsString();
         DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
         df.setLenient(false);
         Date dt;
         try {
-            dt = df.parse(user.get("dateBirth").getAsString());
+            dt = df.parse(user.get("birthDate").getAsString());
         } catch (ParseException ex) {
             dt = new Date();
         }
-        this.dateBirth = dt;
+        this.birthDate = dt;
         this.email = user.get("email").getAsString();
+        this.password = user.get("password").getAsString();
+        this.image = user.get("image").getAsString();
         this.type = user.get("type").getAsInt();//Definir o tipo de utilizador, como é registo, deverá ser do tipo aluno
     }
-
 
     public int getId_User() {
         return _id;
@@ -83,6 +85,14 @@ public class User {
 
     public void setId_User(int id_User) {
         this._id = id_User;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getName() {
@@ -102,11 +112,11 @@ public class User {
     }
 
     public Date getDateBirth() {
-        return dateBirth;
+        return birthDate;
     }
 
     public void setDateBirth(Date dateBirth) {
-        this.dateBirth = dateBirth;
+        this.birthDate = dateBirth;
     }
 
     public String getEmail() {
@@ -132,7 +142,7 @@ public class User {
         Gson gson = new Gson();
 
         String json = gson.toJson(this);
-        System.out.println("json \n"+ json);
+        System.out.println("json \n" + json);
         return json;
     }
 
@@ -140,13 +150,30 @@ public class User {
         /**
          * Se estiver tudo OK, inserer na BD,
          */
-        regist();
-         /**Senão Devolve um erro (mas dos
-         * amigáveis :D)
+        boolean valid = false;
+
+        boolean usernameValid = utils.isUsernameValid(username);
+        boolean nameValid = utils.isString(name);
+        boolean dateValid = utils.isThisDateValid(birthDate.toString());
+        boolean emailValid = utils.isEmailValid(email);
+        boolean imageValid = utils.isString(image);
+        boolean passwordValid = utils.isString(password);
+        boolean typeValid = utils.isNumber(Integer.toString(type));
+
+       
+        valid = usernameValid && nameValid && dateValid && emailValid && imageValid && passwordValid && typeValid;
+        if (valid) { 
+            //se for tudo validado regista
+            regist();
+        } else /**
+         * Senão Devolve um erro (mas dos amigáveis :D)
          */
+        {
+            
+        }
     }
-    
-        public int regist() {
+
+    public int regist() {
         int status = 0;
         try {
             // Load the MySQL driver, each DB has its own driver
@@ -154,15 +181,18 @@ public class User {
             // DB connection setup 
             connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt" + "user=algo&password=algo");
             // PreparedStatements 
-            preparedStatement = connect.prepareStatement("insert into user values (?, ?, ?, ?, ?, ?, ? )");
+            preparedStatement = connect.prepareStatement("insert into user values (?, ?, ?, ?, ?, ?, ?, ? )");
             // Parameters start with 1
+            
+            //ordem segundo a tabela da bd v3.2
             preparedStatement.setString(1, _id + "");
-            preparedStatement.setString(2, name);
-            preparedStatement.setString(3, password);
-            preparedStatement.setString(4, imgB64);
-            preparedStatement.setString(5, dateBirth.toString());
-            preparedStatement.setString(6, email);
-            preparedStatement.setString(7, type + "");
+            preparedStatement.setString(2, username);
+            preparedStatement.setString(3, name);
+            preparedStatement.setString(4, birthDate.toString());
+            preparedStatement.setString(5, email);
+            preparedStatement.setString(6, image);
+            preparedStatement.setString(7, password);
+            preparedStatement.setString(8, type + "");
             status = preparedStatement.executeUpdate();
 
             if (connect != null) {
@@ -174,5 +204,5 @@ public class User {
 
         return status;
     }
-    
+
 }
