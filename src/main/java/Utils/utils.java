@@ -8,6 +8,7 @@ package Utils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.*;
 
 /**
  *
@@ -54,4 +55,12 @@ public class utils {
         return true;
     }
 
+    public boolean isUsernameValid(String username){
+         if (username == null) {
+            return false;
+        }
+         //ver se tem espaços ou carateres especiais- se tiver devolve falso
+         return Pattern.matches("[a-zA-Z0-9]+", username);
+
+    }
 }
