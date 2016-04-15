@@ -18,10 +18,15 @@ package algorithmi.models;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -37,6 +42,9 @@ public class User {
     private String email;
     private int type;
 
+    private Connection connect = null;
+    PreparedStatement preparedStatement = null;
+    
     public User(String data) {
 
         //Transforma a string recebida pelo pedido http para json
@@ -66,10 +74,6 @@ public class User {
         this.dateBirth = dt;
         this.email = user.get("email").getAsString();
         this.type = user.get("type").getAsInt();//Definir o tipo de utilizador, como é registo, deverá ser do tipo aluno
-    }
-
-    public void regist() {
-        //Insere na BD
     }
 
 
@@ -142,6 +146,33 @@ public class User {
          */
     }
     
-    
+        public int regist() {
+        int status = 0;
+        try {
+            // Load the MySQL driver, each DB has its own driver
+            Class.forName("com.mysql.jdbc.Driver");
+            // DB connection setup 
+            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt" + "user=algo&password=algo");
+            // PreparedStatements 
+            preparedStatement = connect.prepareStatement("insert into user values (?, ?, ?, ?, ?, ?, ? )");
+            // Parameters start with 1
+            preparedStatement.setString(1, _id + "");
+            preparedStatement.setString(2, name);
+            preparedStatement.setString(3, password);
+            preparedStatement.setString(4, imgB64);
+            preparedStatement.setString(5, dateBirth.toString());
+            preparedStatement.setString(6, email);
+            preparedStatement.setString(7, type + "");
+            status = preparedStatement.executeUpdate();
+
+            if (connect != null) {
+                connect.close();
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return status;
+    }
     
 }
