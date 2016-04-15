@@ -5,6 +5,10 @@
  */
 package Utils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  *
  * @author Pedro Batista
@@ -19,9 +23,35 @@ public class utils {
         }
         return true;
     }
-    
-    public static boolean isString(String data){
-        
+
+    public static boolean isString(String data) {
+
         return true;
     }
+
+    public boolean isThisDateValid(String dateToValidate, String dateFromat) {
+        //validar data formato proposto dd/MM/yyyy 
+        //dateFormat="dd/MM/yyyy"
+        if (dateToValidate == null) {
+            return false;
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat(dateFromat);
+        sdf.setLenient(false);
+
+        try {
+
+            //if not valid, it will throw ParseException
+            Date date = sdf.parse(dateToValidate);
+            System.out.println(date);
+
+        } catch (ParseException e) {
+
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
 }
