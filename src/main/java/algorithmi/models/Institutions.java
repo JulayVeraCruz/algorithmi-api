@@ -101,6 +101,7 @@ public class Institutions {
             // DB connection setup 
             connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt" + "user=algo&password=algo");
             // PreparedStatements 
+            preparedStatement = connect.prepareStatement("insert into user values (?, ?, ?, ? )");
             // Parameters start with 1
             preparedStatement.setString(1, _id + "");
             preparedStatement.setString(2, name);
