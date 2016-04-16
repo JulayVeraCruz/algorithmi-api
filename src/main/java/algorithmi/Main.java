@@ -62,6 +62,50 @@ public class Main {
         delete("/question/:id", (request, response) -> {
             return "Hello World";
         });
+        
+        
+        post("/course", (request, response) -> {
+            return "Hello World";
+        });
+
+        put("/course/:id", (request, response) -> {
+            return "Hello World";
+        });
+
+        delete("/course/:id", (request, response) -> {
+            return "Hello World";
+        });
+        
+        
+        
+        
+               post("/institution", (request, response) -> {
+            return "Hello World";
+        });
+
+        put("/institution/:id", (request, response) -> {
+            return "Hello World";
+        });
+
+        delete("/institution/:id", (request, response) -> {
+            return "Hello World";
+        });
+        
+        
+        
+        post("/teacher", (request, response) -> {
+            return "Hello World";
+        });
+
+        put("/teacher/:id", (request, response) -> {
+            return "Hello World";
+        });
+
+        delete("/teacher/:id", (request, response) -> {
+            return "Hello World";
+        });
+        
+        
 
         //Obtem a lista de todos os utilizadores
         get("/students", (request, response) -> {
