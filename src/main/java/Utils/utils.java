@@ -28,19 +28,36 @@ public class utils {
         //return Pattern.matches("[0-9]+", data));
     }
 
-    public static boolean isString(String data) {
-
-        return Pattern.matches("[a-zA-Z0-9]+", data);
+    public static boolean isNumberLimited(String data, int limit) {
+        /**
+         * [admite numeros] {tamanho min=1, max=limit} 
+         * caso data seja null devolve false
+         */
+        return Pattern.matches("[0-9]{1,limit}", data);
     }
 
-    public boolean isThisDateValid(String dateToValidate, String dateFromat) {
+    public static boolean isString(String data) {
+        //admite letras,numeros e espaço
+        return Pattern.matches("[a-zA-Z0-9 ]+", data);
+    }
+
+    public static boolean isStringLimited(String data, int limit) {
+        /**
+         * [admite letras,numeros e espaço] {tamanho min=1, max=limit} caso data
+         * seja null devolve false
+         */
+
+        return Pattern.matches("[a-zA-Z0-9 ]{1,limit}", data);
+    }
+
+    public static boolean isThisDateValid(String dateToValidate) {
         //validar data formato proposto dd/MM/yyyy 
         //dateFormat="dd/MM/yyyy"
         if (dateToValidate == null) {
             return false;
         }
 
-        SimpleDateFormat sdf = new SimpleDateFormat(dateFromat);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         sdf.setLenient(false);
 
         try {
@@ -58,7 +75,7 @@ public class utils {
         return true;
     }
 
-    public boolean isUsernameValid(String username) {
+    public static boolean isUsernameValid(String username) {
 
         //ver se tem espaços ou carateres especiais- se tiver devolve falso
         //X+	X occurs once or more times
@@ -67,4 +84,13 @@ public class utils {
 
     }
 
+    public static boolean isEmailValid(String email) {
+        return Pattern.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+                + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", email);
+    }
+
 }
+//ajuda sobre regex
+//Pattern.matches("[carateresOUconjunto-ADMITIDO]",dadosAcomparar)
+//se nos dados a comparar n existir algo que n esteja em carateresOUconjunto-ADMITIDO devolve falso!
+//fonte: http://www.javatpoint.com/java-regex
