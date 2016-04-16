@@ -25,8 +25,8 @@ import com.google.gson.JsonParser;
  */
 public class UserCourse {
 
-    private int user;
-    private int course;
+    private int userID;
+    private int courseID;
 
     public UserCourse(String data) {
 
@@ -42,8 +42,8 @@ public class UserCourse {
          */
         validateData();
         //Associa os dados ao objecto UserCourse
-        this.user = UserCourse.get("_id").getAsInt();; //ir buscar o max id da bd + 1 
-        this.course = UserCourse.get("codCourse").getAsInt();
+        this.userID = UserCourse.get("_id").getAsInt();; //ir buscar o max id da bd + 1 
+        this.courseID = UserCourse.get("codCourse").getAsInt();
 
     }
 
@@ -52,24 +52,24 @@ public class UserCourse {
     }
 
     public UserCourse(int user, int curse) {
-        this.user = user;
-        this.course = curse;
+        this.userID = user;
+        this.courseID = curse;
     }
 
-    public int getUser() {
-        return user;
+    public int getUserID() {
+        return userID;
     }
 
-    public void setUser(int user) {
-        this.user = user;
+    public void setUserID(int userID) {
+        this.userID = userID;
     }
 
-    public int getCourse() {
-        return course;
+    public int getCourseID() {
+        return courseID;
     }
 
-    public void setCourse(int course) {
-        this.course = course;
+    public void setCourseID(int courseID) {
+        this.courseID = courseID;
     }
 
     // converts a java object to JSON format,

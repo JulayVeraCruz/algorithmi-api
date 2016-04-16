@@ -28,8 +28,9 @@ import java.util.Date;
  * @author FilipeRosa
  */
 public class Course {
-    private int codCourse;
+    private int _id;
     private String name;
+    private String image;
     private int school;
     
     public Course(String data) {
@@ -46,8 +47,9 @@ public class Course {
          */
         validateData();
         //Associa os dados ao objecto Course
-        this.codCourse = Course.getAsInt(); //ir buscar o max id da bd + 1 
+        this._id = Course.getAsInt(); //ir buscar o max id da bd + 1 
         this.name = Course.get("name").getAsString();
+        this.image=Course.get("image").getAsString();
         this.school=Course.get("school").getAsInt();
        
     }
@@ -57,17 +59,17 @@ public class Course {
     }
 
     public Course(int CodCurse, String name, int scholl) {
-        this.codCourse = codCourse;
+        this._id = _id;
         this.name = name;
         this.school = scholl;
     }
     
-    public int getCodCourse() {
-        return codCourse;
+    public int getId() {
+        return _id;
     }
 
-    public void setCodCourse(int codCourse) {
-        this.codCourse = codCourse;
+    public void setId(int _id) {
+        this._id = _id;
     }
 
     public String getName() {

@@ -90,7 +90,7 @@ public class TypeUser {
         /**
          * Se estiver tudo OK, inserer na BD,
          */
-        boolean valid = false;
+        boolean valid ;
 
         boolean nameValid = utils.isString(UserType.get("name").getAsString());
         boolean idValid = utils.isNumber(UserType.get("_id").getAsString());
