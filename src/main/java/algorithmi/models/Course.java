@@ -32,6 +32,7 @@ public class Course {
     private String name;
     private String image;
     private int school;
+    private String image;
     
     public Course(String data) {
 
@@ -51,7 +52,7 @@ public class Course {
         this.name = Course.get("name").getAsString();
         this.image=Course.get("image").getAsString();
         this.school=Course.get("school").getAsInt();
-       
+        this.image = Course.get("image").getAsString();
     }
 
     public void regist() {
@@ -62,6 +63,7 @@ public class Course {
         this._id = _id;
         this.name = name;
         this.school = scholl;
+        this.image = image;
     }
     
     public int getId() {
@@ -86,6 +88,14 @@ public class Course {
 
     public void setSchool(int school) {
         this.school = school;
+    }
+    
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
     
     
