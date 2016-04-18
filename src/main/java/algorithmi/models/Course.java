@@ -32,7 +32,7 @@ public class Course {
     private String name;
     private String image;
     private int school;
-    private String image;
+    
     
     public Course(String data) {
 
