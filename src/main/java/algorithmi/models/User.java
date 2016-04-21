@@ -59,24 +59,33 @@ public class User {
          * Revalidar TUDO, formatos, campos vazios, TUDO!!
          *
          */
-        validateData();
-        //Associa os dados ao objecto User
-        this._id = user.get("_id").getAsInt(); //ir buscar o max id da bd + 1 
-        this.username = user.get("username").getAsString();
-        this.name = user.get("name").getAsString();
-        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-        df.setLenient(false);
-        Date dt;
-        try {
-            dt = df.parse(user.get("birthDate").getAsString());
-        } catch (ParseException ex) {
-            dt = new Date();
+        boolean existErro = false;
+        String[] erros = validateData();
+        for (int i = 0; i < erros.length; i++) {
+            if (erros[i] == null);
+            {
+                existErro = existErro || false;
+            }
         }
-        this.birthDate = dt;
-        this.email = user.get("email").getAsString();
-        this.password = user.get("password").getAsString();
-        this.image = user.get("image").getAsString();
-        this.type = user.get("type").getAsInt();//Definir o tipo de utilizador, como é registo, deverá ser do tipo aluno
+        if (!existErro) {
+            //Associa os dados ao objecto User
+            this._id = getLastID_Users() + 1; //ir buscar o max id da bd + 1 
+            this.username = user.get("username").getAsString();
+            this.name = user.get("name").getAsString();
+            DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+            df.setLenient(false);
+            Date dt;
+            try {
+                dt = df.parse(user.get("birthDate").getAsString());
+            } catch (ParseException ex) {
+                dt = new Date();
+            }
+            this.birthDate = dt;
+            this.email = user.get("email").getAsString();
+            this.password = user.get("password").getAsString();
+            this.image = user.get("image").getAsString();
+            this.type = user.get("type").getAsInt();//Definir o tipo de utilizador, como é registo, deverá ser do tipo aluno
+        }
     }
 
     public int getId_User() {
@@ -135,6 +144,16 @@ public class User {
         this.type = type;
     }
 
+    /**
+     * obtem o maximo id utilizado na tabela tblUsers
+     *
+     * @return int
+     */
+    public static int getLastID_Users() {
+        utils getid = new utils();
+        return getid.getLastID("tblUsers");
+    }
+
     // converts a java object to JSON format,
     // and returned as JSON formatted string
     @Override
@@ -146,31 +165,53 @@ public class User {
         return json;
     }
 
-    private void validateData() {
+    private String[] validateData() {
         /**
          * Se estiver tudo OK, inserer na BD,
          */
+        String respostasErro[] = new String[7];
         boolean valid = false;
 
-        boolean usernameValid = utils.isUsernameValid(username);
-        boolean nameValid = utils.isString(name);
-        boolean dateValid = utils.isThisDateValid(birthDate.toString());
-        boolean emailValid = utils.isEmailValid(email);
-        boolean imageValid = utils.isString(image);
-        boolean passwordValid = utils.isString(password);
-        boolean typeValid = utils.isNumber(Integer.toString(type));
+        boolean usernameValid = utils.isUsernameValid(username);//0
+        boolean nameValid = utils.isString(name);//1
+        boolean dateValid = utils.isThisDateValid(birthDate.toString());//2
+        boolean emailValid = utils.isEmailValid(email);//3
+        boolean imageValid = utils.isString(image);//4
+        boolean passwordValid = utils.isString(password);//5
+        boolean typeValid = utils.isNumber(Integer.toString(type));//6
 
-       
         valid = usernameValid && nameValid && dateValid && emailValid && imageValid && passwordValid && typeValid;
-        if (valid) { 
+        if (valid) {
             //se for tudo validado regista
             regist();
         } else /**
          * Senão Devolve um erro (mas dos amigáveis :D)
          */
         {
-            
+            if (!usernameValid) {
+                respostasErro[0] = "Username invalido";
+            }
+            if (!nameValid) {
+                respostasErro[1] = "Nome invalido";
+            }
+            if (!dateValid) {
+                respostasErro[2] = "Data invalida";
+            }
+            if (!emailValid) {
+                respostasErro[3] = "Email invalido";
+            }
+            if (!imageValid) {
+                respostasErro[4] = "path invalido";
+            }
+            if (!passwordValid) {
+                respostasErro[5] = "Password invalida";
+            }
+            if (!typeValid) {
+                respostasErro[6] = "Tipo invalido";
+            }
         }
+
+        return respostasErro;
     }
 
     public int regist() {
@@ -183,7 +224,7 @@ public class User {
             // PreparedStatements 
             preparedStatement = connect.prepareStatement("insert into user values (?, ?, ?, ?, ?, ?, ?, ? )");
             // Parameters start with 1
-            
+
             //ordem segundo a tabela da bd v3.2
             preparedStatement.setString(1, _id + "");
             preparedStatement.setString(2, username);
