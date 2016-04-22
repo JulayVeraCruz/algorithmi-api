@@ -15,9 +15,15 @@
  */
 package algorithmi.Models;
 
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -31,7 +37,12 @@ public class Question {
     private String description;
     private String image;
     private String algorithm;
+    private int difficulty;
 
+    private Connection connect = null;
+    PreparedStatement preparedStatement = null;
+
+    // EXEMPLO DE STRING RECEBIDA [title="olol", category="1", description="olololo", difficulty="1", image="", in="9", out="9"]
     public Question(String data) {
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -39,20 +50,17 @@ public class Question {
         //Exibe os dados, em formato json
         System.out.println(Question.entrySet());
         /**
-         *
          * Revalidar TUDO, formatos, campos vazios, TUDO!!
-         *
          */
         validateData();
         //Associa os dados ao objecto Question
-        this._id = 123; //ir buscar o max id da bd + 1 
-        this.title = Question.get("titulo").getAsString();
-        this.category = Question.get("categoria").getAsInt();
-        this.description = Question.get("descricao").getAsString();
-        this.image = Question.get("imagem").getAsString();
+        this._id = getLastID() + 1; //ir buscar o max id da bd + 1 
+        this.title = Question.get("title").getAsString();
+        this.category = Question.get("category").getAsInt();
+        this.description = Question.get("description").getAsString();
+        this.image = Question.get("image").getAsString();
         this.algorithm = Question.get("algoritmo").getAsString();
     }
-
 
     // converts a java object to JSON format,
     // and returned as JSON formatted string
@@ -69,7 +77,7 @@ public class Question {
         /**
          * Se estiver tudo OK, inserer na BD,
          */
-        }
+    }
 
     /**
      * @return the _id
@@ -155,5 +163,40 @@ public class Question {
         this.algorithm = algorithm;
     }
 
+    public static int getLastID() {
+        utils getid = new utils();
+        return getid.getLastID("tblQuestions");
+    }
+
+    public int regist() {
+        int status = 0;
+        try {
+            // Load the MySQL driver, each DB has its own driver
+            Class.forName("com.mysql.jdbc.Driver");
+            // DB connection setup 
+            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt" + "user=algo&password=algo");
+            // PreparedStatements 
+            preparedStatement = connect.prepareStatement("insert into tblQuestions values (?, ?, ?, ?, ?, ?, ?)");
+            // Parameters start with 1
+
+            //ordem segundo a tabela da bd v3.3
+            preparedStatement.setString(1, _id + "");
+            preparedStatement.setString(2, description);
+            preparedStatement.setString(3, difficulty + "");
+            preparedStatement.setString(4, image);
+            preparedStatement.setString(5, algorithm);
+            preparedStatement.setString(6, title);
+            preparedStatement.setString(7, category + "");
+            status = preparedStatement.executeUpdate();
+
+            if (connect != null) {
+                connect.close();
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(algorithmi.models.User.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return status;
+    }
 
 }

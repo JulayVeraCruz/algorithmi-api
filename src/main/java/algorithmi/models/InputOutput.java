@@ -5,9 +5,15 @@
  */
 package algorithmi.models;
 
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -19,6 +25,9 @@ public class InputOutput {
     private int question;
     private String input;
     private String output;
+
+    private Connection connect = null;
+    PreparedStatement preparedStatement = null;
 
     public InputOutput(String data) {
         //Transforma a string recebida pelo pedido http para json
@@ -33,8 +42,8 @@ public class InputOutput {
          */
         validateData();
         //Associa os dados ao objecto Question
-        this._id = 123; //ir buscar o max id da bd + 1 
-        this.question = QuestionIO.get("titulo").getAsInt();
+        this._id = getLastID()+1; //ir buscar o max id da bd + 1 
+        this.question = QuestionIO.get("title").getAsInt();
         this.input = QuestionIO.get("in").getAsString();
         this.output = QuestionIO.get("out").getAsString();
 
@@ -55,6 +64,39 @@ public class InputOutput {
         /**
          * Se estiver tudo OK, inserer na BD,
          */
+    }
+
+        public static int getLastID() {
+        utils getid = new utils();
+        return getid.getLastID("tblQuestions");
+    }
+    
+    public int regist() {
+        int status = 0;
+        try {
+            // Load the MySQL driver, each DB has its own driver
+            Class.forName("com.mysql.jdbc.Driver");
+            // DB connection setup 
+            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt" + "user=algo&password=algo");
+            // PreparedStatements 
+            preparedStatement = connect.prepareStatement("insert into user from tblQuestions values (?, ?, ?, ?, ?, ?, ?)");
+            // Parameters start with 1
+            
+            //ordem segundo a tabela da bd v3.3
+            preparedStatement.setString(1, _id + "");
+            preparedStatement.setString(2, question+"");
+            preparedStatement.setString(3, input);
+            preparedStatement.setString(4, output);
+            status = preparedStatement.executeUpdate();
+
+            if (connect != null) {
+                connect.close();
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(algorithmi.models.User.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return status;
     }
 
 }
