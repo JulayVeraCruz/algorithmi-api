@@ -78,6 +78,33 @@ public class Main {
             return "Hello World";
         });
         
+        post("/course/new", (request, response) -> {
+
+            String data;
+            try {
+                //JSon Puro (Raw)
+                data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+                
+                //Objecto Jason para aceder aos parametros via Java
+                JsonParser jsonParser = new JsonParser();
+                JsonObject user = (JsonObject)jsonParser.parse(data);
+                
+                //Exibe os dados, em formato json
+                System.out.println(user.entrySet());
+                
+                //Exibe o paramentro "name" do objecto json
+                //System.out.println(user.get("name"));
+                
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            
+                        
+            return "Hello World";
+        });
+        
+        
         
         
         
@@ -108,7 +135,7 @@ public class Main {
                 System.out.println(user.entrySet());
                 
                 //Exibe o paramentro "name" do objecto json
-                System.out.println(user.get("name"));
+                //System.out.println(user.get("name"));
                 
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -118,6 +145,51 @@ public class Main {
                         
             return "Hello World";
         });
+        
+        
+        
+        
+        post("/school", (request, response) -> {
+            return "Hello World";
+        });
+
+        put("/school/:id", (request, response) -> {
+            return "Hello World";
+        });
+
+        delete("/school/:id", (request, response) -> {
+            return "Hello World";
+        });
+        
+        post("/school/new", (request, response) -> {
+
+            String data;
+            try {
+                //JSon Puro (Raw)
+                data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+                
+                //Objecto Jason para aceder aos parametros via Java
+                JsonParser jsonParser = new JsonParser();
+                JsonObject user = (JsonObject)jsonParser.parse(data);
+                
+                //Exibe os dados, em formato json
+                System.out.println(user.entrySet());
+                
+                //Exibe o paramentro "name" do objecto json
+                //System.out.println(user.get("name"));
+                
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            
+                        
+            return "Hello World";
+        });
+        
+        
+        
+        
         
         
         post("/teacher", (request, response) -> {
