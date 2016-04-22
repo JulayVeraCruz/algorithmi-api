@@ -31,20 +31,12 @@ public class utils {
     private ResultSet resultSet = null;
 
     /**
-     *
+     * verifica se a string é composta apenas por algarismos
      * @param data
-     * @return
+     * @return bolean
      */
     public static boolean isNumber(String data) {
-        try {
-            int d = Integer.parseInt(data);
-        } catch (NumberFormatException nfe) {
-            return false;
-        }
-        return true;
-
-        //ou simplesmente
-        //return Pattern.matches("[0-9]+", data));
+            return Pattern.matches("[0-9]+", data);
     }
 
     /**

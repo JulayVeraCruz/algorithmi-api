@@ -5,6 +5,7 @@
  */
 package algorithmi.models;
 
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -36,8 +37,8 @@ public class MatrixTests {
         //Revalidar TUDO, formatos, campos vazios, TUDO!!
         validateData();
         
-        //TEM DE IR BUSCAR O ULTIMO ID E ACRESCENTAR UM
-        this._id = 123;
+        
+        this._id = getLastID_MatrixTests()+ 1; //ir buscar o max id da bd + 1
         this.name = matrixTests.get("name").getAsString();
         this.teacher = matrixTests.get("teacher").getAsInt();
         this.course = matrixTests.get("course").getAsInt();
@@ -108,6 +109,11 @@ public class MatrixTests {
 
     public void setFinishingTime(Date finishingTime) {
         this.finishingTime = finishingTime;
+    }
+   
+    public static int getLastID_MatrixTests() {
+        utils getid = new utils();
+        return getid.getLastID("tblMatrixTests");
     }
     
    public void regist() {
