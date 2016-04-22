@@ -8,7 +8,6 @@ package Utils;
 import algorithmi.models.Course;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,23 +24,20 @@ import java.util.regex.*;
  */
 public class utils {
 
-    private Connection connect = null;
-    PreparedStatement preparedStatement = null;
-    private Statement statement = null;
-    private ResultSet resultSet = null;
-
     /**
      * verifica se a string é composta apenas por algarismos
+     *
      * @param data
      * @return bolean
      */
     public static boolean isNumber(String data) {
-            return Pattern.matches("[0-9]+", data);
+        return Pattern.matches("[0-9]+", data);
     }
 
     /**
-     * verifica se a string é composta apenas por algarismos e 
-     * se possui o tamanho (limit) correcto 
+     * verifica se a string é composta apenas por algarismos e se possui o
+     * tamanho (limit) correcto
+     *
      * @param data
      * @param limit
      * @return boolean
@@ -55,8 +51,8 @@ public class utils {
     }
 
     /**
-     * verifica se a string tem apenas 
-     * letras,algarismos e espaço
+     * verifica se a string tem apenas letras,algarismos e espaço
+     *
      * @param data
      * @return bollean
      */
@@ -66,9 +62,9 @@ public class utils {
     }
 
     /**
-     *verifica se a string tem apenas 
-     * letras,algarismos e espaço e 
-     * se possui o tamanho (limit) correcto 
+     * verifica se a string tem apenas letras,algarismos e espaço e se possui o
+     * tamanho (limit) correcto
+     *
      * @param data
      * @param limit
      * @return boolean
@@ -83,8 +79,8 @@ public class utils {
     }
 
     /**
-     * verifica se a data tem formato valido
-     * o formato admitido é dd/MM/yyyy
+     * verifica se a data tem formato valido o formato admitido é dd/MM/yyyy
+     *
      * @param dateToValidate
      * @return boolean
      */
@@ -114,8 +110,9 @@ public class utils {
     }
 
     /**
-     * verifica se o username tem formato válido
-     * apenas admite letras e algarismos
+     * verifica se o username tem formato válido apenas admite letras e
+     * algarismos
+     *
      * @param username
      * @return boolean
      */
@@ -129,7 +126,8 @@ public class utils {
     }
 
     /**
-     * verifica se o email tem formato válido 
+     * verifica se o email tem formato válido
+     *
      * @param email
      * @return boolean
      */
@@ -139,31 +137,29 @@ public class utils {
     }
 
     /**
-     * Devolve o último id da tabela nomeTabela
-     * na base de dados algoritmi.ipt.pt
-     * retorna zero se n existitem dados 
+     * Devolve o último id da tabela nomeTabela na base de dados
+     * algoritmi.ipt.pt retorna zero se n existitem dados
+     *
      * @param nomeTabela
      * @return int
      */
     public int getLastID(String nomeTabela) {
+
         try {
-            // This will load the MySQL driver, each DB has its own driver
-            // Load the MySQL driver, each DB has its own driver
-            // Class.forName("com.mysql.jdbc.Driver");
-            // DB connection setup 
-            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt" + "user=algo&password=algo");
-
-            // Statements allow to issue SQL queries to the database
-            statement = connect.createStatement();
-            // Result set get the result of the SQL query
-            preparedStatement = connect
-                    .prepareStatement("select " + nomeTabela + "._id from" + nomeTabela + " order by _id desc limit 1");
-            resultSet = preparedStatement.executeQuery();
-            return (int) resultSet.getObject(1);
-
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("select " + nomeTabela + "._id from" + nomeTabela + " order by _id desc limit 1");
+            ResultSet res = stmtt.getResultSet();
+            stmtt.close();
+            connn.close();
+            System.out.println("Last id  "+res);
+            return Integer.parseInt(res.getString("_id"));
         } catch (SQLException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        }
+            Logger.getLogger(nomeTabela).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(utils.class.getName()).log(Level.SEVERE, null, ex);
+        } 
         return 0;
     }
 
