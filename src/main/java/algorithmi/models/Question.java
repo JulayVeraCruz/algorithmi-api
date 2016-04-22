@@ -52,6 +52,7 @@ public class Question {
         /**
          * Revalidar TUDO, formatos, campos vazios, TUDO!!
          */
+        regist();
         validateData();
         //Associa os dados ao objecto Question
         this._id = getLastID() + 1; //ir buscar o max id da bd + 1 
@@ -165,7 +166,7 @@ public class Question {
 
     public static int getLastID() {
         utils getid = new utils();
-        return getid.getLastID("tblQuestions");
+        return getid.getLastID("tblquestions");
     }
 
     public int regist() {
@@ -174,9 +175,9 @@ public class Question {
             // Load the MySQL driver, each DB has its own driver
             Class.forName("com.mysql.jdbc.Driver");
             // DB connection setup 
-            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt" + "user=algo&password=algo");
+            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
             // PreparedStatements 
-            preparedStatement = connect.prepareStatement("insert into tblQuestions values (?, ?, ?, ?, ?, ?, ?)");
+            preparedStatement = connect.prepareStatement("INSERT INTO tblquestions VALUES (?, ?, ?, ?, ?, ?, ?)");
             // Parameters start with 1
 
             //ordem segundo a tabela da bd v3.3
