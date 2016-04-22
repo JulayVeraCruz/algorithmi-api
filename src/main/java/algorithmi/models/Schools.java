@@ -5,6 +5,7 @@
  */
 package algorithmi.models;
 
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -29,8 +30,8 @@ public class Schools {
         //Revalidar TUDO, formatos, campos vazios, TUDO!!
         validateData();
         
-        //TEM DE IR BUSCAR O ULTIMO ID E ACRESCENTAR UM
-        this._id = 123;
+        
+        this._id = getLastID_Schools()+ 1; //ir buscar o max id da bd + 1
         this.name = schools.get("name").getAsString();
         this.institution = schools.get("institution").getAsInt();
         this.image = schools.get("image").getAsString();
@@ -66,6 +67,11 @@ public class Schools {
 
     public void setImage(String image) {
         this.image = image;
+    }
+    
+    public static int getLastID_Schools() {
+        utils getid = new utils();
+        return getid.getLastID("tblSchools");
     }
     
     public void regist() {

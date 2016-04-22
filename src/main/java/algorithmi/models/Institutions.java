@@ -5,6 +5,8 @@
  */
 package algorithmi.models;
 
+import Utils.utils;
+import static algorithmi.models.User.getLastID_Users;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -37,8 +39,7 @@ public class Institutions {
         //Revalidar TUDO, formatos, campos vazios, TUDO!!
         validateData();
         
-        //TEM DE IR BUSCAR O ULTIMO ID E ACRESCENTAR UM
-        this._id = 123;
+        this._id = getLastID_Institutions()+ 1; //ir buscar o max id da bd + 1
         this.name = institutions.get("name").getAsString();
         this.address = institutions.get("address").getAsString();
         this.image = institutions.get("image").getAsString();
@@ -88,6 +89,13 @@ public class Institutions {
         return json;
     }
 
+    //Maximo ID da tabela Institutions
+    public static int getLastID_Institutions() {
+        utils getid = new utils();
+        return getid.getLastID("tblInstitutions");
+    }
+    
+    
     private void validateData() {
         //Se estiver tudo OK, inserer na BD
         insert();
