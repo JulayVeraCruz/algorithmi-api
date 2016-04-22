@@ -4,11 +4,11 @@
  * and open the template in the editor.
  */
 package algorithmi;
-
-import com.mysql.jdbc.Connection;
-import com.mysql.jdbc.Statement;
+;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,9 +22,11 @@ public class testsql {
 
   public static void main(String[] args) {
     try {
+        //executa driver para ligar à base de dados
       Class.forName("com.mysql.jdbc.Driver").newInstance();
-      Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "password");
-
+        //faz ligação à base de dados
+      Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+      
       Statement stmtt = (Statement) connn.createStatement();
       stmtt.execute("SELECT * FROM `tblusers`");
 

@@ -74,7 +74,7 @@ public class Main {
 
                 //Objecto Jason para aceder aos parametros via Java
                 JsonParser jsonParser = new JsonParser();
-                JsonObject user = (JsonObject) jsonParser.parse(data);
+                JsonObject question = (JsonObject) jsonParser.parse(data);
 
                 //Exibe os dados, em formato json
                 //System.out.println(user.entrySet());

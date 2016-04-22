@@ -220,7 +220,7 @@ public class User {
             // Load the MySQL driver, each DB has its own driver
             Class.forName("com.mysql.jdbc.Driver");
             // DB connection setup 
-            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt" + "user=algo&password=algo");
+            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
             // PreparedStatements 
             preparedStatement = connect.prepareStatement("insert into user values (?, ?, ?, ?, ?, ?, ?, ? )");
             // Parameters start with 1
@@ -242,7 +242,7 @@ public class User {
         } catch (Exception ex) {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        System.out.println(status+"");
         return status;
     }
 
