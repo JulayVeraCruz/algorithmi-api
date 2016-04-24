@@ -228,8 +228,7 @@ public class User {
     * em que estao envolvidos e a sua foto
     */
     public void listTeacher(){
-        //assume-se que o _id tipo professor é o 1
-        try {
+       try {
             //executa driver para ligar à base de dados
             Class.forName("com.mysql.jdbc.Driver").newInstance();
             //faz ligação à base de dados
@@ -238,7 +237,7 @@ public class User {
             Statement stmtt = (Statement) connn.createStatement();
             stmtt.execute("select tblUsers.name,tblUsers.image,tblCourses.name"
                     + " from tblUsers,tblCourses,tblUserCourse "
-                    + "where tblUsers.'type'=1  and tblUsers._id=tblUserCourse.userID and tblUserCourse.courseID=tblCourses._id; ");
+                    + "where tblUsers.'type'=3  and tblUsers._id=tblUserCourse.userID and tblUserCourse.courseID=tblCourses._id; ");
 
             ResultSet res = stmtt.getResultSet();
 
@@ -258,7 +257,7 @@ public class User {
     * em que estao envolvidos e a sua foto
     */
     public void listStudents(){
-        //assume-se que o _id do tipo aluno é o 2
+       
         try {
             //executa driver para ligar à base de dados
             Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -268,7 +267,7 @@ public class User {
             Statement stmtt = (Statement) connn.createStatement();
             stmtt.execute("select tblUsers.name,tblUsers.image,tblCourses.name"
                     + " from tblUsers,tblCourses,tblUserCourse "
-                    + "where tblUsers.'type'=2  and tblUsers._id=tblUserCourse.userID and tblUserCourse.courseID=tblCourses._id; ");
+                    + "where tblUsers.'type'=4  and tblUsers._id=tblUserCourse.userID and tblUserCourse.courseID=tblCourses._id; ");
 
             ResultSet res = stmtt.getResultSet();
 
