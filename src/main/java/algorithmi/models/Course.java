@@ -70,8 +70,8 @@ public class Course {
     }
 
     /**
-     * para actualizar/alterar os dados de um registo
-     * na tabela cursos
+     * para actualizar/alterar os dados de um registo na tabela cursos
+     *
      * @param _id
      */
     public void updateCourse(int _id) {
@@ -134,17 +134,46 @@ public class Course {
     }
 
     /**
-     * obtem o maximo id utilizado na tabela tblCourses
-     *
-     * @return int
+     * Lista todos os cursos e o nome da escola a que correspondem
      */
-    public static int getLastID_Course() {
+    public void listCourses_WEB() {
+        try {
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("SELECT tblCourses.mame as \"Course\",tblSchools.name as \"School\"\n"
+                    + "from tblCourses,tblSchools\n"
+                    + "where tblCourses.school=tblSchools._id ");
+
+            ResultSet res = stmtt.getResultSet();
+
+            while (res.next()) {
+                String name = res.getString("name");
+                System.out.println(name);
+            }
+
+            stmtt.close();
+            connn.close();
+        } catch (Exception ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+/**
+ * obtem o maximo id utilizado na tabela tblCourses
+ *
+ * @return int
+ */
+public static int getLastID_Course() {
         utils getid = new utils();
         return getid.getLastID("tblCourses");
     }
 
     @Override
-    public String toString() {
+        public String toString() {
         Gson gson = new Gson();
 
         String json = gson.toJson(this);
