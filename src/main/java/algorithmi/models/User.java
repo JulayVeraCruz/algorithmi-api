@@ -223,6 +223,66 @@ public class User {
         }
         
     }
+   /**
+    * lista de professores com indicação dos cursos
+    * em que estao envolvidos e a sua foto
+    */
+    public void listTeacher(){
+        //assume-se que o _id tipo professor é o 1
+        try {
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("select tblUsers.name,tblUsers.image,tblCourses.name"
+                    + " from tblUsers,tblCourses,tblUserCourse "
+                    + "where tblUsers.'type'=1  and tblUsers._id=tblUserCourse.userID and tblUserCourse.courseID=tblCourses._id; ");
+
+            ResultSet res = stmtt.getResultSet();
+
+            while (res.next()) {
+                String name = res.getString("name");
+                System.out.println(name);
+            }
+
+            stmtt.close();
+            connn.close();
+        } catch (Exception ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+      /**
+    * lista de estudantes com indicação dos cursos
+    * em que estao envolvidos e a sua foto
+    */
+    public void listStudents(){
+        //assume-se que o _id do tipo aluno é o 2
+        try {
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("select tblUsers.name,tblUsers.image,tblCourses.name"
+                    + " from tblUsers,tblCourses,tblUserCourse "
+                    + "where tblUsers.'type'=2  and tblUsers._id=tblUserCourse.userID and tblUserCourse.courseID=tblCourses._id; ");
+
+            ResultSet res = stmtt.getResultSet();
+
+            while (res.next()) {
+                String name = res.getString("name");
+                System.out.println(name);
+            }
+
+            stmtt.close();
+            connn.close();
+        } catch (Exception ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
    
     public int getId_User() {
         return _id;
