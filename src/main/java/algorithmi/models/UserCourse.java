@@ -15,9 +15,17 @@
  */
 package algorithmi.models;
 
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -40,15 +48,143 @@ public class UserCourse {
          * Revalidar TUDO, formatos, campos vazios, TUDO!!
          *
          */
-        validateData();
-        //Associa os dados ao objecto UserCourse
-        this.userID = UserCourse.get("_id").getAsInt();; //ir buscar o max id da bd + 1 
-        this.courseID = UserCourse.get("codCourse").getAsInt();
+        boolean existErro = false;
+        String[] erros = validateData();
+        for (int i = 0; i < erros.length; i++) {
+            if (erros[i] == null);
+            {
+                existErro = existErro || false;
+            }
+        }
+        if (!existErro) {
+            this.userID = UserCourse.get("userID").getAsInt();
+
+            this.courseID = UserCourse.get("courseID").getAsInt();
+            regist();
+        }
 
     }
 
-    public void regist() {
-        //Insere na BD
+    /**
+     * para actualizar/alterar os dados de um registo na tabela alteração de
+     * curso de um user curso atruibuido por engano ou substituicao
+     *
+     * @param _id
+     */
+    public void updateCourseOf_User(int user_id,int oldCourse_id) {
+
+        try {
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("UPDATE tblUsersCourse " + "SET courseID=" + courseID + " where userID=" + userID + " AND courseID="+oldCourse_id+")");
+
+            ResultSet res = stmtt.getResultSet();
+
+            System.out.println("result update user's course  " + res);
+
+            stmtt.close();
+            connn.close();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(UserCourse.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(UserCourse.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(UserCourse.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    /**
+     * Insere novos registos na tabela
+     *
+     * @return status
+     */
+    public int regist() {
+        int status = 0;
+        try {
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("INSERT INTO tblCourses values(" + userID + "," + courseID + ")");
+
+            ResultSet res = stmtt.getResultSet();
+
+            System.out.println("result insert user's courses " + res);
+
+            stmtt.close();
+            connn.close();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return status;
+    }
+
+    /**
+     * faz a validação dos dados com o retorno de um array podendo conter ou nao
+     * mensagens de erro
+     *
+     * @return String[]
+     */
+    private String[] validateData() {
+
+        String respostasErro[] = new String[2];
+        boolean valid = false;
+
+        boolean userIdNumberValid = utils.isNumber(userID + "");//0
+        boolean courseIdNumberValid = utils.isNumber(courseID + "");//1
+
+        valid = userIdNumberValid && courseIdNumberValid;
+        if (!valid) {
+            if (!userIdNumberValid) {
+                respostasErro[0] = "User Invalid";
+            }
+            if (!courseIdNumberValid) {
+                respostasErro[1] = "Course Invalid";
+            }
+        }
+
+        return respostasErro;
+    }
+/**
+ * apaga o registo da tabela UsersCurse
+ * @param userID
+ * @param courseID
+ * @return 
+ */
+    public String deleteRegist(int userID, int courseID) {
+        try {
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("DELETE FROM `tblUsersCourses` where userID=" + userID+" and courseID="+courseID);
+
+            ResultSet res = stmtt.getResultSet();
+
+            return "Deleted: " + res.toString();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "regist not deleted";
     }
 
     public UserCourse(int user, int curse) {
@@ -83,13 +219,4 @@ public class UserCourse {
         return json;
     }
 
-    private void validateData() {
-        /**
-         * Se estiver tudo OK, inserer na BD,
-         */
-        regist();
-        /**
-         * Senão Devolve um erro (mas dos amigáveis :D)
-         */
-    }
 }

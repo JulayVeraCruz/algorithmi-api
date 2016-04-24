@@ -20,6 +20,13 @@ import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -43,15 +50,129 @@ public class TypeUser {
          * Revalidar TUDO, formatos, campos vazios, TUDO!!
          *
          */
-        validateData(UserType);
-        //Associa os dados ao objecto UserType
-        this._id = UserType.getAsInt(); //ir buscar o max id da bd + 1 
-        this.name = UserType.get("name").getAsString();
-//       
+        boolean existErro = false;
+        String[] erros = validateData();
+        for (int i = 0; i < erros.length; i++) {
+            if (erros[i] == null);
+            {
+                existErro = existErro || false;
+            }
+        }
+        if (!existErro) {
+            //Associa os dados ao objecto UserType
+            this._id = getLastID_UserTypes() + 1; //ir buscar o max id da bd + 1 
+            this.name = UserType.get("name").getAsString();
+            regist();
+        }
     }
 
-    public void regist() {
-        //Insere na BD
+    /**
+     * Insere novos registos na tabela
+     *
+     * @return status
+     */
+    public int regist() {
+        int status = 0;
+        try {
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("INSERT INTO tblUserTypes values(" + _id + "," + name + ")");
+
+            ResultSet res = stmtt.getResultSet();
+
+            System.out.println("result insert Typeuser " + res);
+
+            stmtt.close();
+            connn.close();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return status;
+    }
+
+    /**
+     * obtem o maximo id utilizado na tabela tblUserTypes
+     *
+     * @return int
+     */
+    public static int getLastID_UserTypes() {
+        utils getid = new utils();
+        return getid.getLastID("tblUserTypes");
+    }
+
+    @Override
+    public String toString() {
+        Gson gson = new Gson();
+
+        String json = gson.toJson(this);
+        System.out.println("json \n" + json);
+        return json;
+    }
+
+    /**
+     * faz a validação dos dados com o retorno de um array podendo conter ou nao
+     * mensagens de erro
+     *
+     * @return String[]
+     */
+    private String[] validateData() {
+        String respostasErro[] = new String[2];
+        boolean valid;
+
+        boolean idValid = utils.isNumber(_id + "");//0
+        boolean nameValid = utils.isString(name);//1
+
+        valid = nameValid && idValid;
+
+        if (!valid) {
+            if (!idValid) {
+                respostasErro[0] = "ID invalido";
+            }
+            if (!nameValid) {
+                respostasErro[1] = "Name invalido";
+            }
+        }
+        return respostasErro;
+    }
+
+    /**
+     * para actualizar/alterar os dados de um registo
+     * na tabela usertypes
+     * @param _id
+     */
+    public void updateTypeUser(int _id) {
+
+        try {
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("UPDATE tblUserTypes " + "SET name=" + name + " where _id=" + _id + ")");
+
+            ResultSet res = stmtt.getResultSet();
+
+            System.out.println("result update usertype " + res);
+
+            stmtt.close();
+            connn.close();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     public TypeUser(int id_Type, String name) {
@@ -75,35 +196,4 @@ public class TypeUser {
         this.name = Name;
     }
 
-    // converts a java object to JSON format,
-    // and returned as JSON formatted string
-    @Override
-    public String toString() {
-        Gson gson = new Gson();
-
-        String json = gson.toJson(this);
-        System.out.println("json \n" + json);
-        return json;
-    }
-
-    private void validateData(JsonObject UserType) {
-        /**
-         * Se estiver tudo OK, inserer na BD,
-         */
-        boolean valid ;
-
-        boolean nameValid = utils.isString(UserType.get("name").getAsString());
-        boolean idValid = utils.isNumber(UserType.get("_id").getAsString());
-       
-        valid = nameValid && idValid;
-       
-        if (valid) {
-            // regista na base de dados
-            regist();
-        } else {
-            /**
-             * Senão Devolve um erro (mas dos amigáveis :D)
-             */
-        }
-    }
 }

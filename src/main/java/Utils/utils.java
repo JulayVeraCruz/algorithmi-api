@@ -163,7 +163,71 @@ public class utils {
         return 0;
     }
 
+    
+ /**
+  * retorna o campo name respectivo do _id de uma tabela
+  * @param _id
+  * @param tabela
+  * @return 
+  */
+    public String getNames(int _id, String tabela){
+        try {
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+            
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("SELECT name FROM `"+tabela+"` where _id="+_id);
+            
+            ResultSet res = stmtt.getResultSet(); 
+            
+            return res.toString();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "Invalid ID or table";
+    }
+    
+ /**
+  * apaga o registo com o _id de uma tabela
+  * desde que só possua UM campo (_id) como chave primaria
+  * @param _id
+  * @param tabela
+  * @return 
+  */
+    public String deleteRegist(int _id, String tabela){
+        try {
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+            
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("DELETE FROM `"+tabela+"` where _id="+_id);
+            
+            ResultSet res = stmtt.getResultSet(); 
+            
+            return "Deleted: "+res.toString();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "regist not deleted";
+    }
 }
+
 //ajuda sobre regex
 //Pattern.matches("[carateresOUconjunto-ADMITIDO]",dadosAcomparar)
 //se nos dados a comparar n existir algo que n esteja em carateresOUconjunto-ADMITIDO devolve falso!
