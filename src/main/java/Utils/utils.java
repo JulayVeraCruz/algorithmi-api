@@ -144,44 +144,50 @@ public class utils {
      * @return int
      */
     public int getLastID(String nomeTabela) {
-
+        int id = 0;
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
             Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
             Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("select " + nomeTabela + "._id from" + nomeTabela + " order by _id desc limit 1");
+            stmtt.execute("select " + nomeTabela + "._id from " + nomeTabela + " order by _id desc limit 1");
+
             ResultSet res = stmtt.getResultSet();
+            
+            while (res.next()) {
+                id=Integer.parseInt(res.getString("_id"));
+//                System.out.println("id   " + id);
+            }
             stmtt.close();
             connn.close();
-            System.out.println("Last id  "+res);
-            return Integer.parseInt(res.getString("_id"));
+            return id;
+            
         } catch (SQLException ex) {
             Logger.getLogger(nomeTabela).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(utils.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+        }
         return 0;
     }
 
-    
- /**
-  * retorna o campo name respectivo do _id de uma tabela
-  * @param _id
-  * @param tabela
-  * @return 
-  */
-    public String getNames(int _id, String tabela){
+    /**
+     * retorna o campo name respectivo do _id de uma tabela
+     *
+     * @param _id
+     * @param tabela
+     * @return
+     */
+    public String getNames(int _id, String tabela) {
         try {
             //executa driver para ligar à base de dados
             Class.forName("com.mysql.jdbc.Driver").newInstance();
             //faz ligação à base de dados
             Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-            
+
             Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("SELECT name FROM `"+tabela+"` where _id="+_id);
-            
-            ResultSet res = stmtt.getResultSet(); 
-            
+            stmtt.execute("SELECT name FROM `" + tabela + "` where _id=" + _id);
+
+            ResultSet res = stmtt.getResultSet();
+
             return res.toString();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
@@ -194,27 +200,28 @@ public class utils {
         }
         return "Invalid ID or table";
     }
-    
- /**
-  * apaga o registo com o _id de uma tabela
-  * desde que só possua UM campo (_id) como chave primaria
-  * @param _id
-  * @param tabela
-  * @return 
-  */
-    public String deleteRegist(int _id, String tabela){
+
+    /**
+     * apaga o registo com o _id de uma tabela desde que só possua UM campo
+     * (_id) como chave primaria
+     *
+     * @param _id
+     * @param tabela
+     * @return
+     */
+    public String deleteRegist(int _id, String tabela) {
         try {
             //executa driver para ligar à base de dados
             Class.forName("com.mysql.jdbc.Driver").newInstance();
             //faz ligação à base de dados
             Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-            
+
             Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("DELETE FROM `"+tabela+"` where _id="+_id);
-            
-            ResultSet res = stmtt.getResultSet(); 
-            
-            return "Deleted: "+res.toString();
+            stmtt.execute("DELETE FROM " + tabela + " where _id=" + _id);
+
+            ResultSet res = stmtt.getResultSet();
+
+            return "Deleted: " + res.toString();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {

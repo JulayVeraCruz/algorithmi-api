@@ -38,16 +38,15 @@ import java.util.logging.Logger;
 public class User {
 
     private int _id;
-    private String username;
     private String name;
+    private String user;
     private Date birthDate;
     private String email;
-    private String image;
-    private String password;
     private int type;
-    private int course;
-   
-    public User(String data) {
+    private String password;
+    private String image;
+
+    public User(String data) throws ParseException {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -59,6 +58,22 @@ public class User {
          * Revalidar TUDO, formatos, campos vazios, TUDO!!
          *
          */
+        //Associa os dados ao objecto User
+        this._id = getLastID_Users() + 1; //ir buscar o max id da bd + 1
+        this.user = user.get("username").getAsString();
+        this.name = user.get("name").getAsString();
+        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        df.setLenient(false);
+        Date datBirth;
+
+        datBirth = df.parse(user.get("birthDate").getAsString());
+
+        this.birthDate = datBirth;
+        this.email = user.get("email").getAsString();
+        this.password = user.get("password").getAsString();
+        this.image = user.get("image").getAsString();
+        this.type = user.get("type").getAsInt();//Definir o tipo de utilizador, como é registo, deverá ser do tipo aluno
+
         boolean existErro = false;
         String[] erros = validateData();
         for (int i = 0; i < erros.length; i++) {
@@ -68,33 +83,13 @@ public class User {
             }
         }
         if (!existErro) {
-            try {
-                //Associa os dados ao objecto User
-                this._id = getLastID_Users() + 1; //ir buscar o max id da bd + 1
-                this.username = user.get("username").getAsString();
-                this.name = user.get("name").getAsString();
-                DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-                df.setLenient(false);
-                Date datBirth;
-
-                datBirth = df.parse(user.get("birthDate").getAsString());
-
-                this.birthDate = datBirth;
-                this.email = user.get("email").getAsString();
-                this.password = user.get("password").getAsString();
-                this.image = user.get("image").getAsString();
-                this.type = user.get("type").getAsInt();//Definir o tipo de utilizador, como é registo, deverá ser do tipo aluno
-                this.course = user.get("course").getAsInt();//Definir o curso do utilizador
-                regist();
-            } catch (ParseException ex) {
-                Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            regist();
         }
     }
 
-       /**
-     * Insere novos registos na tabela
-     * INSERT INTO tabela Values(?,..)
+    /**
+     * Insere novos registos na tabela INSERT INTO tabela Values(?,..)
+     *
      * @return status
      */
     public int regist() {
@@ -106,12 +101,12 @@ public class User {
             Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
 
             Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("INSERT INTO tblUsers values(" + _id + "," + username +"," + name + "," + birthDate + "," + email + "," + password + "," + image + "," + type + "," + course + ")");
+            stmtt.execute("INSERT INTO tblUsers values(" + _id + "," + '"' + name + '"' + "," + '"' + user + '"' + "," + birthDate + "," + '"' + email + '"' + "," + '"' + type + '"' + "," + '"' + password + '"' + "," + image + ")");
 
             ResultSet res = stmtt.getResultSet();
 
-            System.out.println("result insert user " + res);
-
+            System.out.println(" insert user " + res.getRow());
+            status = 1;//
             stmtt.close();
             connn.close();
         } catch (ClassNotFoundException ex) {
@@ -131,7 +126,7 @@ public class User {
      */
     public static int getLastID_Users() {
         utils getid = new utils();
-        return getid.getLastID("tblUsers");
+        return getid.getLastID("tblusers");
     }
 
     @Override
@@ -154,7 +149,7 @@ public class User {
         String respostasErro[] = new String[7];
         boolean valid = false;
 
-        boolean usernameValid = utils.isUsernameValid(username);//0
+        boolean userValid = utils.isUsernameValid(user);//0
         boolean nameValid = utils.isString(name);//1
         boolean dateValid = utils.isThisDateValid(birthDate.toString());//2
         boolean emailValid = utils.isEmailValid(email);//3
@@ -162,10 +157,10 @@ public class User {
         boolean passwordValid = utils.isString(password);//5
         boolean typeValid = utils.isNumber(Integer.toString(type));//6
 
-        valid = usernameValid && nameValid && dateValid && emailValid && imageValid && passwordValid && typeValid;
+        valid = userValid && nameValid && dateValid && emailValid && imageValid && passwordValid && typeValid;
         if (!valid) {
             {
-                if (!usernameValid) {
+                if (!userValid) {
                     respostasErro[0] = "Username invalido";
                 }
                 if (!nameValid) {
@@ -192,25 +187,25 @@ public class User {
     }
 
     /**
-     * para actualizar/alterar os dados de um registo
-     * na tabela user
-     * @param _id 
+     * para actualizar/alterar os dados de um registo na tabela user
+     *
+     * @param _id
      */
-    public void updateUser(int _id){
-    
-         try {
+    public void updateUser(int _id) {
+
+        try {
             //executa driver para ligar à base de dados
             Class.forName("com.mysql.jdbc.Driver").newInstance();
             //faz ligação à base de dados
             Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
 
             Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("UPDATE tblUsers "+"SET username=" + username + 
-                    ",name="+name + ", birthDate=" + birthDate + ",email=" + email + ",password=" + password + ",image=" + image + ",type=" + type + ",course=" + course + " where _id="+_id+")");
+            stmtt.execute("UPDATE tblUsers " + "SET username=" + '"' + user + '"'
+                    + ",name=" + '"' + name + '"' + ", birthDate=" + birthDate + ",email=" + '"' + email + '"' + ",password=" + '"' + password + '"' + ",image=" + '"' + image + '"' + ",type=" + type + " where _id=" + _id + ")");
 
             ResultSet res = stmtt.getResultSet();
 
-            System.out.println("result update user " + res);
+            System.out.println("result update user " + res.rowUpdated());
 
             stmtt.close();
             connn.close();
@@ -221,14 +216,17 @@ public class User {
         } catch (Exception ex) {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
     }
-   /**
-    * lista de professores com indicação dos cursos
-    * em que estao envolvidos e a sua foto
-    */
-    public void listTeacher(){
-       try {
+
+    /**
+     * lista de professores com indicação dos cursos em que estao envolvidos e a
+     * sua foto
+     *
+     * @return Json[]
+     */
+    public Gson[] listTeacher() {
+        Gson lisOfTeacher[] = new Gson[getLastID_Users()];
+        try {
             //executa driver para ligar à base de dados
             Class.forName("com.mysql.jdbc.Driver").newInstance();
             //faz ligação à base de dados
@@ -236,14 +234,13 @@ public class User {
 
             Statement stmtt = (Statement) connn.createStatement();
             stmtt.execute("select tblUsers.name,tblUsers.image,tblCourses.name"
-                    + " from tblUsers,tblCourses,tblUserCourse "
-                    + "where tblUsers.'type'=3  and tblUsers._id=tblUserCourse.userID and tblUserCourse.courseID=tblCourses._id; ");
+                    + " from tblUsers,tblCourses,tblUserCourses "
+                    + "where tblUsers.type=3  and tblUsers._id=tblUserCourses.userID and tblUserCourses.courseID=tblCourses._id; ");
 
             ResultSet res = stmtt.getResultSet();
 
             while (res.next()) {
-                String name = res.getString("name");
-                System.out.println(name);
+                lisOfTeacher[res.getRow() - 1].toJson(res);
             }
 
             stmtt.close();
@@ -251,13 +248,16 @@ public class User {
         } catch (Exception ex) {
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return lisOfTeacher;
     }
-      /**
-    * lista de estudantes com indicação dos cursos
-    * em que estao envolvidos e a sua foto
-    */
-    public void listStudents(){
-       
+
+    /**
+     * lista dos users do tipo students devolvendo o nome,imagem e o curso
+     *
+     * @return Json[]
+     */
+    public Gson[] listStudents() {
+        Gson lisOfStudents[] = new Gson[getLastID_Users()];
         try {
             //executa driver para ligar à base de dados
             Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -272,8 +272,8 @@ public class User {
             ResultSet res = stmtt.getResultSet();
 
             while (res.next()) {
-                String name = res.getString("name");
-                System.out.println(name);
+                lisOfStudents[res.getRow() - 1].toJson(res);
+
             }
 
             stmtt.close();
@@ -281,8 +281,9 @@ public class User {
         } catch (Exception ex) {
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return lisOfStudents;
     }
-   
+
     public int getId_User() {
         return _id;
     }
@@ -291,12 +292,12 @@ public class User {
         this._id = id_User;
     }
 
-    public String getUsername() {
-        return username;
+    public String getUser() {
+        return user;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUser(String user) {
+        this.user = user;
     }
 
     public String getName() {

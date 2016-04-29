@@ -35,8 +35,8 @@ public class Course {
 
     private int _id;
     private String name;
-    private String image;
     private int school;
+    private String image;
 
     public Course(String data) {
 
@@ -50,6 +50,14 @@ public class Course {
          * Revalidar TUDO, formatos, campos vazios, TUDO!!
          *
          */
+
+        //Associa os dados ao objecto Course
+        this._id = getLastID_Courses() + 1; //ir buscar o max id da bd + 1
+        this.name = Course.get("name").getAsString();
+        this.image = Course.get("image").getAsString();
+        //tenho de ir buscar o id da escola
+        this.school = Course.get("school").getAsInt();
+
         boolean existErro = false;
         String[] erros = validateData();
         for (int i = 0; i < erros.length; i++) {
@@ -59,12 +67,7 @@ public class Course {
             }
         }
         if (!existErro) {
-            //Associa os dados ao objecto Course
-            this._id = getLastID_Course() + 1; //ir buscar o max id da bd + 1
-            this.name = Course.get("name").getAsString();
-            this.image = Course.get("image").getAsString();
-            //tenho de ir buscar o id da escola
-            this.school = Course.get("school").getAsInt();
+
             regist();
         }
     }
@@ -74,21 +77,21 @@ public class Course {
      *
      * @param _id
      */
-    public void updateCourse(int _id) {
-
+    public int updateCourse(int _id) {
+        int status = 0;
         try {
             //executa driver para ligar à base de dados
             Class.forName("com.mysql.jdbc.Driver").newInstance();
             //faz ligação à base de dados
-            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost/algorithmifr", "root", "root");
 
             Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("UPDATE tblCourse " + "SET name=" + name + ",image=" + image + ",school=" + school + " where _id=" + _id + ")");
+            stmtt.execute("UPDATE tblCourse " + "SET name=" + name +  ",school=" + school +",image=" + image + " where _id=" + _id + ")");
 
             ResultSet res = stmtt.getResultSet();
 
             System.out.println("result update course " + res);
-
+            status = 1;
             stmtt.close();
             connn.close();
         } catch (ClassNotFoundException ex) {
@@ -98,7 +101,7 @@ public class Course {
         } catch (Exception ex) {
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        return status;
     }
 
     /**
@@ -115,17 +118,20 @@ public class Course {
             Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
 
             Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("INSERT INTO tblCourses values(" + _id + "," + name + "," + image + "," + school + ")");
+            System.out.println("antes ibsert ");
+
+            stmtt.execute("INSERT INTO tblcourses values(" + _id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")");
 
             ResultSet res = stmtt.getResultSet();
-
-            System.out.println("result insert cursos " + res);
+            status = 1;//sem erros
+            System.out.println(" insert new cursos id" + res.getString(1));
 
             stmtt.close();
             connn.close();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
+            System.out.println("SQL ERROR regist " + ex);
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
@@ -134,9 +140,13 @@ public class Course {
     }
 
     /**
-     * Lista todos os cursos e o nome da escola a que correspondem
+     * lista os cursos existentes e as escolas a que pertencem
+     *
+     * @return []json
      */
-    public void listCourses_WEB() {
+    public static Gson[] listCourses_WEB() {
+
+        Gson lisOfCourses[] = new Gson[getLastID_Courses()];
         try {
             //executa driver para ligar à base de dados
             Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -144,36 +154,37 @@ public class Course {
             Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
 
             Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("SELECT tblCourses.mame as \"Course\",tblSchools.name as \"School\"\n"
+            stmtt.execute("SELECT tblcourses.name as Course,tblschools.name as School\n"
                     + "from tblCourses,tblSchools\n"
-                    + "where tblCourses.school=tblSchools._id ");
-
+                    + "where tblCourses.school=tblSchools._id");
+//            stmtt.execute("SELECT tblCourses.name as \"Course\",tblSchools.name as \"School\"\n"
+//                    + "from tblCourses,tblSchools\n"
+//                    + "where tblCourses.school=tblSchools._id ");
             ResultSet res = stmtt.getResultSet();
 
             while (res.next()) {
-                String name = res.getString("name");
-                System.out.println(name);
+                lisOfCourses[res.getRow() - 1].toJson(res);
             }
-
             stmtt.close();
             connn.close();
         } catch (Exception ex) {
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return lisOfCourses;
     }
 
-/**
- * obtem o maximo id utilizado na tabela tblCourses
- *
- * @return int
- */
-public static int getLastID_Course() {
+    /**
+     * obtem o maximo id utilizado na tabela tblCourses
+     *
+     * @return int
+     */
+    public static int getLastID_Courses() {
         utils getid = new utils();
-        return getid.getLastID("tblCourses");
+        return getid.getLastID("tblcourses");
     }
 
     @Override
-        public String toString() {
+    public String toString() {
         Gson gson = new Gson();
 
         String json = gson.toJson(this);
@@ -194,9 +205,9 @@ public static int getLastID_Course() {
 
         boolean nameValid = utils.isString(name);//0
         boolean schoolNumberValid = utils.isNumber(school + "");//1
-        boolean imageValid = utils.isString(image);//2
+//        boolean imageValid = utils.isString(image);//2
 
-        valid = nameValid && schoolNumberValid && imageValid;
+        valid = nameValid && schoolNumberValid; //&& imageValid;
         if (!valid) {
             if (!nameValid) {
                 respostasErro[0] = "Nome invalido";
@@ -204,9 +215,9 @@ public static int getLastID_Course() {
             if (!schoolNumberValid) {
                 respostasErro[1] = "Escola invalida";
             }
-            if (!imageValid) {
-                respostasErro[2] = "path invalido";
-            }
+//            if (!imageValid) {
+//                respostasErro[2] = "path invalido";
+//            }
 
         }
 

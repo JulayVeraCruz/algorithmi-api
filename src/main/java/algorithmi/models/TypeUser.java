@@ -50,6 +50,10 @@ public class TypeUser {
          * Revalidar TUDO, formatos, campos vazios, TUDO!!
          *
          */
+        //Associa os dados ao objecto UserType
+        this._id = getLastID_UserTypes() + 1; //ir buscar o max id da bd + 1 
+        this.name = UserType.get("name").getAsString();
+        
         boolean existErro = false;
         String[] erros = validateData();
         for (int i = 0; i < erros.length; i++) {
@@ -59,9 +63,7 @@ public class TypeUser {
             }
         }
         if (!existErro) {
-            //Associa os dados ao objecto UserType
-            this._id = getLastID_UserTypes() + 1; //ir buscar o max id da bd + 1 
-            this.name = UserType.get("name").getAsString();
+
             regist();
         }
     }
@@ -80,7 +82,7 @@ public class TypeUser {
             Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
 
             Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("INSERT INTO tblUserTypes values(" + _id + "," + name + ")");
+            stmtt.execute("INSERT INTO tblUserTypes values(" + _id + "," + '"' + name  + '"'+ ")");
 
             ResultSet res = stmtt.getResultSet();
 
@@ -105,7 +107,7 @@ public class TypeUser {
      */
     public static int getLastID_UserTypes() {
         utils getid = new utils();
-        return getid.getLastID("tblUserTypes");
+        return getid.getLastID("tblusertypes");
     }
 
     @Override
@@ -144,8 +146,8 @@ public class TypeUser {
     }
 
     /**
-     * para actualizar/alterar os dados de um registo
-     * na tabela usertypes
+     * para actualizar/alterar os dados de um registo na tabela usertypes
+     *
      * @param _id
      */
     public void updateTypeUser(int _id) {
@@ -157,7 +159,7 @@ public class TypeUser {
             Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
 
             Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("UPDATE tblUserTypes " + "SET name=" + name + " where _id=" + _id + ")");
+            stmtt.execute("UPDATE tblUserTypes " + "SET name="  + '"'+ name + '"' + " where _id=" + _id + ")");
 
             ResultSet res = stmtt.getResultSet();
 
