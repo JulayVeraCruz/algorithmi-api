@@ -15,7 +15,7 @@
  */
 package algorithmi.models;
 
-import Utils.Utils;
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -76,7 +76,7 @@ public class UserCourse {
 
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();
+            Statement stmtt = utils.connectDatabase();
             
             stmtt.execute("UPDATE tblUsersCourse " + "SET courseID=" + courseID + " where userID=" + userID + " AND courseID=" + oldCourse_id + ")");
 
@@ -105,7 +105,7 @@ public class UserCourse {
         int status = 0;
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();
+            Statement stmtt = utils.connectDatabase();
             
             stmtt.execute("INSERT INTO tblCourses values(" + userID + "," + courseID + ")");
 
@@ -136,8 +136,8 @@ public class UserCourse {
         String respostasErro[] = new String[2];
         boolean valid = false;
 
-        boolean userIdNumberValid = Utils.isNumber(userID + "");//0
-        boolean courseIdNumberValid = Utils.isNumber(courseID + "");//1
+        boolean userIdNumberValid = utils.isNumber(userID + "");//0
+        boolean courseIdNumberValid = utils.isNumber(courseID + "");//1
 
         valid = userIdNumberValid && courseIdNumberValid;
         if (!valid) {
@@ -162,7 +162,7 @@ public class UserCourse {
     public String deleteRegist(int userID, int courseID) {
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();
+            Statement stmtt = utils.connectDatabase();
             
             stmtt.execute("DELETE FROM `tblUsersCourses` where userID=" + userID + " and courseID=" + courseID);
 

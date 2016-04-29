@@ -5,7 +5,7 @@
  */
 package algorithmi.models;
 
-import Utils.Utils;
+import Utils.utils;
 import static algorithmi.models.User.getLastID_Users;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -92,7 +92,7 @@ public class Institutions {
 
     //Maximo ID da tabela Institutions
     public static int getLastID_Institutions() {
-        Utils getid = new Utils();
+        utils getid = new utils();
         return getid.getLastID("tblInstitutions");
     }
 
@@ -104,8 +104,8 @@ public class Institutions {
     public int insert() {
         int status = 0;
         try {
-            //as credenciais de ligaçao estao agora em Utils
-            Statement stmtt = Utils.connectDatabase();
+            //as credenciais de ligaçao estao agora em utils
+            Statement stmtt = utils.connectDatabase();
 //            // Load the MySQL driver, each DB has its own driver
 //            Class.forName("com.mysql.jdbc.Driver");
 //            // DB connection setup 

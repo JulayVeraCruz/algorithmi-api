@@ -16,7 +16,7 @@
  */
 package algorithmi.models;
 
-import Utils.Utils;
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -77,7 +77,7 @@ public class TypeUser {
         int status = 0;
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();
+            Statement stmtt = utils.connectDatabase();
 
             stmtt.execute("INSERT INTO tblUserTypes values(" + _id + "," + '"' + name + '"' + ")");
 
@@ -102,7 +102,7 @@ public class TypeUser {
      * @return int
      */
     public static int getLastID_UserTypes() {
-        Utils getid = new Utils();
+        utils getid = new utils();
         return getid.getLastID("tblusertypes");
     }
 
@@ -125,8 +125,8 @@ public class TypeUser {
         String respostasErro[] = new String[2];
         boolean valid;
 
-        boolean idValid = Utils.isNumber(_id + "");//0
-        boolean nameValid = Utils.isString(name);//1
+        boolean idValid = utils.isNumber(_id + "");//0
+        boolean nameValid = utils.isString(name);//1
 
         valid = nameValid && idValid;
 
@@ -150,7 +150,7 @@ public class TypeUser {
 
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();
+            Statement stmtt = utils.connectDatabase();
 
             stmtt.execute("UPDATE tblUserTypes " + "SET name=" + '"' + name + '"' + " where _id=" + _id + ")");
 

@@ -5,7 +5,7 @@
  */
 package algorithmi.models;
 
-import Utils.Utils;
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -61,7 +61,7 @@ public class MatrixTests {
     }
 
     public static int getLastID_MatrixTests() {
-        Utils getid = new Utils();
+        utils getid = new utils();
         return getid.getLastID("tblmatrixtests");
     }
 
@@ -69,7 +69,7 @@ public class MatrixTests {
         int status = 0;
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();
+            Statement stmtt = utils.connectDatabase();
 
           stmtt.execute("INSERT INTO tblmatrixtests values(" + _id + "," + '"' + name + '"' + "," + teacher + "," + course + "," + '"' + date + '"' + "," + '"' + startingTime + '"'+"," + '"' +finishingTime+ '"' + ")");
 //            stmtt.execute("INSERT INTO tblmatrixtests values(1," +'"testname"'+",1,1," + '"2016-29-04"' + "," + '"17:00"'+"," + '"19:00"'+")");
@@ -95,7 +95,7 @@ public class MatrixTests {
      * @param _id
      */
     public void deleteTest(int _id) {
-        Utils utils = new Utils();
+        utils utils = new utils();
         utils.deleteRegist(_id, "tblmatrixtests");
     }
 
@@ -108,7 +108,7 @@ public class MatrixTests {
         int status = 0;
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();ResultSet res = stmtt.getResultSet();
+            Statement stmtt = utils.connectDatabase();ResultSet res = stmtt.getResultSet();
         stmtt.execute("UPDATE tblmatrixtests values(_id=" + _id + ",name=" + '"' + name + '"' + ",teacher=" + teacher + ",course=" + course + ",date=" + '"' + date + '"' + ",startingTime=" + '"' + startingTime + '"'+",finishingTime=" + '"' +finishingTime+ '"' + " where _id=" + _id + ")");
 
             System.out.println("result update matrix " + res);
@@ -144,10 +144,10 @@ public class MatrixTests {
         String respostasErro[] = new String[4];
         boolean valid = false;
 
-        boolean nameValid = Utils.isString(name);//0
-        boolean dateValid = Utils.isThisDateValid(date + "");//1
-//        boolean startTimeValid = Utils.isString(time);//2
-//        boolean finishTimeValid = Utils.isString(time);//3
+        boolean nameValid = utils.isString(name);//0
+        boolean dateValid = utils.isThisDateValid(date + "");//1
+//        boolean startTimeValid = utils.isString(time);//2
+//        boolean finishTimeValid = utils.isString(time);//3
 
         valid = nameValid && dateValid; //&& imageValid;
         if (!valid) {

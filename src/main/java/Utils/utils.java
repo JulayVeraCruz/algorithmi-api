@@ -25,6 +25,23 @@ import java.util.regex.*;
 public class utils {
 
     /**
+     * credencias e ligação base de dados
+     *
+     * @return Statement
+     * @throws ClassNotFoundException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws SQLException
+     */
+    public static Statement connectDatabase() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
+        Class.forName("com.mysql.jdbc.Driver").newInstance();
+        //faz ligação à base de dados
+        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+        Statement stmtt = (Statement) connn.createStatement();
+        return stmtt;
+    }
+
+    /**
      * verifica se a string é composta apenas por algarismos
      *
      * @param data
@@ -32,6 +49,15 @@ public class utils {
      */
     public static boolean isNumber(String data) {
         return Pattern.matches("[0-9]+", data);
+    }
+  /**
+     * verifica se a string é um float
+     *
+     * @param data
+     * @return bolean
+     */
+    public static boolean isValidFloat(String data) {
+        return Pattern.matches("[0-9.,]+", data);
     }
 
     /**
@@ -91,7 +117,7 @@ public class utils {
             return false;
         }
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         sdf.setLenient(false);
 
         try {
@@ -152,15 +178,15 @@ public class utils {
             stmtt.execute("select " + nomeTabela + "._id from " + nomeTabela + " order by _id desc limit 1");
 
             ResultSet res = stmtt.getResultSet();
-            
+
             while (res.next()) {
-                id=Integer.parseInt(res.getString("_id"));
+                id = Integer.parseInt(res.getString("_id"));
 //                System.out.println("id   " + id);
             }
             stmtt.close();
             connn.close();
             return id;
-            
+
         } catch (SQLException ex) {
             Logger.getLogger(nomeTabela).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {

@@ -15,7 +15,7 @@
  */
 package algorithmi.models;
 
-import Utils.Utils;
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -96,7 +96,7 @@ public class User {
         int status = 0;
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();
+            Statement stmtt = utils.connectDatabase();
             stmtt.execute("INSERT INTO tblUsers values(" + _id + "," + '"' + name + '"' + "," + '"' + user + '"' + "," + birthDate + "," + '"' + email + '"' + "," + '"' + type + '"' + "," + '"' + password + '"' + "," + image + ")");
 
             ResultSet res = stmtt.getResultSet();
@@ -121,7 +121,7 @@ public class User {
      * @return int
      */
     public static int getLastID_Users() {
-        Utils getid = new Utils();
+        utils getid = new utils();
         return getid.getLastID("tblusers");
     }
 
@@ -145,13 +145,13 @@ public class User {
         String respostasErro[] = new String[7];
         boolean valid = false;
 
-        boolean userValid = Utils.isUsernameValid(user);//0
-        boolean nameValid = Utils.isString(name);//1
-        boolean dateValid = Utils.isThisDateValid(birthDate.toString());//2
-        boolean emailValid = Utils.isEmailValid(email);//3
-        boolean imageValid = Utils.isString(image);//4
-        boolean passwordValid = Utils.isString(password);//5
-        boolean typeValid = Utils.isNumber(Integer.toString(type));//6
+        boolean userValid = utils.isUsernameValid(user);//0
+        boolean nameValid = utils.isString(name);//1
+        boolean dateValid = utils.isThisDateValid(birthDate.toString());//2
+        boolean emailValid = utils.isEmailValid(email);//3
+        boolean imageValid = utils.isString(image);//4
+        boolean passwordValid = utils.isString(password);//5
+        boolean typeValid = utils.isNumber(Integer.toString(type));//6
 
         valid = userValid && nameValid && dateValid && emailValid && imageValid && passwordValid && typeValid;
         if (!valid) {
@@ -191,7 +191,7 @@ public class User {
 
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();
+            Statement stmtt = utils.connectDatabase();
             stmtt.execute("UPDATE tblUsers " + "SET username=" + '"' + user + '"'
                     + ",name=" + '"' + name + '"' + ", birthDate=" + birthDate + ",email=" + '"' + email + '"' + ",password=" + '"' + password + '"' + ",image=" + '"' + image + '"' + ",type=" + type + " where _id=" + _id + ")");
 
@@ -219,7 +219,7 @@ public class User {
         Gson lisOfTeacher[] = new Gson[getLastID_Users()];
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();
+            Statement stmtt = utils.connectDatabase();
 
             stmtt.execute("select tblUsers.name,tblUsers.image,tblCourses.name"
                     + " from tblUsers,tblCourses,tblUserCourses "
@@ -248,7 +248,7 @@ public class User {
         Gson lisOfStudents[] = new Gson[getLastID_Users()];
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();
+            Statement stmtt = utils.connectDatabase();
 
             stmtt.execute("select tblUsers.name,tblUsers.image,tblCourses.name"
                     + " from tblUsers,tblCourses,tblUserCourse "

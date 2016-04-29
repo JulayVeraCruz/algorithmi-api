@@ -15,7 +15,7 @@
  */
 package algorithmi.Models;
 
-import Utils.Utils;
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -164,15 +164,15 @@ public class Question {
     }
 
     public static int getLastID() {
-        Utils getid = new Utils();
+        utils getid = new utils();
         return getid.getLastID("tblquestions");
     }
 
     public int regist() {
         int status = 0;
         try {
-           //as credenciais de ligaçao estao agora em Utils
-            Statement stmtt = Utils.connectDatabase();
+           //as credenciais de ligaçao estao agora em utils
+            Statement stmtt = utils.connectDatabase();
 //            // Load the MySQL driver, each DB has its own driver
 //            Class.forName("com.mysql.jdbc.Driver");
 //            // DB connection setup 

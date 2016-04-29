@@ -15,7 +15,7 @@
  */
 package algorithmi.models;
 
-import Utils.Utils;
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -78,7 +78,7 @@ public class Course {
      * @param _id
      */
     public void deleteCourse(int _id) {
-        Utils utils = new Utils();
+        utils utils = new utils();
         utils.deleteRegist(_id, "tblcourses");
     }
 
@@ -92,7 +92,7 @@ public class Course {
         int status = 0;
         try {
             try ( //executa driver para ligar à base de dados
-                    Statement stmtt = Utils.connectDatabase()) {
+                    Statement stmtt = utils.connectDatabase()) {
                 stmtt.execute("UPDATE tblCourse " + "SET name=" + name + ",school=" + school + ",image=" + image + " where _id=" + _id + ")");
                 
                 ResultSet res = stmtt.getResultSet();
@@ -119,7 +119,7 @@ public class Course {
         int status = 0;
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();
+            Statement stmtt = utils.connectDatabase();
             System.out.println("antes ibsert ");
 
             stmtt.execute("INSERT INTO tblcourses values(" + _id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")");
@@ -150,7 +150,7 @@ public class Course {
         Gson lisOfCourses[] = new Gson[getLastID_Courses()];
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();
+            Statement stmtt = utils.connectDatabase();
 
             stmtt.execute("SELECT tblcourses.name as Course,tblschools.name as School\n"
                     + "from tblCourses,tblSchools\n"
@@ -176,7 +176,7 @@ public class Course {
      * @return int
      */
     public static int getLastID_Courses() {
-        Utils getid = new Utils();
+        utils getid = new utils();
         return getid.getLastID("tblcourses");
     }
 
@@ -200,9 +200,9 @@ public class Course {
         String respostasErro[] = new String[3];
         boolean valid = false;
 
-        boolean nameValid = Utils.isString(name);//0
-        boolean schoolNumberValid = Utils.isNumber(school + "");//1
-//        boolean imageValid = Utils.isString(image);//2
+        boolean nameValid = utils.isString(name);//0
+        boolean schoolNumberValid = utils.isNumber(school + "");//1
+//        boolean imageValid = utils.isString(image);//2
 
         valid = nameValid && schoolNumberValid; //&& imageValid;
         if (!valid) {

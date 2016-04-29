@@ -5,7 +5,7 @@
  */
 package algorithmi.models;
 
-import Utils.Utils;
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -60,7 +60,7 @@ public class Tests {
      * @return int
      */
     public static int getLastID_Tests() {
-        Utils getid = new Utils();
+        utils getid = new utils();
         return getid.getLastID("tblTests");
     }
 
@@ -70,7 +70,7 @@ public class Tests {
      * @param _id
      */
     public void deleteTest(int _id) {
-        Utils utils = new Utils();
+        utils utils = new utils();
         utils.deleteRegist(_id, "tbltests");
     }
 
@@ -83,7 +83,7 @@ public class Tests {
         int status = 0;
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();
+            Statement stmtt = utils.connectDatabase();
 
             stmtt.execute("INSERT INTO tbltests values()");
 
@@ -113,7 +113,7 @@ public class Tests {
         int status = 0;
         try {
             //executa driver para ligar à base de dados
-            Statement stmtt = Utils.connectDatabase();
+            Statement stmtt = utils.connectDatabase();
 
             stmtt.execute("UPDATE tbltests " + "SET matrixTest=" + matrixTest + ",quotation=" + quotation + ",student=" + student + " where _id=" + _id + ")");
 
@@ -141,7 +141,7 @@ public class Tests {
         String respostasErro[] = new String[1];
         boolean valid = false;
 
-        boolean validQuotation = Utils.isValidFloat(quotation + "");
+        boolean validQuotation = utils.isValidFloat(quotation + "");
 
         valid = validQuotation;
         if (!valid) {
