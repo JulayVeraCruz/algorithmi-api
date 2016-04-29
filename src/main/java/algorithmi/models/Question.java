@@ -22,6 +22,8 @@ import com.google.gson.JsonParser;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -169,34 +171,31 @@ public class Question {
         return getid.getLastID("tblquestions");
     }
 
-    public int regist() {
+
+        public int regist() {
         int status = 0;
         try {
-            // Load the MySQL driver, each DB has its own driver
-            Class.forName("com.mysql.jdbc.Driver");
-            // DB connection setup 
-            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-            // PreparedStatements 
-            preparedStatement = connect.prepareStatement("INSERT INTO tblquestions VALUES (?, ?, ?, ?, ?, ?, ?)");
-            // Parameters start with 1
-
-            //ordem segundo a tabela da bd v3.3
-            preparedStatement.setString(1, _id + "");
-            preparedStatement.setString(2, description);
-            preparedStatement.setString(3, difficulty + "");
-            preparedStatement.setString(4, image);
-            preparedStatement.setString(5, algorithm);
-            preparedStatement.setString(6, title);
-            preparedStatement.setString(7, category + "");
-            status = preparedStatement.executeUpdate();
-
-            if (connect != null) {
-                connect.close();
-            }
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+            //inicia uma declaracao
+            Statement stmtt = (Statement) connn.createStatement();
+            //a declaracao executa o comando mysql
+            stmtt.execute("INSERT INTO tblQuestions values(" + _id + "," + '"' + title + '"' + "," + category + "," + '"' + description + '"' + "," + image + "," + algorithm + "," + difficulty + ")");
+            status = 1;//sem erros
+            //fecha a declaracao
+            stmtt.close();
+            //fecha a ligacao
+            connn.close();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(algorithmi.models.Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            System.out.println("SQL ERROR regist " + ex);
+            Logger.getLogger(algorithmi.models.Course.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
-            Logger.getLogger(algorithmi.models.User.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(algorithmi.models.Course.class.getName()).log(Level.SEVERE, null, ex);
         }
-
         return status;
     }
 

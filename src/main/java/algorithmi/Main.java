@@ -91,14 +91,13 @@ public class Main {
                 JsonObject question = (JsonObject) jsonParser.parse(data);
 
                 //Exibe os dados, em formato json
-                System.out.println(user.entrySet());
+                System.out.println(question.entrySet());
 
                 //Exibe o paramentro "name" do objecto json
                 //System.out.println(user.get("name"));
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-
             return "Hello World";
         });
 
