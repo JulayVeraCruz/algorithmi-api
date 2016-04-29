@@ -6,13 +6,14 @@
 package algorithmi.models;
 
 import Utils.utils;
-import static algorithmi.models.User.getLastID_Users;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,9 +27,6 @@ public class Institutions {
     private String address;
     private String image;
     
-    private Connection connect = null;
-    PreparedStatement preparedStatement = null;
-
     public Institutions(String data) {
         
         //Transforma a string recebida pelo pedido http para json
@@ -37,12 +35,24 @@ public class Institutions {
         //Exibe os dados, em formato json
         System.out.println(institutions.entrySet());
         //Revalidar TUDO, formatos, campos vazios, TUDO!!
-        validateData();
-        
+        boolean existErro = false;
+        String[] erros = validateData();
+        for (int i = 0; i < erros.length; i++) {
+            if (erros[i] == null);
+            {
+                existErro = existErro || false;
+            }
+        }
+        if (!existErro) {
+   
         this._id = getLastID_Institutions()+ 1; //ir buscar o max id da bd + 1
         this.name = institutions.get("name").getAsString();
         this.address = institutions.get("address").getAsString();
         this.image = institutions.get("image").getAsString();
+        
+        regist();
+            
+        }
     }
 
     
@@ -96,35 +106,84 @@ public class Institutions {
     }
     
     
-    private void validateData() {
-        //Se estiver tudo OK, inserer na BD
-        insert();
+    private String[] validateData() {
+        
+        String respostasErro[] = new String[3];
+        boolean valid = false;
+
+        boolean nameValid = utils.isString(name);//0
+        boolean addressValid = utils.isThisDateValid(address);//1
+        boolean imageValid = utils.isString(image);//2
+
+        valid = nameValid && addressValid && imageValid;
+        if (!valid) {
+            {
+                if (!nameValid) {
+                    respostasErro[0] = "Nome invalido";
+                }
+                if (!addressValid) {
+                    respostasErro[1] = "Address invalida";
+                }
+                if (!imageValid) {
+                    respostasErro[2] = "path invalido";
+                }
+            }
+        }
+        return respostasErro;
     }
 
-    public int insert() {
+    public int regist() {
         int status = 0;
         try {
-            // Load the MySQL driver, each DB has its own driver
-            Class.forName("com.mysql.jdbc.Driver");
-            // DB connection setup 
-            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt" + "user=algo&password=algo");
-            // PreparedStatements 
-            preparedStatement = connect.prepareStatement("insert into user values (?, ?, ?, ? )");
-            // Parameters start with 1
-            preparedStatement.setString(1, _id + "");
-            preparedStatement.setString(2, name);
-            preparedStatement.setString(3, address);
-            preparedStatement.setString(4, image);
-            status = preparedStatement.executeUpdate();
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
 
-            if (connect != null) {
-                connect.close();
-            }
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("INSERT INTO tblInstitutions values(" + _id + "," + name + "," + address + "," + image + ")");
+
+            ResultSet res = stmtt.getResultSet();
+
+            System.out.println("result insert institution " + res);
+
+            stmtt.close();
+            connn.close();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
-            Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
-
         return status;
+    }
+    
+    public void updateInstitution(int _id){
+    
+         try {
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("UPDATE tblInstitutions "+"SET name=" + name + ", address=" + address + ",image=" + image + " where _id=" + _id +")");
+
+            ResultSet res = stmtt.getResultSet();
+
+            System.out.println("result update institution " + res);
+
+            stmtt.close();
+            connn.close();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
   
 }
