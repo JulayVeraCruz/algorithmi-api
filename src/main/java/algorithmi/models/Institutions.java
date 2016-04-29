@@ -35,6 +35,12 @@ public class Institutions {
         //Exibe os dados, em formato json
         System.out.println(institutions.entrySet());
         //Revalidar TUDO, formatos, campos vazios, TUDO!!
+        
+        this._id = getLastID_Institutions()+ 1; //ir buscar o max id da bd + 1
+        this.name = institutions.get("name").getAsString();
+        this.address = institutions.get("address").getAsString();
+        this.image = institutions.get("image").getAsString();
+       
         boolean existErro = false;
         String[] erros = validateData();
         for (int i = 0; i < erros.length; i++) {
@@ -45,11 +51,6 @@ public class Institutions {
         }
         if (!existErro) {
    
-        this._id = getLastID_Institutions()+ 1; //ir buscar o max id da bd + 1
-        this.name = institutions.get("name").getAsString();
-        this.address = institutions.get("address").getAsString();
-        this.image = institutions.get("image").getAsString();
-        
         regist();
             
         }
@@ -141,17 +142,20 @@ public class Institutions {
             Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
 
             Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("INSERT INTO tblInstitutions values(" + _id + "," + name + "," + address + "," + image + ")");
+            System.out.println("antes insert ");
+            
+            stmtt.execute("INSERT INTO tblInstitutions values(" + _id + "," + '"' + name + '"' + "," + address + "," + '"' + image + '"' + ")");
 
             ResultSet res = stmtt.getResultSet();
-
-            System.out.println("result insert institution " + res);
+            status = 1;//sem erros
+            System.out.println("insert new institution id" + res.getString(1));
 
             stmtt.close();
             connn.close();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
+            System.out.println("SQL ERROR regist " + ex);
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
@@ -159,8 +163,8 @@ public class Institutions {
         return status;
     }
     
-    public void updateInstitution(int _id){
-    
+    public int updateInstitution(int _id){
+            int status = 0;
          try {
             //executa driver para ligar à base de dados
             Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -173,7 +177,7 @@ public class Institutions {
             ResultSet res = stmtt.getResultSet();
 
             System.out.println("result update institution " + res);
-
+            status = 1;
             stmtt.close();
             connn.close();
         } catch (ClassNotFoundException ex) {
@@ -183,7 +187,7 @@ public class Institutions {
         } catch (Exception ex) {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+        return status;
     }
   
 }

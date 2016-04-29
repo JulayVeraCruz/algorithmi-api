@@ -35,6 +35,12 @@ public class Schools {
         //Exibe os dados, em formato json
         System.out.println(schools.entrySet());
         //Revalidar TUDO, formatos, campos vazios, TUDO!!
+        
+        this._id = getLastID_Schools()+ 1; //ir buscar o max id da bd + 1
+        this.name = schools.get("name").getAsString();
+        this.institution = schools.get("institution").getAsInt();
+        this.image = schools.get("image").getAsString();
+        
         boolean existErro = false;
         String[] erros = validateData();
         for (int i = 0; i < erros.length; i++) {
@@ -44,12 +50,7 @@ public class Schools {
             }
         }
         if (!existErro) {
-
-        this._id = getLastID_Schools()+ 1; //ir buscar o max id da bd + 1
-        this.name = schools.get("name").getAsString();
-        this.institution = schools.get("institution").getAsInt();
-        this.image = schools.get("image").getAsString();
-        
+            
         regist();
             
         }
@@ -136,12 +137,42 @@ public class Schools {
             Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
 
             Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("INSERT INTO tblSchools values(" + _id + "," + name + "," + institution + "," + image + ")");
+            System.out.println("antes insert ");
+            
+            stmtt.execute("INSERT INTO tblSchools values(" + _id + "," + '"' + name + '"' + "," + institution + "," + '"' + image + '"' + ")");
+
+            ResultSet res = stmtt.getResultSet();
+            status = 1;//sem erros
+            System.out.println("insert new schools id" + res.getString(1));
+
+            stmtt.close();
+            connn.close();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            System.out.println("SQL ERROR regist " + ex);
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return status;
+    }
+    
+    public int updateInstitution(int _id){
+         int status = 0;
+         try {
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("UPDATE tblInstitutions " + "SET name=" + name + ", institution=" + institution + ",image=" + image + " where _id=" + _id +")");
 
             ResultSet res = stmtt.getResultSet();
 
-            System.out.println("result insert schools " + res);
-
+            System.out.println("result update school " + res);
+            status = 1;
             stmtt.close();
             connn.close();
         } catch (ClassNotFoundException ex) {
@@ -152,32 +183,5 @@ public class Schools {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
         return status;
-    }
-    
-    public void updateInstitution(int _id){
-    
-         try {
-            //executa driver para ligar à base de dados
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            //faz ligação à base de dados
-            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-
-            Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("UPDATE tblInstitutions "+"SET name=" + name + ", institution=" + institution + ",image=" + image + " where _id=" + _id +")");
-
-            ResultSet res = stmtt.getResultSet();
-
-            System.out.println("result update school " + res);
-
-            stmtt.close();
-            connn.close();
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
     }
 }

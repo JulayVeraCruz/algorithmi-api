@@ -9,10 +9,17 @@ import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -35,14 +42,12 @@ public class MatrixTests {
         //Exibe os dados, em formato json
         System.out.println(matrixTests.entrySet());
         //Revalidar TUDO, formatos, campos vazios, TUDO!!
-        validateData();
-        
         
         this._id = getLastID_MatrixTests()+ 1; //ir buscar o max id da bd + 1
         this.name = matrixTests.get("name").getAsString();
         this.teacher = matrixTests.get("teacher").getAsInt();
         this.course = matrixTests.get("course").getAsInt();
-        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
         df.setLenient(false);
         Date dt;
         try {
@@ -53,6 +58,19 @@ public class MatrixTests {
         this.date = dt;
         this.startingTime = startingTime;
         this.finishingTime = finishingTime;
+        
+        boolean existErro = false;
+        String[] erros = validateData();
+        for (int i = 0; i < erros.length; i++) {
+            if (erros[i] == null);
+            {
+                existErro = existErro || false;
+            }
+        }
+        if (!existErro) {
+
+            regist();
+        }
     }
 
     public int getId() {
@@ -116,10 +134,6 @@ public class MatrixTests {
         return getid.getLastID("tblMatrixTests");
     }
     
-   public void regist() {
-        //Insere na BD
-    }
-    
     // converts a java object to JSON format,
     // and returned as JSON formatted string
     @Override
@@ -131,10 +145,91 @@ public class MatrixTests {
         return json;
     }
 
-    private void validateData() {
-        //Se estiver tudo OK, inserer na BD
-        regist();
+    public int updateCourse(int _id) {
+        int status = 0;
+        try {
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+
+            Statement stmtt = (Statement) connn.createStatement();
+            stmtt.execute("UPDATE tblMatrixTests " + "SET name=" + name +  ",teacher=" + teacher +",course=" + course + ",date=" + date + ",startingTime=" + startingTime + ",finishingTime=" + finishingTime + " where _id=" + _id + ")");
+
+            ResultSet res = stmtt.getResultSet();
+
+            System.out.println("result update matrixTest " + res);
+            status = 1;
+            stmtt.close();
+            connn.close();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return status;
     }
 
+    public int regist() {
+        int status = 0;
+        try {
+            //executa driver para ligar à base de dados
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            //faz ligação à base de dados
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+
+            Statement stmtt = (Statement) connn.createStatement();
+            System.out.println("antes insert ");
+
+            stmtt.execute("INSERT INTO tblcourses values(" + _id + "," + '"' + name + '"' + "," + teacher + "," + '"' + course + "," + '"' + date + "," + '"' + startingTime + "," + '"' + finishingTime + "," + '"' + ")");
+
+            ResultSet res = stmtt.getResultSet();
+            status = 1;//sem erros
+            System.out.println(" insert new matrixTest id" + res.getString(1));
+
+            stmtt.close();
+            connn.close();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            System.out.println("SQL ERROR regist " + ex);
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return status;
+    }
+    
+    private String[] validateData() {
+
+        String respostasErro[] = new String[6];
+        boolean valid = false;
+
+        boolean nameValid = utils.isString(name);//0
+        boolean teacherValid = utils.isNumber(Integer.toString(teacher));//1
+        boolean courseValid = utils.isNumber(Integer.toString(course));
+        //DATE
+        //STARTING TIME 
+        //FINISHING IME
+
+        valid = nameValid && teacherValid && courseValid ; //date, staring time and finishing time
+        if (!valid) {
+            if (!nameValid) {
+                respostasErro[0] = "Nome invalido";
+            }
+            if (!teacherValid) {
+                respostasErro[1] = "Escola invalida";
+            }
+            if (!courseValid) {
+                respostasErro[2] = "path invalido";
+            }
+            //datevalid, starting time valid, finishing time valid
+        }
+
+        return respostasErro;
+    }
+    
 }
 
