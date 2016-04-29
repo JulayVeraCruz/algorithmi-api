@@ -73,6 +73,16 @@ public class Course {
     }
 
     /**
+     * apaga um curso com o _id
+     *
+     * @param _id
+     */
+    public void deleteCourse(int _id) {
+        utils utils = new utils();
+        utils.deleteRegist(_id, "tblcourses");
+    }
+
+    /**
      * para actualizar/alterar os dados de um registo na tabela cursos
      *
      * @param _id
@@ -83,10 +93,10 @@ public class Course {
             //executa driver para ligar à base de dados
             Class.forName("com.mysql.jdbc.Driver").newInstance();
             //faz ligação à base de dados
-            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost/algorithmifr", "root", "root");
+            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
 
             Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("UPDATE tblCourse " + "SET name=" + name +  ",school=" + school +",image=" + image + " where _id=" + _id + ")");
+            stmtt.execute("UPDATE tblCourse " + "SET name=" + name + ",school=" + school + ",image=" + image + " where _id=" + _id + ")");
 
             ResultSet res = stmtt.getResultSet();
 
