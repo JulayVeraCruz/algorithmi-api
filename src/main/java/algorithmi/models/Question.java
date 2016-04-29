@@ -15,13 +15,14 @@
  */
 package algorithmi.Models;
 
-import Utils.utils;
+import Utils.Utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,8 +40,6 @@ public class Question {
     private String algorithm;
     private int difficulty;
 
-    private Connection connect = null;
-    PreparedStatement preparedStatement = null;
 
     // EXEMPLO DE STRING RECEBIDA [title="olol", category="1", description="olololo", difficulty="1", image="", in="9", out="9"]
     public Question(String data) {
@@ -165,34 +164,36 @@ public class Question {
     }
 
     public static int getLastID() {
-        utils getid = new utils();
+        Utils getid = new Utils();
         return getid.getLastID("tblquestions");
     }
 
     public int regist() {
         int status = 0;
         try {
-            // Load the MySQL driver, each DB has its own driver
-            Class.forName("com.mysql.jdbc.Driver");
-            // DB connection setup 
-            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-            // PreparedStatements 
-            preparedStatement = connect.prepareStatement("INSERT INTO tblquestions VALUES (?, ?, ?, ?, ?, ?, ?)");
-            // Parameters start with 1
-
-            //ordem segundo a tabela da bd v3.3
-            preparedStatement.setString(1, _id + "");
-            preparedStatement.setString(2, description);
-            preparedStatement.setString(3, difficulty + "");
-            preparedStatement.setString(4, image);
-            preparedStatement.setString(5, algorithm);
-            preparedStatement.setString(6, title);
-            preparedStatement.setString(7, category + "");
-            status = preparedStatement.executeUpdate();
-
-            if (connect != null) {
-                connect.close();
-            }
+           //as credenciais de ligaçao estao agora em Utils
+            Statement stmtt = Utils.connectDatabase();
+//            // Load the MySQL driver, each DB has its own driver
+//            Class.forName("com.mysql.jdbc.Driver");
+//            // DB connection setup 
+//            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+//            // PreparedStatements 
+//            preparedStatement = connect.prepareStatement("INSERT INTO tblquestions VALUES (?, ?, ?, ?, ?, ?, ?)");
+//            // Parameters start with 1
+//
+//            //ordem segundo a tabela da bd v3.3
+//            preparedStatement.setString(1, _id + "");
+//            preparedStatement.setString(2, description);
+//            preparedStatement.setString(3, difficulty + "");
+//            preparedStatement.setString(4, image);
+//            preparedStatement.setString(5, algorithm);
+//            preparedStatement.setString(6, title);
+//            preparedStatement.setString(7, category + "");
+//            status = preparedStatement.executeUpdate();
+//
+//            if (connect != null) {
+//                connect.close();
+//            }
         } catch (Exception ex) {
             Logger.getLogger(algorithmi.models.User.class.getName()).log(Level.SEVERE, null, ex);
         }

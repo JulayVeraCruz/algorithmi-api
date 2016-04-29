@@ -16,7 +16,7 @@
  */
 package algorithmi.models;
 
-import Utils.utils;
+import Utils.Utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -53,7 +53,7 @@ public class TypeUser {
         //Associa os dados ao objecto UserType
         this._id = getLastID_UserTypes() + 1; //ir buscar o max id da bd + 1 
         this.name = UserType.get("name").getAsString();
-        
+
         boolean existErro = false;
         String[] erros = validateData();
         for (int i = 0; i < erros.length; i++) {
@@ -77,19 +77,15 @@ public class TypeUser {
         int status = 0;
         try {
             //executa driver para ligar à base de dados
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            //faz ligação à base de dados
-            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+            Statement stmtt = Utils.connectDatabase();
 
-            Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("INSERT INTO tblUserTypes values(" + _id + "," + '"' + name  + '"'+ ")");
+            stmtt.execute("INSERT INTO tblUserTypes values(" + _id + "," + '"' + name + '"' + ")");
 
             ResultSet res = stmtt.getResultSet();
 
             System.out.println("result insert Typeuser " + res);
 
             stmtt.close();
-            connn.close();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
@@ -106,7 +102,7 @@ public class TypeUser {
      * @return int
      */
     public static int getLastID_UserTypes() {
-        utils getid = new utils();
+        Utils getid = new Utils();
         return getid.getLastID("tblusertypes");
     }
 
@@ -129,8 +125,8 @@ public class TypeUser {
         String respostasErro[] = new String[2];
         boolean valid;
 
-        boolean idValid = utils.isNumber(_id + "");//0
-        boolean nameValid = utils.isString(name);//1
+        boolean idValid = Utils.isNumber(_id + "");//0
+        boolean nameValid = Utils.isString(name);//1
 
         valid = nameValid && idValid;
 
@@ -154,19 +150,16 @@ public class TypeUser {
 
         try {
             //executa driver para ligar à base de dados
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            //faz ligação à base de dados
-            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+            Statement stmtt = Utils.connectDatabase();
 
-            Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("UPDATE tblUserTypes " + "SET name="  + '"'+ name + '"' + " where _id=" + _id + ")");
+            stmtt.execute("UPDATE tblUserTypes " + "SET name=" + '"' + name + '"' + " where _id=" + _id + ")");
 
             ResultSet res = stmtt.getResultSet();
 
             System.out.println("result update usertype " + res);
 
             stmtt.close();
-            connn.close();
+            
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {

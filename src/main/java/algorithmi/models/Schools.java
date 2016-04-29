@@ -5,7 +5,7 @@
  */
 package algorithmi.models;
 
-import Utils.utils;
+import Utils.Utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -70,7 +70,7 @@ public class Schools {
     }
     
     public static int getLastID_Schools() {
-        utils getid = new utils();
+        Utils getid = new Utils();
         return getid.getLastID("tblSchools");
     }
     

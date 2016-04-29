@@ -5,35 +5,151 @@
  */
 package algorithmi.models;
 
-import Utils.utils;
+import Utils.Utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Pedro Batista
  */
 public class Tests {
+
     private int _id;
     private int matrixTest;
     private float quotation;
     private int student;
 
     public Tests(String data) {
-        
+
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
         JsonObject tests = (JsonObject) jsonParser.parse(data);
         //Exibe os dados, em formato json
         System.out.println(tests.entrySet());
         //Revalidar TUDO, formatos, campos vazios, TUDO!!
-        validateData();
-        
-        this._id = getLastID_Tests()+ 1; //ir buscar o max id da bd + 1
+
+        this._id = getLastID_Tests() + 1; //ir buscar o max id da bd + 1
         this.matrixTest = tests.get("matrixTest").getAsInt();
         this.quotation = tests.get("quotation").getAsFloat();
         this.student = tests.get("student").getAsInt();
+
+        boolean existErro = false;
+        String[] erros = validateData();
+        for (int i = 0; i < erros.length; i++) {
+            if (erros[i] == null);
+            {
+                existErro = existErro || false;
+            }
+        }
+        if (!existErro) {
+
+            regist();
+        }
+    }
+
+    /**
+     * obtem o maximo id utilizado na tabela tbltests
+     *
+     * @return int
+     */
+    public static int getLastID_Tests() {
+        Utils getid = new Utils();
+        return getid.getLastID("tblTests");
+    }
+
+    /**
+     * apaga um teste com o _id
+     *
+     * @param _id
+     */
+    public void deleteTest(int _id) {
+        Utils utils = new Utils();
+        utils.deleteRegist(_id, "tbltests");
+    }
+
+    /**
+     * introduz um novo teste
+     *
+     * @return
+     */
+    public int regist() {
+        int status = 0;
+        try {
+            //executa driver para ligar à base de dados
+            Statement stmtt = Utils.connectDatabase();
+
+            stmtt.execute("INSERT INTO tbltests values()");
+
+            ResultSet res = stmtt.getResultSet();
+            status = 1;//sem erros
+            System.out.println(" tests" + res.getString(1));
+
+            stmtt.close();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            System.out.println("SQL ERROR regist " + ex);
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return status;
+    }
+
+    /**
+     * para actualizar/alterar os dados de um registo na tabela tests
+     *
+     * @param _id
+     * @return
+     */
+    public int updateTest(int _id) {
+        int status = 0;
+        try {
+            //executa driver para ligar à base de dados
+            Statement stmtt = Utils.connectDatabase();
+
+            stmtt.execute("UPDATE tbltests " + "SET matrixTest=" + matrixTest + ",quotation=" + quotation + ",student=" + student + " where _id=" + _id + ")");
+
+            ResultSet res = stmtt.getResultSet();
+
+            System.out.println("result update course " + res);
+            status = 1;
+            stmtt.close();
+        } catch (Exception ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return status;
+    }
+
+    @Override
+    public String toString() {
+        Gson gson = new Gson();
+
+        String json = gson.toJson(this);
+        System.out.println("json \n" + json);
+        return json;
+    }
+
+    private String[] validateData() {
+        String respostasErro[] = new String[1];
+        boolean valid = false;
+
+        boolean validQuotation = Utils.isValidFloat(quotation + "");
+
+        valid = validQuotation;
+        if (!valid) {
+            if (!validQuotation) {
+                respostasErro[0] = "Nota invalida";
+            }
+        }
+        return respostasErro;
     }
 
     public int getId() {
@@ -67,32 +183,4 @@ public class Tests {
     public void setStudent(int student) {
         this.student = student;
     }
-    
-    public static int getLastID_Tests() {
-        utils getid = new utils();
-        return getid.getLastID("tblTests");
-    }
-    
-    public void regist() {
-        //Insere na BD
-    }
-    
-    // converts a java object to JSON format,
-    // and returned as JSON formatted string
-    @Override
-    public String toString() {
-        Gson gson = new Gson();
-
-        String json = gson.toJson(this);
-        System.out.println("json \n"+ json);
-        return json;
-    }
-
-    private void validateData() {
-        //Se estiver tudo OK, inserer na BD
-        regist();
-    }
-    
-    
-    
 }

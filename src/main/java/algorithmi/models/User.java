@@ -15,7 +15,7 @@
  */
 package algorithmi.models;
 
-import Utils.utils;
+import Utils.Utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -96,11 +96,7 @@ public class User {
         int status = 0;
         try {
             //executa driver para ligar à base de dados
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            //faz ligação à base de dados
-            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-
-            Statement stmtt = (Statement) connn.createStatement();
+            Statement stmtt = Utils.connectDatabase();
             stmtt.execute("INSERT INTO tblUsers values(" + _id + "," + '"' + name + '"' + "," + '"' + user + '"' + "," + birthDate + "," + '"' + email + '"' + "," + '"' + type + '"' + "," + '"' + password + '"' + "," + image + ")");
 
             ResultSet res = stmtt.getResultSet();
@@ -108,7 +104,7 @@ public class User {
             System.out.println(" insert user " + res.getRow());
             status = 1;//
             stmtt.close();
-            connn.close();
+            //connn.close(); caso haja problemas depois resolve-se com um objecto
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
@@ -125,7 +121,7 @@ public class User {
      * @return int
      */
     public static int getLastID_Users() {
-        utils getid = new utils();
+        Utils getid = new Utils();
         return getid.getLastID("tblusers");
     }
 
@@ -149,13 +145,13 @@ public class User {
         String respostasErro[] = new String[7];
         boolean valid = false;
 
-        boolean userValid = utils.isUsernameValid(user);//0
-        boolean nameValid = utils.isString(name);//1
-        boolean dateValid = utils.isThisDateValid(birthDate.toString());//2
-        boolean emailValid = utils.isEmailValid(email);//3
-        boolean imageValid = utils.isString(image);//4
-        boolean passwordValid = utils.isString(password);//5
-        boolean typeValid = utils.isNumber(Integer.toString(type));//6
+        boolean userValid = Utils.isUsernameValid(user);//0
+        boolean nameValid = Utils.isString(name);//1
+        boolean dateValid = Utils.isThisDateValid(birthDate.toString());//2
+        boolean emailValid = Utils.isEmailValid(email);//3
+        boolean imageValid = Utils.isString(image);//4
+        boolean passwordValid = Utils.isString(password);//5
+        boolean typeValid = Utils.isNumber(Integer.toString(type));//6
 
         valid = userValid && nameValid && dateValid && emailValid && imageValid && passwordValid && typeValid;
         if (!valid) {
@@ -195,11 +191,7 @@ public class User {
 
         try {
             //executa driver para ligar à base de dados
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            //faz ligação à base de dados
-            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-
-            Statement stmtt = (Statement) connn.createStatement();
+            Statement stmtt = Utils.connectDatabase();
             stmtt.execute("UPDATE tblUsers " + "SET username=" + '"' + user + '"'
                     + ",name=" + '"' + name + '"' + ", birthDate=" + birthDate + ",email=" + '"' + email + '"' + ",password=" + '"' + password + '"' + ",image=" + '"' + image + '"' + ",type=" + type + " where _id=" + _id + ")");
 
@@ -208,7 +200,6 @@ public class User {
             System.out.println("result update user " + res.rowUpdated());
 
             stmtt.close();
-            connn.close();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
@@ -224,15 +215,12 @@ public class User {
      *
      * @return Json[]
      */
-    public Gson[] listTeacher() {
+    public static Gson[] listTeacher() {
         Gson lisOfTeacher[] = new Gson[getLastID_Users()];
         try {
             //executa driver para ligar à base de dados
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            //faz ligação à base de dados
-            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+            Statement stmtt = Utils.connectDatabase();
 
-            Statement stmtt = (Statement) connn.createStatement();
             stmtt.execute("select tblUsers.name,tblUsers.image,tblCourses.name"
                     + " from tblUsers,tblCourses,tblUserCourses "
                     + "where tblUsers.type=3  and tblUsers._id=tblUserCourses.userID and tblUserCourses.courseID=tblCourses._id; ");
@@ -241,10 +229,10 @@ public class User {
 
             while (res.next()) {
                 lisOfTeacher[res.getRow() - 1].toJson(res);
+                System.out.println("" + lisOfTeacher[res.getRow() - 1]);
             }
 
             stmtt.close();
-            connn.close();
         } catch (Exception ex) {
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -256,15 +244,12 @@ public class User {
      *
      * @return Json[]
      */
-    public Gson[] listStudents() {
+    public static Gson[] listStudents() {
         Gson lisOfStudents[] = new Gson[getLastID_Users()];
         try {
             //executa driver para ligar à base de dados
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            //faz ligação à base de dados
-            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+            Statement stmtt = Utils.connectDatabase();
 
-            Statement stmtt = (Statement) connn.createStatement();
             stmtt.execute("select tblUsers.name,tblUsers.image,tblCourses.name"
                     + " from tblUsers,tblCourses,tblUserCourse "
                     + "where tblUsers.'type'=4  and tblUsers._id=tblUserCourse.userID and tblUserCourse.courseID=tblCourses._id; ");
@@ -277,7 +262,6 @@ public class User {
             }
 
             stmtt.close();
-            connn.close();
         } catch (Exception ex) {
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         }

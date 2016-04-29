@@ -5,20 +5,26 @@
  */
 package algorithmi.models;
 
-import Utils.utils;
+import Utils.Utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Pedro Batista
  */
 public class MatrixTests {
+
     private int _id;
     private String name;
     private int teacher;
@@ -28,7 +34,7 @@ public class MatrixTests {
     private Date finishingTime;
 
     public MatrixTests(String data) {
-        
+
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
         JsonObject matrixTests = (JsonObject) jsonParser.parse(data);
@@ -36,13 +42,12 @@ public class MatrixTests {
         System.out.println(matrixTests.entrySet());
         //Revalidar TUDO, formatos, campos vazios, TUDO!!
         validateData();
-        
-        
-        this._id = getLastID_MatrixTests()+ 1; //ir buscar o max id da bd + 1
+
+        this._id = getLastID_MatrixTests() + 1; //ir buscar o max id da bd + 1
         this.name = matrixTests.get("name").getAsString();
         this.teacher = matrixTests.get("teacher").getAsInt();
         this.course = matrixTests.get("course").getAsInt();
-        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         df.setLenient(false);
         Date dt;
         try {
@@ -53,6 +58,115 @@ public class MatrixTests {
         this.date = dt;
         this.startingTime = startingTime;
         this.finishingTime = finishingTime;
+    }
+
+    public static int getLastID_MatrixTests() {
+        Utils getid = new Utils();
+        return getid.getLastID("tblmatrixtests");
+    }
+
+    public int regist() {
+        int status = 0;
+        try {
+            //executa driver para ligar à base de dados
+            Statement stmtt = Utils.connectDatabase();
+
+          stmtt.execute("INSERT INTO tblmatrixtests values(" + _id + "," + '"' + name + '"' + "," + teacher + "," + course + "," + '"' + date + '"' + "," + '"' + startingTime + '"'+"," + '"' +finishingTime+ '"' + ")");
+//            stmtt.execute("INSERT INTO tblmatrixtests values(1," +'"testname"'+",1,1," + '"2016-29-04"' + "," + '"17:00"'+"," + '"19:00"'+")");
+
+            ResultSet res = stmtt.getResultSet();
+            status = 1;//sem erros
+            System.out.println(" insert new cursos id" + res.getString(1));
+
+            stmtt.close();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return status;
+    }
+
+     /**
+     * apaga um teste com o _id
+     *
+     * @param _id
+     */
+    public void deleteTest(int _id) {
+        Utils utils = new Utils();
+        utils.deleteRegist(_id, "tblmatrixtests");
+    }
+
+     /**
+     * para actualizar/alterar os dados de um registo na tabela tests
+     *
+     * @param _id
+     */
+    public int updateTest(int _id) {
+        int status = 0;
+        try {
+            //executa driver para ligar à base de dados
+            Statement stmtt = Utils.connectDatabase();ResultSet res = stmtt.getResultSet();
+        stmtt.execute("UPDATE tblmatrixtests values(_id=" + _id + ",name=" + '"' + name + '"' + ",teacher=" + teacher + ",course=" + course + ",date=" + '"' + date + '"' + ",startingTime=" + '"' + startingTime + '"'+",finishingTime=" + '"' +finishingTime+ '"' + " where _id=" + _id + ")");
+
+            System.out.println("result update matrix " + res);
+            status = 1;
+            stmtt.close();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return status;
+    }
+
+    @Override
+    public String toString() {
+        Gson gson = new Gson();
+
+        String json = gson.toJson(this);
+        System.out.println("json \n" + json);
+        return json;
+    }
+
+  /**
+     * faz a validação dos dados com o retorno de um array podendo conter ou nao
+     * mensagens de erro
+     *
+     * @return String[]
+     */
+    private String[] validateData() {
+
+        String respostasErro[] = new String[4];
+        boolean valid = false;
+
+        boolean nameValid = Utils.isString(name);//0
+        boolean dateValid = Utils.isThisDateValid(date + "");//1
+//        boolean startTimeValid = Utils.isString(time);//2
+//        boolean finishTimeValid = Utils.isString(time);//3
+
+        valid = nameValid && dateValid; //&& imageValid;
+        if (!valid) {
+            if (!nameValid) {
+                respostasErro[0] = "Nome invalido";
+            }
+            if (!dateValid) {
+                respostasErro[1] = "Data invalida";
+            }
+//            if (!startTimeValid) {
+//                respostasErro[2] = "startTime invalido";
+//            }
+//            if (!finishTimeValid) {
+//                respostasErro[3] = "finishTime invalido";
+//            }
+
+        }
+
+        return respostasErro;
     }
 
     public int getId() {
@@ -110,31 +224,5 @@ public class MatrixTests {
     public void setFinishingTime(Date finishingTime) {
         this.finishingTime = finishingTime;
     }
-   
-    public static int getLastID_MatrixTests() {
-        utils getid = new utils();
-        return getid.getLastID("tblMatrixTests");
-    }
-    
-   public void regist() {
-        //Insere na BD
-    }
-    
-    // converts a java object to JSON format,
-    // and returned as JSON formatted string
-    @Override
-    public String toString() {
-        Gson gson = new Gson();
-
-        String json = gson.toJson(this);
-        System.out.println("json \n"+ json);
-        return json;
-    }
-
-    private void validateData() {
-        //Se estiver tudo OK, inserer na BD
-        regist();
-    }
 
 }
-
