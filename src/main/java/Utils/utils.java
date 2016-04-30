@@ -176,9 +176,7 @@ public class utils {
     public int getLastID(String nomeTabela) {
         int id = 0;
         try {
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-            Statement stmtt = (Statement) connn.createStatement();
+           Statement stmtt = utils.connectDatabase();
             stmtt.execute("select " + nomeTabela + "._id from " + nomeTabela + " order by _id desc limit 1");
 
             ResultSet res = stmtt.getResultSet();
@@ -188,7 +186,6 @@ public class utils {
 //                System.out.println("id   " + id);
             }
             stmtt.close();
-            connn.close();
             return id;
 
         } catch (SQLException ex) {
@@ -209,11 +206,7 @@ public class utils {
     public String getNames(int _id, String tabela) {
         try {
             //executa driver para ligar à base de dados
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            //faz ligação à base de dados
-            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-
-            Statement stmtt = (Statement) connn.createStatement();
+           Statement stmtt = utils.connectDatabase();
             stmtt.execute("SELECT name FROM `" + tabela + "` where _id=" + _id);
 
             ResultSet res = stmtt.getResultSet();
@@ -242,11 +235,7 @@ public class utils {
     public String deleteRegist(int _id, String tabela) {
         try {
             //executa driver para ligar à base de dados
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            //faz ligação à base de dados
-            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-
-            Statement stmtt = (Statement) connn.createStatement();
+            Statement stmtt = utils.connectDatabase();
             stmtt.execute("DELETE FROM " + tabela + " where _id=" + _id);
 
             ResultSet res = stmtt.getResultSet();
