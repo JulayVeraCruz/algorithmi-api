@@ -60,6 +60,10 @@ public class utils {
         return Pattern.matches("[0-9.,]+", data);
     }
 
+    public static boolean isFloat(String data) {
+        return Pattern.matches("[0-9.,]+", data);
+    }
+
     /**
      * verifica se a string é composta apenas por algarismos e se possui o
      * tamanho (limit) correcto
