@@ -17,10 +17,10 @@ package algorithmi.models;
 
 import Utils.utils;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.sql.Connection;
-import java.sql.DriverManager;
+import com.mysql.jdbc.ResultSetMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -30,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+//import javax.json;
 
 /**
  *
@@ -46,7 +47,7 @@ public class User {
     private String password;
     private String image;
 
-    public User(String data) throws ParseException {
+    public User(String data) throws ParseException, SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -101,15 +102,11 @@ public class User {
 
             ResultSet res = stmtt.getResultSet();
 
-            System.out.println(" insert user " + res.getRow());
+            System.out.println(" insert user nº " + _id);
             status = 1;//
             stmtt.close();
-            //connn.close(); caso haja problemas depois resolve-se com um objecto
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
+            System.out.println("exception regist user= " + ex);
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
         return status;
@@ -120,7 +117,7 @@ public class User {
      *
      * @return int
      */
-    public static int getLastID_Users() {
+    public static int getLastID_Users() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         utils getid = new utils();
         return getid.getLastID("tblusers");
     }
@@ -203,6 +200,7 @@ public class User {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
+            System.out.println("sql ex updateuser= " + ex);
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
@@ -215,57 +213,89 @@ public class User {
      *
      * @return Json[]
      */
-    public static Gson[] listTeacher() {
-        Gson lisOfTeacher[] = new Gson[getLastID_Users()];
-        try {
-            //executa driver para ligar à base de dados
-            Statement stmtt = utils.connectDatabase();
+    public static JsonObject listTeacher() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        JsonObject obj = new JsonObject();
+        JsonArray header = new JsonArray();
+        JsonArray list = new JsonArray();
 
-            stmtt.execute("select tblUsers.name,tblUsers.image,tblCourses.name"
-                    + " from tblUsers,tblCourses,tblUserCourses "
-                    + "where tblUsers.type=3  and tblUsers._id=tblUserCourses.userID and tblUserCourses.courseID=tblCourses._id; ");
+        try (
+                //executa driver para ligar à base de dados
+                Statement stmtt = utils.connectDatabase()) {
+
+            stmtt.execute("select tblusers.`name`,tblusers.image,tblcourses.`name` from tblusers,tblcourses,tblusercourses where tblusers.`type`=3  and tblusers._id=tblusercourses.userID and tblusercourses.courseID=tblcourses._id ");
 
             ResultSet res = stmtt.getResultSet();
 
-            while (res.next()) {
-                lisOfTeacher[res.getRow() - 1].toJson(res);
-                System.out.println("" + lisOfTeacher[res.getRow() - 1]);
+            int columnCount = res.getMetaData().getColumnCount();
+            ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
+
+            //headers column  name,image,name
+            for (int i = 1; i <= columnCount; i++) {
+                //header.add(Name);
+                //header.add(image);
+                //header.add(Course);
+
+                header.add(String.valueOf(metadata.getColumnName(i)));
+                obj.add("columndata", header);
             }
 
-            stmtt.close();
+            while (res.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    list.add(String.valueOf(res.getObject(i)));
+                    obj.add("rowdata", list);
+                }
+            }
         } catch (Exception ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("list teachers error :" + ex);
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return lisOfTeacher;
+        return obj;
     }
 
     /**
      * lista dos users do tipo students devolvendo o nome,imagem e o curso
      *
      * @return Json[]
+     * @throws java.sql.SQLException
      */
-    public static Gson[] listStudents() {
-        Gson lisOfStudents[] = new Gson[getLastID_Users()];
-        try {
-            //executa driver para ligar à base de dados
-            Statement stmtt = utils.connectDatabase();
+    public static JsonObject listStudents() throws SQLException, InstantiationException, ClassNotFoundException, IllegalAccessException {
 
-            stmtt.execute("select tblUsers.name,tblUsers.image,tblCourses.name"
-                    + " from tblUsers,tblCourses,tblUserCourse "
-                    + "where tblUsers.'type'=4  and tblUsers._id=tblUserCourse.userID and tblUserCourse.courseID=tblCourses._id; ");
+        JsonObject obj = new JsonObject();
+        JsonArray header = new JsonArray();
+        JsonArray list = new JsonArray();
+
+        try (
+                //executa driver para ligar à base de dados
+                Statement stmtt = utils.connectDatabase()) {
+
+            stmtt.execute("select tblUsers.name as Name,tblUsers.image as Image,tblCourses.name as Course from tblUsers,tblCourses,tblUserCourses where tblUsers.type=4  and tblUsers._id=tblUserCourses.userID and tblUserCourses.courseID=tblCourses._id ");
 
             ResultSet res = stmtt.getResultSet();
 
-            while (res.next()) {
-                lisOfStudents[res.getRow() - 1].toJson(res);
+            int columnCount = res.getMetaData().getColumnCount();
+            ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
 
+            //headers column  name,image,name
+            for (int i = 1; i <= columnCount; i++) {
+                //header.add(Name);
+                //header.add(image);
+                //header.add(Course);
+
+                header.add(String.valueOf(metadata.getColumnName(i)));
+                obj.add("columndata", header);
             }
 
-            stmtt.close();
+            while (res.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    list.add(String.valueOf(res.getObject(i)));
+                    obj.add("rowdata", list);
+                }
+            }
         } catch (Exception ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("list students error :" + ex);
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return lisOfStudents;
+        return obj;
     }
 
     public int getId_User() {

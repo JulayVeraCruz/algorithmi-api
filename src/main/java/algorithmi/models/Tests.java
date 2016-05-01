@@ -26,8 +26,9 @@ public class Tests {
     private int matrixTest;
     private float quotation;
     private int student;
+    private String image;
 
-    public Tests(String data) {
+    public Tests(String data) throws SQLException, ClassNotFoundException, IllegalAccessException, InstantiationException {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -40,6 +41,7 @@ public class Tests {
         this.matrixTest = tests.get("matrixTest").getAsInt();
         this.quotation = tests.get("quotation").getAsFloat();
         this.student = tests.get("student").getAsInt();
+        this.image = tests.get("image").getAsString();
 
         boolean existErro = false;
         String[] erros = validateData();
@@ -60,9 +62,9 @@ public class Tests {
      *
      * @return int
      */
-    public static int getLastID_Tests() {
+    public static int getLastID_Tests() throws SQLException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         utils getid = new utils();
-        return getid.getLastID("tblTests");
+        return getid.getLastID("tbltests");
     }
 
     /**
@@ -70,7 +72,7 @@ public class Tests {
      *
      * @param _id
      */
-    public void deleteTest(int _id) {
+    public void deleteTest(int _id) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
         utils utils = new utils();
         utils.deleteRegist(_id, "tbltests");
     }
@@ -90,13 +92,13 @@ public class Tests {
 
             ResultSet res = stmtt.getResultSet();
             status = 1;//sem erros
-            System.out.println(" tests" + res.getString(1));
+            System.out.println("insert test nº " + res.getString(1));
 
             stmtt.close();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
-            System.out.println("SQL ERROR regist " + ex);
+            System.out.println("SQL ERROR test regist " + ex);
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
@@ -116,7 +118,7 @@ public class Tests {
             //executa driver para ligar à base de dados
             Statement stmtt = utils.connectDatabase();
 
-            stmtt.execute("UPDATE tbltests " + "SET matrixTest=" + matrixTest + ",quotation=" + quotation + ",student=" + student + " where _id=" + _id + ")");
+            stmtt.execute("UPDATE tbltests SET matrixTest=" + matrixTest + ",quotation=" + quotation + ",student=" + student + ",image=" + image + " where _id=" + _id + ")");
 
             ResultSet res = stmtt.getResultSet();
 
@@ -153,6 +155,7 @@ public class Tests {
         return respostasErro;
     }
 
+    
     public int getId() {
         return _id;
     }

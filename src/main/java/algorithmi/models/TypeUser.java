@@ -18,10 +18,10 @@ package algorithmi.models;
 
 import Utils.utils;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.sql.Connection;
-import java.sql.DriverManager;
+import com.mysql.jdbc.ResultSetMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -37,7 +37,7 @@ public class TypeUser {
     private int _id;
     private String name;
 
-    public TypeUser(String data) {
+    public TypeUser(String data) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -89,6 +89,7 @@ public class TypeUser {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
+            System.out.println("insert sql error typeuser: "+ex);
             Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
@@ -101,7 +102,7 @@ public class TypeUser {
      *
      * @return int
      */
-    public static int getLastID_UserTypes() {
+    public static int getLastID_UserTypes() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         utils getid = new utils();
         return getid.getLastID("tblusertypes");
     }
@@ -163,6 +164,7 @@ public class TypeUser {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
+            System.out.println("error sql typeuser update; "+ex);
             Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
@@ -170,6 +172,47 @@ public class TypeUser {
 
     }
 
+    /**
+ * lista os varios tipos de utilizadores existentes
+ * @return JsonObject
+ */
+    public static JsonObject listTypesOfUser(){
+        JsonObject obj = new JsonObject();
+        JsonArray header = new JsonArray();
+        JsonArray list = new JsonArray();
+
+        try (
+                //executa driver para ligar à base de dados
+                Statement stmtt = utils.connectDatabase()) {
+
+            stmtt.execute("select tblusertypes.'name' as Name from tblusertypes ");
+
+            ResultSet res = stmtt.getResultSet();
+
+            int columnCount = res.getMetaData().getColumnCount();
+            ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
+
+            //headers column  name,image,name
+            for (int i = 1; i <= columnCount; i++) {
+                //header.add(Name);
+
+                header.add(String.valueOf(metadata.getColumnName(i)));
+                obj.add("columndata", header);
+            }
+
+            while (res.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    list.add(String.valueOf(res.getObject(i)));
+                    obj.add("rowdata", list);
+                }
+            }
+        } catch (Exception ex) {
+            System.out.println("list students error :" + ex);
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return obj;
+    }
+  
     public TypeUser(int id_Type, String name) {
         this._id = id_Type;
         this.name = name;

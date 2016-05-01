@@ -16,11 +16,12 @@
 package algorithmi.models;
 
 import Utils.utils;
+import static Utils.utils.connectDatabase;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.sql.Connection;
-import java.sql.DriverManager;
+import com.mysql.jdbc.ResultSetMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -38,7 +39,7 @@ public class Course {
     private int school;
     private String image;
 
-    public Course(String data) {
+    public Course(String data) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -77,7 +78,7 @@ public class Course {
      *
      * @param _id
      */
-    public void deleteCourse(int _id) {
+    public void deleteCourse(int _id) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
         utils utils = new utils();
         utils.deleteRegist(_id, "tblcourses");
     }
@@ -86,27 +87,19 @@ public class Course {
      * para actualizar/alterar os dados de um registo na tabela cursos
      *
      * @param _id
-     * @return 
+     * @return
      */
-    public int updateCourse(int _id) {
+    public int updateCourse(int _id) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
         int status = 0;
-        try {
-            try ( //executa driver para ligar à base de dados
-                    Statement stmtt = utils.connectDatabase()) {
-                stmtt.execute("UPDATE tblCourse " + "SET name=" + name + ",school=" + school + ",image=" + image + " where _id=" + _id + ")");
-                
-                ResultSet res = stmtt.getResultSet();
-                
-                System.out.println("result update course " + res);
-                status = 1;
-            }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
+        Statement stmtt = utils.connectDatabase();
+        stmtt.execute("UPDATE tblCourse SET name=" + name + ",school=" + school + ",image=" + image + " where _id=" + _id + ")");
+
+        ResultSet res = stmtt.getResultSet();
+
+        System.out.println("result update Course " + res.rowUpdated());
+
+        stmtt.close();
         return status;
     }
 
@@ -114,29 +107,22 @@ public class Course {
      * Insere novos registos na tabela
      *
      * @return status
+     * @throws java.lang.ClassNotFoundException
+     * @throws java.lang.InstantiationException
+     * @throws java.lang.IllegalAccessException
+     * @throws java.sql.SQLException
      */
-    public int regist() {
-        int status = 0;
-        try {
-            //executa driver para ligar à base de dados
-            Statement stmtt = utils.connectDatabase();
-            System.out.println("antes ibsert ");
+    public int regist() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
+        int status = 1;
+        Statement stmtt = connectDatabase();
 
-            stmtt.execute("INSERT INTO tblcourses values(" + _id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")");
-
-            ResultSet res = stmtt.getResultSet();
-            status = 1;//sem erros
-            System.out.println(" insert new cursos id" + res.getString(1));
-
-            stmtt.close();
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            System.out.println("SQL ERROR regist " + ex);
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        stmtt.execute("INSERT INTO tblcourses values(" + _id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")");
+        ResultSet res = stmtt.getResultSet();
+        while (res.next()) {
+            status = 0;
         }
+        System.out.println(" insert course nº " + _id);
+        stmtt.close();
         return status;
     }
 
@@ -145,29 +131,42 @@ public class Course {
      *
      * @return []json
      */
-    public static Gson[] listCourses_WEB() {
+    public static JsonObject listCourses_WEB() throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
+        JsonObject obj = new JsonObject();
+        JsonArray header = new JsonArray();
+        JsonArray list = new JsonArray();
 
-        Gson lisOfCourses[] = new Gson[getLastID_Courses()];
-        try {
-            //executa driver para ligar à base de dados
-            Statement stmtt = utils.connectDatabase();
+        try (
+                //executa driver para ligar à base de dados
+                Statement stmtt = utils.connectDatabase()) {
 
-            stmtt.execute("SELECT tblcourses.name as Course,tblschools.name as School\n"
-                    + "from tblCourses,tblSchools\n"
-                    + "where tblCourses.school=tblSchools._id");
-//            stmtt.execute("SELECT tblCourses.name as \"Course\",tblSchools.name as \"School\"\n"
-//                    + "from tblCourses,tblSchools\n"
-//                    + "where tblCourses.school=tblSchools._id ");
+            stmtt.execute("SELECT tblcourses.`name` as Course,tblschools.`name` as School from tblCourses,tblSchools where tblCourses.school=tblSchools._id");
+
             ResultSet res = stmtt.getResultSet();
 
-            while (res.next()) {
-                lisOfCourses[res.getRow() - 1].toJson(res);
+            int columnCount = res.getMetaData().getColumnCount();
+            ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
+
+            //headers column  name,image,name
+            for (int i = 1; i <= columnCount; i++) {
+                //header.add(Course);
+                //header.add(School);
+
+                header.add(String.valueOf(metadata.getColumnName(i)));
+                obj.add("columndata", header);
             }
-            stmtt.close();
+
+            while (res.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    list.add(String.valueOf(res.getObject(i)));
+                    obj.add("rowdata", list);
+                }
+            }
         } catch (Exception ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("list courses error :" + ex);
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return lisOfCourses;
+        return obj;
     }
 
     /**
@@ -175,7 +174,7 @@ public class Course {
      *
      * @return int
      */
-    public static int getLastID_Courses() {
+    public static int getLastID_Courses() throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
         utils getid = new utils();
         return getid.getLastID("tblcourses");
     }

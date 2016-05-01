@@ -19,8 +19,6 @@ import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -77,18 +75,19 @@ public class UserCourse {
         try {
             //executa driver para ligar à base de dados
             Statement stmtt = utils.connectDatabase();
-            
+
             stmtt.execute("UPDATE tblUsersCourse " + "SET courseID=" + courseID + " where userID=" + userID + " AND courseID=" + oldCourse_id + ")");
 
             ResultSet res = stmtt.getResultSet();
 
-            System.out.println("result update user's course  " + res);
+            System.out.println("result update user's course  " + res.toString());
 
             stmtt.close();
-            
+
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(UserCourse.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
+            System.out.println("sql error update UserCourse :" + ex);
             Logger.getLogger(UserCourse.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(UserCourse.class.getName()).log(Level.SEVERE, null, ex);
@@ -106,18 +105,21 @@ public class UserCourse {
         try {
             //executa driver para ligar à base de dados
             Statement stmtt = utils.connectDatabase();
-            
-            stmtt.execute("INSERT INTO tblCourses values(" + userID + "," + courseID + ")");
+
+            stmtt.execute("INSERT INTO tblusercourses values(" + userID + "," + courseID + ")");
 
             ResultSet res = stmtt.getResultSet();
 
-            System.out.println("result insert user's courses " + res);
-
+            System.out.println("result insert user's courses " + res.toString());
+            while (res.next()) {
+                status = 0;
+            }
             stmtt.close();
-            
+
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
+            System.out.println("error sql insert usercourses error : "+ex);
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
@@ -163,8 +165,8 @@ public class UserCourse {
         try {
             //executa driver para ligar à base de dados
             Statement stmtt = utils.connectDatabase();
-            
-            stmtt.execute("DELETE FROM `tblUsersCourses` where userID=" + userID + " and courseID=" + courseID);
+
+            stmtt.execute("DELETE FROM `tbluserscourses` where userID=" + userID + " and courseID=" + courseID);
 
             ResultSet res = stmtt.getResultSet();
 

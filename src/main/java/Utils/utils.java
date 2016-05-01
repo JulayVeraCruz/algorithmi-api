@@ -5,7 +5,6 @@
  */
 package Utils;
 
-import algorithmi.models.Course;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -14,8 +13,6 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.*;
 
 /**
@@ -23,20 +20,20 @@ import java.util.regex.*;
  * @author Pedro Batista
  */
 public class utils {
-
-    /**
-     * credencias e ligação base de dados
-     *
-     * @return Statement
-     * @throws ClassNotFoundException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws SQLException
-     */
+/**
+ * Faz a ligação a base de dados com as devidas credecias de acesso
+ * @return Statment
+ * @throws ClassNotFoundException
+ * @throws InstantiationException
+ * @throws IllegalAccessException
+ * @throws SQLException 
+ */
     public static Statement connectDatabase() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
+        Object resultados[];
         Class.forName("com.mysql.jdbc.Driver").newInstance();
         //faz ligação à base de dados
-        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+        //Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/fralgo", "root", "root");
         Statement stmtt = (Statement) connn.createStatement();
         return stmtt;
     }
@@ -50,7 +47,8 @@ public class utils {
     public static boolean isNumber(String data) {
         return Pattern.matches("[0-9]+", data);
     }
-  /**
+
+    /**
      * verifica se a string é um float
      *
      * @param data
@@ -167,33 +165,24 @@ public class utils {
     }
 
     /**
-     * Devolve o último id da tabela nomeTabela na base de dados
+     * Devolve o último id da tabela nomeTabela na base de dados "algo" de
      * algoritmi.ipt.pt retorna zero se n existitem dados
      *
      * @param nomeTabela
      * @return int
      */
-    public int getLastID(String nomeTabela) {
+    public int getLastID(String nomeTabela) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         int id = 0;
-        try {
-           Statement stmtt = utils.connectDatabase();
-            stmtt.execute("select " + nomeTabela + "._id from " + nomeTabela + " order by _id desc limit 1");
 
-            ResultSet res = stmtt.getResultSet();
+        Statement stmtt = connectDatabase();
 
-            while (res.next()) {
-                id = Integer.parseInt(res.getString("_id"));
-//                System.out.println("id   " + id);
-            }
-            stmtt.close();
-            return id;
+        stmtt.execute("select " + nomeTabela + "._id from " + nomeTabela + " order by _id desc limit 1");
+        ResultSet res = stmtt.getResultSet();
 
-        } catch (SQLException ex) {
-            Logger.getLogger(nomeTabela).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(utils.class.getName()).log(Level.SEVERE, null, ex);
+        while (res.next()) {
+            id = Integer.parseInt(res.getString("_id"));
         }
-        return 0;
+        return id;
     }
 
     /**
@@ -203,25 +192,19 @@ public class utils {
      * @param tabela
      * @return
      */
-    public String getNames(int _id, String tabela) {
-        try {
-            //executa driver para ligar à base de dados
-           Statement stmtt = utils.connectDatabase();
-            stmtt.execute("SELECT name FROM `" + tabela + "` where _id=" + _id);
+    public String getName(int _id, String tabela) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
 
-            ResultSet res = stmtt.getResultSet();
+        String name = null;
+        Statement stmtt = connectDatabase();
 
-            return res.toString();
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        stmtt.execute("SELECT name FROM `" + tabela + "` where _id=" + _id + "");
+//        ResultSet res = connectDatabase(mySQL);//se for apenas um insert o res=null
+        ResultSet res = stmtt.getResultSet();
+
+        while (res.next()) {
+            name = res.getString("name");
         }
-        return "Invalid ID or table";
+        return name;
     }
 
     /**
@@ -232,25 +215,19 @@ public class utils {
      * @param tabela
      * @return
      */
-    public String deleteRegist(int _id, String tabela) {
-        try {
-            //executa driver para ligar à base de dados
-            Statement stmtt = utils.connectDatabase();
-            stmtt.execute("DELETE FROM " + tabela + " where _id=" + _id);
+    public String deleteRegist(int _id, String tabela) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
 
-            ResultSet res = stmtt.getResultSet();
 
-            return "Deleted: " + res.toString();
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        Statement stmtt = connectDatabase();
+
+        stmtt.execute("DELETE FROM " + tabela + " where _id=" + _id + "");
+        ResultSet res = stmtt.getResultSet();
+
+        while (res.next()) {
         }
-        return "regist not deleted";
+        stmtt.close();
+
+        return "Regist deleted";
     }
 }
 
