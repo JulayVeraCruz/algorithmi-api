@@ -214,41 +214,12 @@ public class User {
      * @return Json[]
      */
     public static JsonObject listTeacher() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+
+        String query = "select tblusers.`Name`,tblusers.image,tblcourses.`name` from tblusers,tblcourses,tblusercourses where tblusers.`type`=3  and tblusers._id=tblusercourses.userID and tblusercourses.courseID=tblcourses._id ";
+
         JsonObject obj = new JsonObject();
-        JsonArray header = new JsonArray();
-        JsonArray list = new JsonArray();
+        obj = utils.querysToJson(query);
 
-        try (
-                //executa driver para ligar à base de dados
-                Statement stmtt = utils.connectDatabase()) {
-
-            stmtt.execute("select tblusers.`name`,tblusers.image,tblcourses.`name` from tblusers,tblcourses,tblusercourses where tblusers.`type`=3  and tblusers._id=tblusercourses.userID and tblusercourses.courseID=tblcourses._id ");
-
-            ResultSet res = stmtt.getResultSet();
-
-            int columnCount = res.getMetaData().getColumnCount();
-            ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
-
-            //headers column  name,image,name
-            for (int i = 1; i <= columnCount; i++) {
-                //header.add(Name);
-                //header.add(image);
-                //header.add(Course);
-
-                header.add(String.valueOf(metadata.getColumnName(i)));
-                obj.add("columndata", header);
-            }
-
-            while (res.next()) {
-                for (int i = 1; i <= columnCount; i++) {
-                    list.add(String.valueOf(res.getObject(i)));
-                    obj.add("rowdata", list);
-                }
-            }
-        } catch (Exception ex) {
-            System.out.println("list teachers error :" + ex);
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        }
         return obj;
     }
 
@@ -260,41 +231,11 @@ public class User {
      */
     public static JsonObject listStudents() throws SQLException, InstantiationException, ClassNotFoundException, IllegalAccessException {
 
+        String query = "select tblUsers.name as Name,tblUsers.image as Image,tblCourses.name as Course from tblUsers,tblCourses,tblUserCourses where tblUsers.type=4  and tblUsers._id=tblUserCourses.userID and tblUserCourses.courseID=tblCourses._id ";
+
         JsonObject obj = new JsonObject();
-        JsonArray header = new JsonArray();
-        JsonArray list = new JsonArray();
+        obj = utils.querysToJson(query);
 
-        try (
-                //executa driver para ligar à base de dados
-                Statement stmtt = utils.connectDatabase()) {
-
-            stmtt.execute("select tblUsers.name as Name,tblUsers.image as Image,tblCourses.name as Course from tblUsers,tblCourses,tblUserCourses where tblUsers.type=4  and tblUsers._id=tblUserCourses.userID and tblUserCourses.courseID=tblCourses._id ");
-
-            ResultSet res = stmtt.getResultSet();
-
-            int columnCount = res.getMetaData().getColumnCount();
-            ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
-
-            //headers column  name,image,name
-            for (int i = 1; i <= columnCount; i++) {
-                //header.add(Name);
-                //header.add(image);
-                //header.add(Course);
-
-                header.add(String.valueOf(metadata.getColumnName(i)));
-                obj.add("columndata", header);
-            }
-
-            while (res.next()) {
-                for (int i = 1; i <= columnCount; i++) {
-                    list.add(String.valueOf(res.getObject(i)));
-                    obj.add("rowdata", list);
-                }
-            }
-        } catch (Exception ex) {
-            System.out.println("list students error :" + ex);
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        }
         return obj;
     }
 

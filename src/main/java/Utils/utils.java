@@ -5,6 +5,10 @@
  */
 package Utils;
 
+import algorithmi.models.User;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.mysql.jdbc.ResultSetMetaData;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -13,6 +17,8 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.*;
 
 /**
@@ -20,14 +26,16 @@ import java.util.regex.*;
  * @author Pedro Batista
  */
 public class utils {
-/**
- * Faz a ligação a base de dados com as devidas credecias de acesso
- * @return Statment
- * @throws ClassNotFoundException
- * @throws InstantiationException
- * @throws IllegalAccessException
- * @throws SQLException 
- */
+
+    /**
+     * Faz a ligação a base de dados com as devidas credecias de acesso
+     *
+     * @return Statment
+     * @throws ClassNotFoundException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws SQLException
+     */
     public static Statement connectDatabase() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
         Object resultados[];
         Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -36,6 +44,48 @@ public class utils {
         Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/fralgo", "root", "root");
         Statement stmtt = (Statement) connn.createStatement();
         return stmtt;
+    }
+
+    /**
+     *converte o resultado da query para array de json
+     * nota: devolve o nome das colunas e os valores das linhas
+     * resultantes das querys
+     * @param query
+     * @return
+     */
+    public static JsonObject querysToJson(String query) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
+        JsonObject obj = new JsonObject();
+        JsonArray header = new JsonArray();
+        JsonArray list = new JsonArray();
+
+        //executa driver para ligar à base de dados
+        Statement stmtt = connectDatabase();
+
+        stmtt.execute(query);
+
+        ResultSet res = stmtt.getResultSet();
+
+        int columnCount = res.getMetaData().getColumnCount();
+        ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
+
+        //headers column  name,image,name
+        for (int i = 1; i <= columnCount; i++) {
+            //header.add(Name);
+            //header.add(image);
+            //header.add(Course);
+
+            header.add(String.valueOf(metadata.getColumnName(i)));
+            obj.add("columndata", header);
+        }
+
+        while (res.next()) {
+            for (int i = 1; i <= columnCount; i++) {
+                list.add(String.valueOf(res.getObject(i)));
+                obj.add("rowdata", list);
+            }
+        }
+
+        return obj;
     }
 
     /**
@@ -216,7 +266,6 @@ public class utils {
      * @return
      */
     public String deleteRegist(int _id, String tabela) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
-
 
         Statement stmtt = connectDatabase();
 
