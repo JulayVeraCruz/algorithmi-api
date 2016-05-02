@@ -6,7 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import com.sun.xml.internal.messaging.saaj.util.Base64;
+//import com.sun.xml.internal.messaging.saaj.util.Base64;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -36,10 +36,10 @@ public class Main {
         before("/api/*",(request, response) -> {
             System.out.println(request.url());
             if (request.headers("Authorization") != null) {
-                String aux[] = Base64.base64Decode(request.headers("Authorization").split(" ")[1]).split(":");
+               // String aux[] = Base64.base64Decode(request.headers("Authorization").split(" ")[1]).split(":");
 
-                System.out.println(aux[0]);
-                System.out.println(aux[1]);
+                //System.out.println(aux[0]);
+                //System.out.println(aux[1]);
 
                 // halt(401, "You are not welcome here");
             }
