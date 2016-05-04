@@ -18,15 +18,11 @@ package algorithmi.models;
 import Utils.utils;
 import static Utils.utils.connectDatabase;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mysql.jdbc.ResultSetMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -122,7 +118,10 @@ public class Course {
             status = 0;
         }
         System.out.println(" insert course nº " + _id);
+        
+        stmtt.getConnection().close();
         stmtt.close();
+        
         return status;
     }
 
@@ -132,41 +131,12 @@ public class Course {
      * @return []json
      */
     public static JsonObject listCourses_WEB() throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
+        String query = "SELECT tblcourses.`name` as Course,tblschools.`name` as School from tblCourses,tblSchools where tblCourses.school=tblSchools._id";
         JsonObject obj = new JsonObject();
-        JsonArray header = new JsonArray();
-        JsonArray list = new JsonArray();
+        obj = utils.querysToJson(query);
 
-        try (
-                //executa driver para ligar à base de dados
-                Statement stmtt = utils.connectDatabase()) {
-
-            stmtt.execute("SELECT tblcourses.`name` as Course,tblschools.`name` as School from tblCourses,tblSchools where tblCourses.school=tblSchools._id");
-
-            ResultSet res = stmtt.getResultSet();
-
-            int columnCount = res.getMetaData().getColumnCount();
-            ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
-
-            //headers column  name,image,name
-            for (int i = 1; i <= columnCount; i++) {
-                //header.add(Course);
-                //header.add(School);
-
-                header.add(String.valueOf(metadata.getColumnName(i)));
-                obj.add("columndata", header);
-            }
-
-            while (res.next()) {
-                for (int i = 1; i <= columnCount; i++) {
-                    list.add(String.valueOf(res.getObject(i)));
-                    obj.add("rowdata", list);
-                }
-            }
-        } catch (Exception ex) {
-            System.out.println("list courses error :" + ex);
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        }
         return obj;
+
     }
 
     /**
@@ -199,8 +169,8 @@ public class Course {
         String respostasErro[] = new String[3];
         boolean valid = false;
 
-        boolean nameValid = utils.isString(name);//0
-        boolean schoolNumberValid = utils.isNumber(school + "");//1
+        boolean nameValid = utils.isString(name,true);//0
+        boolean schoolNumberValid = utils.isNumber(school + "",false);//1
 //        boolean imageValid = utils.isString(image);//2
 
         valid = nameValid && schoolNumberValid; //&& imageValid;

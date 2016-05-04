@@ -1,15 +1,13 @@
 package algorithmi;
 
 import algorithmi.Models.Question;
+import algorithmi.models.Course;
 import algorithmi.models.User;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import com.sun.xml.internal.messaging.saaj.util.Base64;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static spark.Spark.delete;
@@ -33,7 +31,7 @@ public class Main {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        before("/api/*",(request, response) -> {
+        before("/api/*", (request, response) -> {
             System.out.println(request.url());
             if (request.headers("Authorization") != null) {
                 String aux[] = Base64.base64Decode(request.headers("Authorization").split(" ")[1]).split(":");
@@ -112,29 +110,39 @@ public class Main {
         delete("/api/course/:id", (request, response) -> {
             return "Hello World";
         });
+        get("/api/courses", (request, response) -> {
 
-
+            try {
+                return Course.listCourses_WEB();
+            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | SQLException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return "sem cursoso!!!!";
+        });
         post("/api/course/new", (request, response) -> {
 
-            String data;
+            String data = null;
             try {
                 //JSon Puro (Raw)
                 data = java.net.URLDecoder.decode(request.body(), "UTF-8");
 
                 //Objecto Jason para aceder aos parametros via Java
                 JsonParser jsonParser = new JsonParser();
-                JsonObject user = (JsonObject) jsonParser.parse(data);
+                JsonObject course = (JsonObject) jsonParser.parse(data);
 
                 //Exibe os dados, em formato json
-                System.out.println(user.entrySet());
+                System.out.println("course.entrySet " + course.entrySet());
 
+                Course newCourse = new Course(data);
+                
+                System.out.println("novo popcurso");
                 //Exibe o paramentro "name" do objecto json
                 //System.out.println(user.get("name"));
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            return "Hello World";
+            return data;
         });
 
         post("/api/institution", (request, response) -> {
@@ -219,12 +227,26 @@ public class Main {
             return "Hello World";
         });
 
-        //Obtem a lista de todos os utilizadores
+        //Obtem a lista de todos os estudantes
         get("/api/students", (request, response) -> {
-            //http://127.0.0.1:4567/#students
-            return "Hello World";
-        });
+            try {
+                return User.listStudents();
 
+            } catch (SQLException | InstantiationException | ClassNotFoundException | IllegalAccessException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return "dl,ºçw,º";
+        });
+        //Obtem a lista de todos os professores
+        get("/api/teachers", (request, response) -> {
+            try {
+                return User.listTeacher();
+
+            } catch (SQLException | InstantiationException | ClassNotFoundException | IllegalAccessException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return "error";
+        });
         //Obtem um utilizador pelo seu id (id_User)
         get("/api/user/:id", (request, response) -> {
             //http://127.0.0.1:4567/#students/56
@@ -237,17 +259,28 @@ public class Main {
         post("/api/user", (request, response) -> {
             //http://127.0.0.1:4567/#login
             //separador registar
+            String data = null;
+            try {
+                //JSon Puro (Raw)
+                data = java.net.URLDecoder.decode(request.body(), "UTF-8");
 
-//            try {
-//                User newUser;
-//                newUser = new User(java.net.URLDecoder.decode(request.body(), "UTF-8"));
-//                newUser.regist();
-//                System.out.println(newUser.toString());
-//            } catch (UnsupportedEncodingException ex) {
-//                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//
-//            //Devolve OK
+                //Objecto Jason para aceder aos parametros via Java
+                JsonParser jsonParser = new JsonParser();
+                JsonObject user = (JsonObject) jsonParser.parse(data);
+
+                //Exibe os dados, em formato json
+                System.out.println("user.entrySet " + user.entrySet());
+
+                User newUser = new User(data);
+             
+                System.out.println("novo user");
+                //Exibe o paramentro "name" do objecto json
+                //System.out.println(user.get("name"));
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                return "{\"resposta\":\"Utilizador nao inserido\"}";
+            }
+
             response.status(200);
             //E os dados do novo utilizador
             return "{\"resposta\":\"Utilizador inserido com sucesso\"}";

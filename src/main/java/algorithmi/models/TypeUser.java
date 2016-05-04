@@ -126,8 +126,8 @@ public class TypeUser {
         String respostasErro[] = new String[2];
         boolean valid;
 
-        boolean idValid = utils.isNumber(_id + "");//0
-        boolean nameValid = utils.isString(name);//1
+        boolean idValid = utils.isNumber(_id + "",false);//0
+        boolean nameValid = utils.isString(name,true);//1
 
         valid = nameValid && idValid;
 
@@ -176,40 +176,11 @@ public class TypeUser {
  * lista os varios tipos de utilizadores existentes
  * @return JsonObject
  */
-    public static JsonObject listTypesOfUser(){
+    public static JsonObject listTypesOfUser() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException{
+        String query="select tblusertypes.'name' as Name from tblusertypes ";
         JsonObject obj = new JsonObject();
-        JsonArray header = new JsonArray();
-        JsonArray list = new JsonArray();
-
-        try (
-                //executa driver para ligar à base de dados
-                Statement stmtt = utils.connectDatabase()) {
-
-            stmtt.execute("select tblusertypes.'name' as Name from tblusertypes ");
-
-            ResultSet res = stmtt.getResultSet();
-
-            int columnCount = res.getMetaData().getColumnCount();
-            ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
-
-            //headers column  name,image,name
-            for (int i = 1; i <= columnCount; i++) {
-                //header.add(Name);
-
-                header.add(String.valueOf(metadata.getColumnName(i)));
-                obj.add("columndata", header);
-            }
-
-            while (res.next()) {
-                for (int i = 1; i <= columnCount; i++) {
-                    list.add(String.valueOf(res.getObject(i)));
-                    obj.add("rowdata", list);
-                }
-            }
-        } catch (Exception ex) {
-            System.out.println("list students error :" + ex);
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        obj = utils.querysToJson(query);
+       
         return obj;
     }
   

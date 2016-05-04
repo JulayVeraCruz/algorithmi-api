@@ -5,7 +5,7 @@
  */
 package Utils;
 
-import algorithmi.models.User;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mysql.jdbc.ResultSetMetaData;
@@ -17,8 +17,6 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.*;
 
 /**
@@ -37,19 +35,19 @@ public class utils {
      * @throws SQLException
      */
     public static Statement connectDatabase() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
-        Object resultados[];
+
         Class.forName("com.mysql.jdbc.Driver").newInstance();
         //faz ligação à base de dados
-        //Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/fralgo", "root", "root");
+//        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/fralgo?zeroDateTimeBehavior=convertToNull", "root", "root");
         Statement stmtt = (Statement) connn.createStatement();
         return stmtt;
     }
 
     /**
-     *converte o resultado da query para array de json
-     * nota: devolve o nome das colunas e os valores das linhas
-     * resultantes das querys
+     * converte o resultado da query para array de json nota: devolve o nome das
+     * colunas e os valores das linhas resultantes das querys
+     *
      * @param query
      * @return
      */
@@ -57,6 +55,7 @@ public class utils {
         JsonObject obj = new JsonObject();
         JsonArray header = new JsonArray();
         JsonArray list = new JsonArray();
+        Gson n = new Gson();
 
         //executa driver para ligar à base de dados
         Statement stmtt = connectDatabase();
@@ -64,7 +63,7 @@ public class utils {
         stmtt.execute(query);
 
         ResultSet res = stmtt.getResultSet();
-
+        String ju = n.toJson(res);
         int columnCount = res.getMetaData().getColumnCount();
         ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
 
@@ -84,7 +83,6 @@ public class utils {
                 obj.add("rowdata", list);
             }
         }
-
         return obj;
     }
 
@@ -94,22 +92,34 @@ public class utils {
      * @param data
      * @return bolean
      */
-    public static boolean isNumber(String data) {
-        return Pattern.matches("[0-9]+", data);
+    public static boolean isNumber(String data, boolean canBeNul) {
+        if (data == null && canBeNul) {
+            return true;
+        } else {
+            return Pattern.matches("[0-9]+", data);
+        }
     }
 
     /**
-     * verifica se a string é um float
-     *
+     * verifica se e float caso data possa ser null devolve true
      * @param data
-     * @return bolean
+     * @param canBeNul
+     * @return 
      */
-    public static boolean isValidFloat(String data) {
-        return Pattern.matches("[0-9.,]+", data);
+    public static boolean isValidFloat(String data, boolean canBeNul) {
+        if (data == null && canBeNul) {
+            return true;
+        } else {
+            return Pattern.matches("[0-9.,]+", data);
+        }
     }
 
-    public static boolean isFloat(String data) {
-        return Pattern.matches("[0-9.,]+", data);
+    public static boolean isFloat(String data, boolean canBeNul) {
+        if (data == null && canBeNul) {
+            return true;
+        } else {
+            return Pattern.matches("[0-9.,]+", data);
+        }
     }
 
     /**
@@ -120,12 +130,16 @@ public class utils {
      * @param limit
      * @return boolean
      */
-    public static boolean isNumberLimited(String data, int limit) {
-        /**
-         * [admite numeros] {tamanho min=1, max=limit} caso data seja null
-         * devolve false
-         */
-        return Pattern.matches("[0-9]{1,limit}", data);
+    public static boolean isNumberLimited(String data, int limit, boolean canBeNul) {
+        if (data == null && canBeNul) {
+            return true;
+        } else {
+            /**
+             * [admite numeros] {tamanho min=1, max=limit} caso data seja null
+             * devolve false
+             */
+            return Pattern.matches("[0-9]{1,limit}", data);
+        }
     }
 
     /**
@@ -134,9 +148,14 @@ public class utils {
      * @param data
      * @return bollean
      */
-    public static boolean isString(String data) {
+    public static boolean isString(String data, boolean canBeNul) {
         //admite letras,numeros e espaço
-        return Pattern.matches("[a-zA-Z0-9 ]+", data);
+        if (data == null && canBeNul) {
+            return true;
+        } else {
+            return Pattern.matches("[a-zA-Z0-9 ]+", data);
+        }
+
     }
 
     /**
@@ -147,13 +166,15 @@ public class utils {
      * @param limit
      * @return boolean
      */
-    public static boolean isStringLimited(String data, int limit) {
+    public static boolean isStringLimited(String data, int limit, boolean canBeNul) {
         /**
          * [admite letras,numeros e espaço] {tamanho min=1, max=limit} caso data
          * seja null devolve false
          */
-
-        return Pattern.matches("[a-zA-Z0-9 ]{1,limit}", data);
+    if (data == null && canBeNul) {
+            return true;
+        } else {
+        return Pattern.matches("[a-zA-Z0-9 ]{1,limit}", data);}
     }
 
     /**
@@ -165,6 +186,7 @@ public class utils {
     public static boolean isThisDateValid(String dateToValidate) {
         //validar data formato proposto dd/MM/yyyy 
         //dateFormat="dd/MM/yyyy"
+
         if (dateToValidate == null) {
             return false;
         }
@@ -176,6 +198,7 @@ public class utils {
 
             //if not valid, it will throw ParseException
             Date date = sdf.parse(dateToValidate);
+
             System.out.println(date);
 
         } catch (ParseException e) {

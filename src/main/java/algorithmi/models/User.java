@@ -17,19 +17,20 @@ package algorithmi.models;
 
 import Utils.utils;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mysql.jdbc.ResultSetMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.scene.AccessibleAttribute;
 //import javax.json;
 
 /**
@@ -61,19 +62,23 @@ public class User {
          */
         //Associa os dados ao objecto User
         this._id = getLastID_Users() + 1; //ir buscar o max id da bd + 1
-        this.user = user.get("username").getAsString();
+
         this.name = user.get("name").getAsString();
-        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         df.setLenient(false);
+
         Date datBirth;
 
-        datBirth = df.parse(user.get("birthDate").getAsString());
+        String gg = user.get("dateBirth").getAsString();
+        String dd = gg.substring(0, 2);
+        String mm = gg.substring(3, 5);
+        String yyyy = gg.substring(6, 10);
+
+        datBirth = df.parse(yyyy + "-" + mm + "-" + dd);
 
         this.birthDate = datBirth;
         this.email = user.get("email").getAsString();
-        this.password = user.get("password").getAsString();
-        this.image = user.get("image").getAsString();
-        this.type = user.get("type").getAsInt();//Definir o tipo de utilizador, como é registo, deverá ser do tipo aluno
+        this.type = 4;//Definir o tipo de utilizador, como é registo, deverá ser do tipo aluno 4
 
         boolean existErro = false;
         String[] erros = validateData();
@@ -98,7 +103,11 @@ public class User {
         try {
             //executa driver para ligar à base de dados
             Statement stmtt = utils.connectDatabase();
-            stmtt.execute("INSERT INTO tblUsers values(" + _id + "," + '"' + name + '"' + "," + '"' + user + '"' + "," + birthDate + "," + '"' + email + '"' + "," + '"' + type + '"' + "," + '"' + password + '"' + "," + image + ")");
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            df.setLenient(false);
+            String bb = df.format(birthDate);
+            String query = "INSERT INTO tblUsers values(" + _id + "," + '"' + name + '"' + "," + '"' + user + '"' + "," + '"' + email + '"' + "," + type + "," + '"' + password + '"' + "," + '"' + image + '"' + "," + '"' + bb + '"' + ")";
+            stmtt.execute(query);
 
             ResultSet res = stmtt.getResultSet();
 
@@ -141,33 +150,35 @@ public class User {
 
         String respostasErro[] = new String[7];
         boolean valid = false;
+//String myString = DateFormat.getDateInstance().format(birthDate);
 
-        boolean userValid = utils.isUsernameValid(user);//0
-        boolean nameValid = utils.isString(name);//1
-        boolean dateValid = utils.isThisDateValid(birthDate.toString());//2
+        //      boolean userValid = utils.isUsernameValid(user);//0
+        boolean nameValid = utils.isString(name, true);//1
+//        boolean dateValid = utils.isThisDateValid(myString);//2
         boolean emailValid = utils.isEmailValid(email);//3
-        boolean imageValid = utils.isString(image);//4
-        boolean passwordValid = utils.isString(password);//5
-        boolean typeValid = utils.isNumber(Integer.toString(type));//6
+//        boolean imageValid = utils.isString(image);//4
 
-        valid = userValid && nameValid && dateValid && emailValid && imageValid && passwordValid && typeValid;
+        boolean passwordValid = utils.isString(password, true);//5
+        boolean typeValid = utils.isNumber(Integer.toString(type),false);//6
+
+        valid = nameValid && emailValid && passwordValid && typeValid;//&& dateValid && imageValid && userValid &&;
         if (!valid) {
             {
-                if (!userValid) {
-                    respostasErro[0] = "Username invalido";
-                }
+//                if (!userValid) {
+//                    respostasErro[0] = "Username invalido";
+//                }
                 if (!nameValid) {
                     respostasErro[1] = "Nome invalido";
                 }
-                if (!dateValid) {
-                    respostasErro[2] = "Data invalida";
-                }
+//                if (!dateValid) {
+//                    respostasErro[2] = "Data invalida";
+//                }
                 if (!emailValid) {
                     respostasErro[3] = "Email invalido";
                 }
-                if (!imageValid) {
-                    respostasErro[4] = "path invalido";
-                }
+//                if (!imageValid) {
+//                    respostasErro[4] = "path invalido";
+//                }
                 if (!passwordValid) {
                     respostasErro[5] = "Password invalida";
                 }
@@ -235,7 +246,7 @@ public class User {
 
         JsonObject obj = new JsonObject();
         obj = utils.querysToJson(query);
-
+        System.out.println("obj student " + obj.toString());
         return obj;
     }
 

@@ -138,8 +138,8 @@ public class UserCourse {
         String respostasErro[] = new String[2];
         boolean valid = false;
 
-        boolean userIdNumberValid = utils.isNumber(userID + "");//0
-        boolean courseIdNumberValid = utils.isNumber(courseID + "");//1
+        boolean userIdNumberValid = utils.isNumber(userID + "",false);//0
+        boolean courseIdNumberValid = utils.isNumber(courseID + "",false);//1
 
         valid = userIdNumberValid && courseIdNumberValid;
         if (!valid) {
@@ -183,6 +183,20 @@ public class UserCourse {
         return "regist not deleted";
     }
 
+    /**
+     * lista os cursos a que o user _idUser
+     * esta ligado
+     * @return JsonObject
+     */
+    public static JsonObject coursesOfUser(int _idUser) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException{
+        String query = "SELECT tblcourses.`name` FROM tblusers,tblcourses,tblusercourses where tblusers.`_id`="+Integer.toString(_idUser)+" group by tblcourses.`_id` ";
+
+        JsonObject obj = new JsonObject();
+        obj = utils.querysToJson(query);
+
+        return obj;
+        
+    }
     public UserCourse(int user, int curse) {
         this.userID = user;
         this.courseID = curse;
