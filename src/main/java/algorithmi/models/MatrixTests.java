@@ -33,7 +33,7 @@ public class MatrixTests {
     private Date startingTime;
     private Date finishingTime;
 
-    public MatrixTests(String data) {
+    public MatrixTests(String data) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -60,7 +60,7 @@ public class MatrixTests {
         this.finishingTime = finishingTime;
     }
 
-    public static int getLastID_MatrixTests() {
+    public static int getLastID_MatrixTests() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         utils getid = new utils();
         return getid.getLastID("tblmatrixtests");
     }
@@ -94,7 +94,7 @@ public class MatrixTests {
      *
      * @param _id
      */
-    public void deleteTest(int _id) {
+    public void deleteTest(int _id) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
         utils utils = new utils();
         utils.deleteRegist(_id, "tblmatrixtests");
     }
@@ -143,8 +143,8 @@ public class MatrixTests {
 
         String respostasErro[] = new String[4];
         boolean valid = false;
-
-        boolean nameValid = utils.isString(name);//0
+//true admite que o campo seja nulo, se for false não valida o nome
+        boolean nameValid = utils.isString(name,false);//0
         boolean dateValid = utils.isThisDateValid(date + "");//1
 //        boolean startTimeValid = utils.isString(time);//2
 //        boolean finishTimeValid = utils.isString(time);//3

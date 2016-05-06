@@ -27,7 +27,7 @@ public class Schools {
     private int institution;
     private String image;
 
-    public Schools(String data) {
+    public Schools(String data) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -88,7 +88,7 @@ public class Schools {
         this.image = image;
     }
     
-    public static int getLastID_Schools() {
+    public static int getLastID_Schools() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         utils getid = new utils();
         return getid.getLastID("tblSchools");
     }
@@ -107,11 +107,11 @@ public class Schools {
         String respostasErro[] = new String[3];
         boolean valid = false;
 
-        boolean nameValid = utils.isString(name);//0
-        boolean institutionValid = utils.isNumber(Integer.toString(institution));//1
-        boolean imageValid = utils.isString(image);//2
+        boolean nameValid = utils.isString(name,false);//0
+        boolean institutionValid = utils.isNumber(Integer.toString(institution),false);//1
+      //  boolean imageValid = utils.isString(image,false);//2
 
-        valid = nameValid && institutionValid && imageValid;
+     //   valid = nameValid && institutionValid && imageValid;
         if (!valid) {
             {
                 if (!nameValid) {
@@ -120,9 +120,9 @@ public class Schools {
                 if (!institutionValid) {
                     respostasErro[1] = "Institution invalida";
                 }
-                if (!imageValid) {
-                    respostasErro[2] = "path invalido";
-                }
+                //if (!imageValid) {
+                //    respostasErro[2] = "path invalido";
+                //}
             }
         }
         return respostasErro;

@@ -13,6 +13,7 @@ import com.google.gson.JsonParser;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,7 +32,7 @@ public class Institutions {
     private Connection connect = null;
     PreparedStatement preparedStatement = null;
 
-    public Institutions(String data) {
+    public Institutions(String data) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -91,7 +92,7 @@ public class Institutions {
     }
 
     //Maximo ID da tabela Institutions
-    public static int getLastID_Institutions() {
+    public static int getLastID_Institutions() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         utils getid = new utils();
         return getid.getLastID("tblInstitutions");
     }

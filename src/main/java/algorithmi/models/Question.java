@@ -22,7 +22,9 @@ import com.google.gson.JsonParser;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,7 +44,7 @@ public class Question {
 
 
     // EXEMPLO DE STRING RECEBIDA [title="olol", category="1", description="olololo", difficulty="1", image="", in="9", out="9"]
-    public Question(String data) {
+    public Question(String data) throws ParseException, SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException{
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
         JsonObject Question = (JsonObject) jsonParser.parse(data);
@@ -54,7 +56,7 @@ public class Question {
         regist();
         validateData();
         //Associa os dados ao objecto Question
-        this._id = getLastID() + 1; //ir buscar o max id da bd + 1 
+        this._id = getLastID()+1; //ir buscar o max id da bd + 1 
         this.title = Question.get("title").getAsString();
         this.category = Question.get("category").getAsInt();
         this.description = Question.get("description").getAsString();
@@ -163,7 +165,7 @@ public class Question {
         this.algorithm = algorithm;
     }
 
-    public static int getLastID() {
+    public static int getLastID() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException{
         utils getid = new utils();
         return getid.getLastID("tblquestions");
     }

@@ -11,7 +11,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,7 +31,7 @@ public class InputOutput {
     private Connection connect = null;
     PreparedStatement preparedStatement = null;
 
-    public InputOutput(String data) {
+    public InputOutput(String data) throws ParseException, SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException{
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
         JsonObject QuestionIO = (JsonObject) jsonParser.parse(data);
@@ -66,7 +68,7 @@ public class InputOutput {
          */
     }
 
-    public static int getLastID() {
+    public static int getLastID() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException{
         utils getid = new utils();
         return getid.getLastID("tblQuestions");
     }

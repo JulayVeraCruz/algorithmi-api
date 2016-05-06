@@ -144,7 +144,7 @@ public class Tests {
         String respostasErro[] = new String[1];
         boolean valid = false;
 
-        boolean validQuotation = utils.isValidFloat(quotation + "");
+        boolean validQuotation = utils.isValidFloat(quotation + "",false);
 
         valid = validQuotation;
         if (!valid) {

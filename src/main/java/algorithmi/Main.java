@@ -136,6 +136,7 @@ public class Main {
 
                 Course newCourse = new Course(data);
                 
+                
                 System.out.println("novo popcurso");
                 //Exibe o paramentro "name" do objecto json
                 //System.out.println(user.get("name"));
