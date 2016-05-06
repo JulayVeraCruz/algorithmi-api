@@ -88,20 +88,17 @@ public class Tests {
             //executa driver para ligar à base de dados
             Statement stmtt = utils.connectDatabase();
 
-            stmtt.execute("INSERT INTO tbltests values()");
-
+            String query = "INSERT INTO tbltests values(" + _id + "," + '"' + matrixTest + '"' + "," + '"' + quotation + '"' + "," + '"' + student + '"' + "," + '"' + image + '"' + ")";
+            stmtt.execute(query);
+            
             ResultSet res = stmtt.getResultSet();
             status = 1;//sem erros
             System.out.println("insert test nº " + res.getString(1));
 
             stmtt.close();
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            System.out.println("SQL ERROR test regist " + ex);
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("exception regist test= " + ex);
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
         return status;
     }
