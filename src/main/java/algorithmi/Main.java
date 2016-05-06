@@ -1,3 +1,4 @@
+
 package algorithmi;
 
 import algorithmi.Models.Question;
@@ -60,8 +61,8 @@ public class Main {
         });
 
         get("/api/question/:id", (request, response) -> {
-//            Question questionExample = new Question("{'id_Pergunta':'1','titulo':'XPTO','categoria':'decisao','descricao':'xpto decide','imagem':'','algoritmo':''}");
-            return "";
+            Question questionExample = new Question("{'id_Pergunta':'1','titulo':'XPTO','categoria':'decisao','descricao':'xpto decide','imagem':'','algoritmo':''}");
+            return questionExample.toString();
 
             //return "Hello World";
         });
@@ -134,17 +135,16 @@ public class Main {
                 System.out.println("course.entrySet " + course.entrySet());
 
                 Course newCourse = new Course(data);
-
-                return newCourse.regist();
-
+                
+                
+                System.out.println("novo popcurso");
                 //Exibe o paramentro "name" do objecto json
                 //System.out.println(user.get("name"));
             } catch (Exception ex) {
-
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                return ex.getMessage();
-
             }
+
+            return data;
         });
 
         post("/api/institution", (request, response) -> {
@@ -274,7 +274,7 @@ public class Main {
                 System.out.println("user.entrySet " + user.entrySet());
 
                 User newUser = new User(data);
-
+             
                 System.out.println("novo user");
                 //Exibe o paramentro "name" do objecto json
                 //System.out.println(user.get("name"));

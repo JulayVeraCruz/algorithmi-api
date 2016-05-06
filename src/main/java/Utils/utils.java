@@ -50,18 +50,18 @@ public class utils {
     }
 
     /**
-     * Converte em Json Object a query solicitada n sendo apresentados os id
-     * necessarios (numTabelas) para uma futura utilizaçao.A query tera de ter
-     * nos ultimos campos os id nao sendo apresentados na view
-     *
+     * Converte em Json Object a query solicitada n sendo apresentados os id necessarios
+     * (numTabelas) para uma futura utilizaçao.A query tera de ter nos ultimos campos os id
+     * nao sendo apresentados na view
      * @param query
      * @param numTabelas
      * @return
      * @throws ClassNotFoundException
      * @throws InstantiationException
      * @throws IllegalAccessException
-     * @throws SQLException
+     * @throws SQLException 
      */
+     
     public static JsonObject querysToJson(String query) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
         JsonObject obj = new JsonObject();
         JsonArray jsonArray = new JsonArray();
@@ -70,10 +70,19 @@ public class utils {
         stmtt.execute(query);
 
         ResultSet res = stmtt.getResultSet();
-
+        
         int columnCount = res.getMetaData().getColumnCount();
         ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
 
+        //headers column  name,image,name
+//        for (int i = 1; i <= columnCount; i++) {
+//            //header.add(Name);
+//            //header.add(image);
+//            //header.add(Course);
+//
+//            header.add(String.valueOf(metadata.getColumnName(i)));
+//            obj.add("columndata", header);
+//        } 
         Gson gson = new Gson();
         String tojson = null;
         obj.add("query", jsonArray);
@@ -85,11 +94,37 @@ public class utils {
             for (int i = 1; i <= total_rows; i++) {
                 System.out.println("col name " + metadata.getColumnLabel(i));
                 row.add(metadata.getColumnLabel(i), gson.toJsonTree(res.getObject(i)));
-            }
-        }
 
+//              list=(List) res.getArray(i+1);
+//              
+//              String property= res.getMetaData().getColumnLabel(i + 1);
+//                  Object prope=  res.getObject(i+1);
+//                  if (prope == null){
+//                    prope = "null";
+            }
+
+//            tojson = gson.toJson(list);
+//                  System.out.println("ddsfsg "+obj2.entrySet());
+//                    obj2.add(property,  prope);
+//                 JsonElement jsel= (JsonElement) res.getArray(property);
+//                obj2.add(res.getMetaData().getColumnLabel(i + 1),(JsonElement)  res.getObject(i + 1));
+        }
+//            jsonArray.add(obj2);
+//        }
+
+//        return jsonArray;
+//        for (int i = 1; i <= columnCount; i++) {
+////                list.add(String.valueOf(res.getObject(i)));
+////                list.add((JsonElement) res.getObject(String.valueOf(metadata.getColumnName(i))),);
+//                list.add(res.getMetaData().toString());
+//                JsonElement fn = (JsonElement) res.getObject(i);
+//                JsonElement ff = (JsonElement) res.getObject(String.valueOf(metadata.getColumnName(i)));
+//                
+//                obj.add(String.valueOf(metadata.getColumnName(i)), (JsonElement) res.getObject(i));
+//            }
         return obj;
     }
+//    }
 
     /**
      * verifica se a string é composta apenas por algarismos
