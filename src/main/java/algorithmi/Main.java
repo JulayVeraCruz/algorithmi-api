@@ -34,6 +34,7 @@ public class Main {
 
         before("/api/*", (request, response) -> {
             System.out.println(request.url());
+            System.out.println(request.requestMethod());
             if (request.headers("Authorization") != null) {
                 String aux[] = Base64.base64Decode(request.headers("Authorization").split(" ")[1]).split(":");
 
@@ -61,10 +62,10 @@ public class Main {
         });
 
         get("/api/question/:id", (request, response) -> {
-            Question questionExample = new Question("{'id_Pergunta':'1','titulo':'XPTO','categoria':'decisao','descricao':'xpto decide','imagem':'','algoritmo':''}");
-            return questionExample.toString();
+          //  Question questionExample = new Question("{'id_Pergunta':'1','titulo':'XPTO','categoria':'decisao','descricao':'xpto decide','imagem':'','algoritmo':''}");
+          //  return questionExample.toString();
 
-            //return "Hello World";
+            return "Hello World";
         });
 
         post("/api/question", (request, response) -> {
@@ -296,7 +297,18 @@ public class Main {
             return "Hello World";
         });
         
-        get("/api/versao", (request, response) -> {
+        post("/api/versao", (request, response) -> {
+            
+            String data;
+            try {
+                //JSon Puro (Raw)
+                data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+                System.out.println(data+"");
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                return "isto trabalha";
+            }
+         
             return "Hello World";
         });
 
