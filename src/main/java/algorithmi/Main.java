@@ -295,6 +295,10 @@ public class Main {
         delete("/api/user/:id", (request, response) -> {
             return "Hello World";
         });
+        
+        get("/api/versao", (request, response) -> {
+            return "Hello World";
+        });
 
     }
 }
