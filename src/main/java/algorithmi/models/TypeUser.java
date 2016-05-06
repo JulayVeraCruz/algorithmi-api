@@ -37,7 +37,7 @@ public class TypeUser {
     private int _id;
     private String name;
 
-    public TypeUser(String data) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public TypeUser(String data) throws Exception {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -54,7 +54,16 @@ public class TypeUser {
         this._id = getLastID_UserTypes() + 1; //ir buscar o max id da bd + 1 
         this.name = UserType.get("name").getAsString();
 
-        boolean existErro = false;
+    }
+
+    /**
+     * Insere novos registos na tabela
+     *
+     * @return status
+     */
+    public int regist() throws Exception {
+        int status = 0;
+         boolean existErro = false;
         String[] erros = validateData();
         for (int i = 0; i < erros.length; i++) {
             if (erros[i] == null);
@@ -63,19 +72,6 @@ public class TypeUser {
             }
         }
         if (!existErro) {
-
-            regist();
-        }
-    }
-
-    /**
-     * Insere novos registos na tabela
-     *
-     * @return status
-     */
-    public int regist() {
-        int status = 0;
-        try {
             //executa driver para ligar à base de dados
             Statement stmtt = utils.connectDatabase();
 
@@ -85,15 +81,7 @@ public class TypeUser {
 
             System.out.println("result insert Typeuser " + res);
 
-            stmtt.close();
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            System.out.println("insert sql error typeuser: "+ex);
-            Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
-        }
+            stmtt.close();}
         return status;
     }
 
@@ -102,7 +90,7 @@ public class TypeUser {
      *
      * @return int
      */
-    public static int getLastID_UserTypes() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public static int getLastID_UserTypes() throws Exception {
         utils getid = new utils();
         return getid.getLastID("tblusertypes");
     }
@@ -176,7 +164,7 @@ public class TypeUser {
  * lista os varios tipos de utilizadores existentes
  * @return JsonObject
  */
-    public static JsonObject listTypesOfUser() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException{
+    public static JsonObject listTypesOfUser() throws Exception{
         String query="select tblusertypes.'name' as Name from tblusertypes ";
         JsonObject obj = new JsonObject();
         obj = utils.querysToJson(query);

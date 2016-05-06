@@ -35,7 +35,7 @@ public class Course {
     private int school;
     private String image;
 
-    public Course(String data) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
+    public Course(String data) throws Exception {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -62,7 +62,7 @@ public class Course {
      *
      * @param _id
      */
-    public void deleteCourse(int _id) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
+    public void deleteCourse(int _id) throws Exception {
         utils utils = new utils();
         utils.deleteRegist(_id, "tblcourses");
     }
@@ -73,7 +73,7 @@ public class Course {
      * @param _id
      * @return
      */
-    public int updateCourse(int _id) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
+    public int updateCourse(int _id) throws Exception {
         int status = 0;
 
         Statement stmtt = utils.connectDatabase();
@@ -96,7 +96,7 @@ public class Course {
      * @throws java.lang.IllegalAccessException
      * @throws java.sql.SQLException
      */
-    public int regist() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
+    public int regist() throws Exception {
 
         boolean existErro = false;
         String[] erros = validateData();
@@ -129,7 +129,7 @@ public class Course {
      *
      * @return []json
      */
-    public static JsonObject listCourses_WEB() throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
+    public static JsonObject listCourses_WEB() throws Exception {
         String query = "SELECT tblcourses.`name` as Course,tblschools.`name` as School from tblCourses,tblSchools where tblCourses.school=tblSchools._id";
         JsonObject obj = new JsonObject();
         obj = utils.querysToJson(query);
@@ -143,7 +143,7 @@ public class Course {
      *
      * @return int
      */
-    public static int getLastID_Courses() throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
+    public static int getLastID_Courses() throws Exception {
         utils getid = new utils();
         return getid.getLastID("tblcourses");
     }

@@ -1,4 +1,3 @@
-
 package algorithmi;
 
 import algorithmi.Models.Question;
@@ -61,10 +60,10 @@ public class Main {
         });
 
         get("/api/question/:id", (request, response) -> {
-            Question questionExample = new Question("{'id_Pergunta':'1','titulo':'XPTO','categoria':'decisao','descricao':'xpto decide','imagem':'','algoritmo':''}");
-            return questionExample.toString();
+//            Question questionExample = new Question("{'id_Pergunta':'1','titulo':'XPTO','categoria':'decisao','descricao':'xpto decide','imagem':'','algoritmo':''}");
+//            return questionExample.toString();
 
-            //return "Hello World";
+            return "Hello World";
         });
 
         post("/api/question", (request, response) -> {
@@ -115,10 +114,11 @@ public class Main {
 
             try {
                 return Course.listCourses_WEB();
-            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | SQLException ex) {
+            } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                return "{\"resposta\":\"Sem cursos para mostrar\"}";
             }
-            return "sem cursoso!!!!";
+
         });
         post("/api/course/new", (request, response) -> {
 
@@ -135,16 +135,16 @@ public class Main {
                 System.out.println("course.entrySet " + course.entrySet());
 
                 Course newCourse = new Course(data);
-                
-                
-                System.out.println("novo popcurso");
+
+                return newCourse.regist();
+
                 //Exibe o paramentro "name" do objecto json
                 //System.out.println(user.get("name"));
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+           return "{\"resposta\":\"Curso nao inserido\"}";
             }
 
-            return data;
         });
 
         post("/api/institution", (request, response) -> {
@@ -231,23 +231,24 @@ public class Main {
 
         //Obtem a lista de todos os estudantes
         get("/api/students", (request, response) -> {
+
             try {
                 return User.listStudents();
-
-            } catch (SQLException | InstantiationException | ClassNotFoundException | IllegalAccessException ex) {
+            } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                return "{\"resposta\":\"Sem alunos para mostrar\"}";
             }
-            return "dl,ºçw,º";
+
         });
         //Obtem a lista de todos os professores
         get("/api/teachers", (request, response) -> {
+
             try {
                 return User.listTeacher();
-
-            } catch (SQLException | InstantiationException | ClassNotFoundException | IllegalAccessException ex) {
+            } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-            return "error";
+            return "{\"resposta\":\"Sem professores para mostrar\"}";
         });
         //Obtem um utilizador pelo seu id (id_User)
         get("/api/user/:id", (request, response) -> {
@@ -274,18 +275,13 @@ public class Main {
                 System.out.println("user.entrySet " + user.entrySet());
 
                 User newUser = new User(data);
-             
-                System.out.println("novo user");
+                return newUser.regist();
                 //Exibe o paramentro "name" do objecto json
                 //System.out.println(user.get("name"));
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 return "{\"resposta\":\"Utilizador nao inserido\"}";
             }
-
-            response.status(200);
-            //E os dados do novo utilizador
-            return "{\"resposta\":\"Utilizador inserido com sucesso\"}";
         });
 
         put("/api/user/:id", (request, response) -> {
