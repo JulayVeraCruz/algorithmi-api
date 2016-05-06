@@ -35,7 +35,7 @@ public class Course {
     private int school;
     private String image;
 
-    public Course(String data) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
+    public Course(String data) throws Exception {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -55,18 +55,6 @@ public class Course {
         //tenho de ir buscar o id da escola
         this.school = Course.get("school").getAsInt();
 
-        boolean existErro = false;
-        String[] erros = validateData();
-        for (int i = 0; i < erros.length; i++) {
-            if (erros[i] == null);
-            {
-                existErro = existErro || false;
-            }
-        }
-        if (!existErro) {
-
-            regist();
-        }
     }
 
     /**
@@ -74,7 +62,7 @@ public class Course {
      *
      * @param _id
      */
-    public void deleteCourse(int _id) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
+    public void deleteCourse(int _id) throws Exception {
         utils utils = new utils();
         utils.deleteRegist(_id, "tblcourses");
     }
@@ -85,7 +73,7 @@ public class Course {
      * @param _id
      * @return
      */
-    public int updateCourse(int _id) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
+    public int updateCourse(int _id) throws Exception {
         int status = 0;
 
         Statement stmtt = utils.connectDatabase();
@@ -108,20 +96,31 @@ public class Course {
      * @throws java.lang.IllegalAccessException
      * @throws java.sql.SQLException
      */
-    public int regist() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
-        int status = 1;
-        Statement stmtt = connectDatabase();
+    public int regist() throws Exception {
 
-        stmtt.execute("INSERT INTO tblcourses values(" + _id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")");
-        ResultSet res = stmtt.getResultSet();
-        while (res.next()) {
-            status = 0;
+        boolean existErro = false;
+        String[] erros = validateData();
+        for (int i = 0; i < erros.length; i++) {
+            if (erros[i] == null);
+            {
+                existErro = existErro || false;
+            }
         }
-        System.out.println(" insert course nº " + _id);
-        
-        stmtt.getConnection().close();
-        stmtt.close();
-        
+        int status = 400;
+        if (!existErro) {
+
+            Statement stmtt = connectDatabase();
+
+            stmtt.execute("INSERT INTO tblcourses values(" + _id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")");
+            ResultSet res = stmtt.getResultSet();
+            while (res.next()) {
+                status = 200;
+            }
+            System.out.println(" insert course nº " + _id);
+
+            stmtt.getConnection().close();
+            stmtt.close();
+        }
         return status;
     }
 
@@ -130,7 +129,7 @@ public class Course {
      *
      * @return []json
      */
-    public static JsonObject listCourses_WEB() throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
+    public static JsonObject listCourses_WEB() throws Exception {
         String query = "SELECT tblcourses.`name` as Course,tblschools.`name` as School from tblCourses,tblSchools where tblCourses.school=tblSchools._id";
         JsonObject obj = new JsonObject();
         obj = utils.querysToJson(query);
@@ -144,7 +143,7 @@ public class Course {
      *
      * @return int
      */
-    public static int getLastID_Courses() throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
+    public static int getLastID_Courses() throws Exception {
         utils getid = new utils();
         return getid.getLastID("tblcourses");
     }
@@ -169,8 +168,8 @@ public class Course {
         String respostasErro[] = new String[3];
         boolean valid = false;
 
-        boolean nameValid = utils.isString(name,true);//0
-        boolean schoolNumberValid = utils.isNumber(school + "",false);//1
+        boolean nameValid = utils.isString(name, true);//0
+        boolean schoolNumberValid = utils.isNumber(school + "", false);//1
 //        boolean imageValid = utils.isString(image);//2
 
         valid = nameValid && schoolNumberValid; //&& imageValid;

@@ -49,19 +49,6 @@ public class UserCourse {
         this.userID = UserCourse.get("userID").getAsInt();
 
         this.courseID = UserCourse.get("courseID").getAsInt();
-        boolean existErro = false;
-        String[] erros = validateData();
-        for (int i = 0; i < erros.length; i++) {
-            if (erros[i] == null);
-            {
-                existErro = existErro || false;
-            }
-        }
-        if (!existErro) {
-
-            regist();
-        }
-
     }
 
     /**
@@ -100,9 +87,17 @@ public class UserCourse {
      *
      * @return status
      */
-    public int regist() {
-        int status = 0;
-        try {
+    public int regist() throws Exception {
+        int status = 400;
+        boolean existErro = false;
+        String[] erros = validateData();
+        for (int i = 0; i < erros.length; i++) {
+            if (erros[i] == null);
+            {
+                existErro = existErro || false;
+            }
+        }
+        if (!existErro) {
             //executa driver para ligar à base de dados
             Statement stmtt = utils.connectDatabase();
 
@@ -112,17 +107,9 @@ public class UserCourse {
 
             System.out.println("result insert user's courses " + res.toString());
             while (res.next()) {
-                status = 0;
+                status = 200;
             }
             stmtt.close();
-
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            System.out.println("error sql insert usercourses error : "+ex);
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
         }
         return status;
     }
@@ -138,8 +125,8 @@ public class UserCourse {
         String respostasErro[] = new String[2];
         boolean valid = false;
 
-        boolean userIdNumberValid = utils.isNumber(userID + "",false);//0
-        boolean courseIdNumberValid = utils.isNumber(courseID + "",false);//1
+        boolean userIdNumberValid = utils.isNumber(userID + "", false);//0
+        boolean courseIdNumberValid = utils.isNumber(courseID + "", false);//1
 
         valid = userIdNumberValid && courseIdNumberValid;
         if (!valid) {
@@ -161,42 +148,36 @@ public class UserCourse {
      * @param courseID
      * @return
      */
-    public String deleteRegist(int userID, int courseID) {
-        try {
-            //executa driver para ligar à base de dados
-            Statement stmtt = utils.connectDatabase();
+    public String deleteRegist(int userID, int courseID) throws Exception {
+        String delete = "regist not deleted";
+        //executa driver para ligar à base de dados
+        Statement stmtt = utils.connectDatabase();
 
-            stmtt.execute("DELETE FROM `tbluserscourses` where userID=" + userID + " and courseID=" + courseID);
+        stmtt.execute("DELETE FROM `tbluserscourses` where userID=" + userID + " and courseID=" + courseID);
 
-            ResultSet res = stmtt.getResultSet();
+        ResultSet res = stmtt.getResultSet();
 
-            return "Deleted: " + res.toString();
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        while (res.next()) {
+            delete = "Deleted: " + res.toString();
         }
-        return "regist not deleted";
+        return delete;
     }
 
     /**
-     * lista os cursos a que o user _idUser
-     * esta ligado
+     * lista os cursos a que o user _idUser esta ligado
+     *
      * @return JsonObject
      */
-    public static JsonObject coursesOfUser(int _idUser) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException{
-        String query = "SELECT tblcourses.`name` FROM tblusers,tblcourses,tblusercourses where tblusers.`_id`="+Integer.toString(_idUser)+" group by tblcourses.`_id` ";
+    public static JsonObject coursesOfUser(int _idUser) throws Exception {
+        String query = "SELECT tblcourses.`name` FROM tblusers,tblcourses,tblusercourses where tblusers.`_id`=" + Integer.toString(_idUser) + " group by tblcourses.`_id` ";
 
         JsonObject obj = new JsonObject();
         obj = utils.querysToJson(query);
 
         return obj;
-        
+
     }
+
     public UserCourse(int user, int curse) {
         this.userID = user;
         this.courseID = curse;

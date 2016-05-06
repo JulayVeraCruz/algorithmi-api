@@ -49,7 +49,7 @@ public class User {
     private String password;
     private String image;
 
-    public User(String data) throws ParseException, SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public User(String data) throws Exception {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -81,6 +81,15 @@ public class User {
         this.email = user.get("email").getAsString();
         this.type = 4;//Definir o tipo de utilizador, como é registo, deverá ser do tipo aluno 4
 
+    }
+
+    /**
+     * Insere novos registos na tabela INSERT INTO tabela Values(?,..)
+     *
+     * @return status
+     */
+    public int regist() throws Exception {
+        int status = 0;
         boolean existErro = false;
         String[] erros = validateData();
         for (int i = 0; i < erros.length; i++) {
@@ -90,18 +99,7 @@ public class User {
             }
         }
         if (!existErro) {
-            regist();
-        }
-    }
 
-    /**
-     * Insere novos registos na tabela INSERT INTO tabela Values(?,..)
-     *
-     * @return status
-     */
-    public int regist() {
-        int status = 0;
-        try {
             //executa driver para ligar à base de dados
             Statement stmtt = utils.connectDatabase();
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -111,13 +109,10 @@ public class User {
             stmtt.execute(query);
 
             ResultSet res = stmtt.getResultSet();
-
-            System.out.println(" insert user nº " + _id);
-            status = 1;//
+            while (res.next()) {
+                status = 200;
+            }
             stmtt.close();
-        } catch (Exception ex) {
-            System.out.println("exception regist user= " + ex);
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
         return status;
     }
@@ -127,7 +122,7 @@ public class User {
      *
      * @return int
      */
-    public static int getLastID_Users() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public static int getLastID_Users() throws Exception {
         utils getid = new utils();
         return getid.getLastID("tblusers");
     }
@@ -153,21 +148,21 @@ public class User {
         boolean valid = false;
 //String myString = DateFormat.getDateInstance().format(birthDate);
 
-        //      boolean userValid = utils.isUsernameValid(user);//0
+        boolean userValid = utils.isUsernameValid(user);//0
         boolean nameValid = utils.isString(name, true);//1
 //        boolean dateValid = utils.isThisDateValid(myString);//2
         boolean emailValid = utils.isEmailValid(email);//3
 //        boolean imageValid = utils.isString(image);//4
 
         boolean passwordValid = utils.isString(password, true);//5
-        boolean typeValid = utils.isNumber(Integer.toString(type),false);//6
+        boolean typeValid = utils.isNumber(Integer.toString(type), false);//6
 
-        valid = nameValid && emailValid && passwordValid && typeValid;//&& dateValid && imageValid && userValid &&;
+        valid = nameValid && emailValid && passwordValid && typeValid && userValid;//&& dateValid && imageValid &&;
         if (!valid) {
             {
-//                if (!userValid) {
-//                    respostasErro[0] = "Username invalido";
-//                }
+                if (!userValid) {
+                    respostasErro[0] = "Username invalido";
+                }
                 if (!nameValid) {
                     respostasErro[1] = "Nome invalido";
                 }
@@ -225,7 +220,7 @@ public class User {
      *
      * @return Json[]
      */
-    public static JsonObject listTeacher() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public static JsonObject listTeacher() throws Exception {
 
         String query = "select tblusers.`Name`,tblusers.image,tblcourses.`name` from tblusers,tblcourses,tblusercourses where tblusers.`type`=3  and tblusers._id=tblusercourses.userID and tblusercourses.courseID=tblcourses._id ";
 
@@ -241,7 +236,7 @@ public class User {
      * @return Json[]
      * @throws java.sql.SQLException
      */
-    public static JsonObject listStudents() throws SQLException, InstantiationException, ClassNotFoundException, IllegalAccessException {
+    public static JsonObject listStudents() throws Exception {
 
         String query = "select tblUsers._id as userID, tblUsers.name as Name,tblUsers.image as Image,tblCourses.name as Course from tblUsers,tblCourses,tblUserCourses where tblUsers.type=4  and tblUsers._id=tblUserCourses.userID and tblUserCourses.courseID=tblCourses._id ";
 
