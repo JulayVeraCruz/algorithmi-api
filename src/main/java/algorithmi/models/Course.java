@@ -55,18 +55,6 @@ public class Course {
         //tenho de ir buscar o id da escola
         this.school = Course.get("school").getAsInt();
 
-        boolean existErro = false;
-        String[] erros = validateData();
-        for (int i = 0; i < erros.length; i++) {
-            if (erros[i] == null);
-            {
-                existErro = existErro || false;
-            }
-        }
-        if (!existErro) {
-
-            regist();
-        }
     }
 
     /**
@@ -109,19 +97,30 @@ public class Course {
      * @throws java.sql.SQLException
      */
     public int regist() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
-        int status = 1;
-        Statement stmtt = connectDatabase();
 
-        stmtt.execute("INSERT INTO tblcourses values(" + _id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")");
-        ResultSet res = stmtt.getResultSet();
-        while (res.next()) {
-            status = 0;
+        boolean existErro = false;
+        String[] erros = validateData();
+        for (int i = 0; i < erros.length; i++) {
+            if (erros[i] == null);
+            {
+                existErro = existErro || false;
+            }
         }
-        System.out.println(" insert course nº " + _id);
-        
-        stmtt.getConnection().close();
-        stmtt.close();
-        
+        int status = 400;
+        if (!existErro) {
+
+            Statement stmtt = connectDatabase();
+
+            stmtt.execute("INSERT INTO tblcourses values(" + _id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")");
+            ResultSet res = stmtt.getResultSet();
+            while (res.next()) {
+                status = 200;
+            }
+            System.out.println(" insert course nº " + _id);
+
+            stmtt.getConnection().close();
+            stmtt.close();
+        }
         return status;
     }
 
@@ -169,8 +168,8 @@ public class Course {
         String respostasErro[] = new String[3];
         boolean valid = false;
 
-        boolean nameValid = utils.isString(name,true);//0
-        boolean schoolNumberValid = utils.isNumber(school + "",false);//1
+        boolean nameValid = utils.isString(name, true);//0
+        boolean schoolNumberValid = utils.isNumber(school + "", false);//1
 //        boolean imageValid = utils.isString(image);//2
 
         valid = nameValid && schoolNumberValid; //&& imageValid;
