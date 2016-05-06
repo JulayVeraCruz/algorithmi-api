@@ -18,6 +18,7 @@ package algorithmi.models;
 import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.sql.ResultSet;
@@ -242,12 +243,13 @@ public class User {
      */
     public static JsonObject listStudents() throws SQLException, InstantiationException, ClassNotFoundException, IllegalAccessException {
 
-        String query = "select tblUsers.name as Name,tblUsers.image as Image,tblCourses.name as Course from tblUsers,tblCourses,tblUserCourses where tblUsers.type=4  and tblUsers._id=tblUserCourses.userID and tblUserCourses.courseID=tblCourses._id ";
+        String query = "select tblUsers._id as userID, tblUsers.name as Name,tblUsers.image as Image,tblCourses.name as Course from tblUsers,tblCourses,tblUserCourses where tblUsers.type=4  and tblUsers._id=tblUserCourses.userID and tblUserCourses.courseID=tblCourses._id ";
 
-        JsonObject obj = new JsonObject();
-        obj = utils.querysToJson(query);
-        System.out.println("obj student " + obj.toString());
-        return obj;
+        JsonObject jsonObj = new JsonObject();
+//        String news= utils.querysToJson(query);
+        jsonObj = utils.querysToJson(query);
+        System.out.println("obj student " + jsonObj.toString());
+        return jsonObj;
     }
 
     public int getId_User() {
