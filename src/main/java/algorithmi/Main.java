@@ -1,32 +1,14 @@
 package algorithmi;
 
-import algorithmi.Models.Question;
 import algorithmi.models.Course;
 import algorithmi.models.User;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.xml.internal.messaging.saaj.util.Base64;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static spark.Spark.delete;
 import static spark.Spark.externalStaticFileLocation;
-import static spark.Spark.get;
-import static spark.Spark.post;
-import static spark.Spark.put;
-import static spark.Spark.before;
-import static spark.Spark.delete;
-import static spark.Spark.get;
-import static spark.Spark.post;
-import static spark.Spark.put;
-import static spark.Spark.before;
-import static spark.Spark.delete;
-import static spark.Spark.get;
-import static spark.Spark.post;
-import static spark.Spark.put;
-import static spark.Spark.before;
 import static spark.Spark.delete;
 import static spark.Spark.get;
 import static spark.Spark.post;
@@ -49,6 +31,7 @@ public class Main {
 
         before("/api/*", (request, response) -> {
             System.out.println(request.url());
+            System.out.println(request.requestMethod());
             if (request.headers("Authorization") != null) {
                 String aux[] = Base64.base64Decode(request.headers("Authorization").split(" ")[1]).split(":");
 
@@ -76,9 +59,9 @@ public class Main {
         });
 
         get("/api/question/:id", (request, response) -> {
-//            Question questionExample = new Question("{'id_Pergunta':'1','titulo':'XPTO','categoria':'decisao','descricao':'xpto decide','imagem':'','algoritmo':''}");
-//            return questionExample.toString();
 
+            //  Question questionExample = new Question("{'id_Pergunta':'1','titulo':'XPTO','categoria':'decisao','descricao':'xpto decide','imagem':'','algoritmo':''}");
+            //  return questionExample.toString();
             return "Hello World";
         });
 
@@ -398,7 +381,24 @@ public class Main {
             return "Hello World";
         });
 
+
         get("/api/versao", (request, response) -> {
+         return "Hello World";
+        });
+
+
+        post("/api/versao", (request, response) -> {
+
+            String data;
+            try {
+                //JSon Puro (Raw)
+                data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+                System.out.println(data + "");
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                return "isto trabalha";
+            }
+
             return "Hello World";
         });
 
