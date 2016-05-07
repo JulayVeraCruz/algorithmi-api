@@ -13,8 +13,11 @@ import com.google.gson.JsonParser;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,10 +32,7 @@ public class Institutions {
     private String address;
     private String image;
 
-    private Connection connect = null;
-    PreparedStatement preparedStatement = null;
-
-    public Institutions(String data) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public Institutions(String data) throws Exception {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -40,8 +40,7 @@ public class Institutions {
         //Exibe os dados, em formato json
         System.out.println(institutions.entrySet());
         //Revalidar TUDO, formatos, campos vazios, TUDO!!
-        validateData();
-
+       
         this._id = getLastID_Institutions() + 1; //ir buscar o max id da bd + 1
         this.name = institutions.get("name").getAsString();
         this.address = institutions.get("address").getAsString();
@@ -92,42 +91,59 @@ public class Institutions {
     }
 
     //Maximo ID da tabela Institutions
-    public static int getLastID_Institutions() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public static int getLastID_Institutions() throws Exception {
         utils getid = new utils();
         return getid.getLastID("tblInstitutions");
     }
 
-    private void validateData() {
-        //Se estiver tudo OK, inserer na BD
-        insert();
-    }
-
-    public int insert() {
+    public int regist() throws Exception {
         int status = 0;
-        try {
-            //as credenciais de ligaçao estao agora em utils
-            Statement stmtt = utils.connectDatabase();
-//            // Load the MySQL driver, each DB has its own driver
-//            Class.forName("com.mysql.jdbc.Driver");
-//            // DB connection setup 
-//            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt" + "user=algo&password=algo");
-//            // PreparedStatements 
-            preparedStatement = connect.prepareStatement("insert into user values (?, ?, ?, ? )");
-            // Parameters start with 1
-            preparedStatement.setString(1, _id + "");
-            preparedStatement.setString(2, name);
-            preparedStatement.setString(3, address);
-            preparedStatement.setString(4, image);
-            status = preparedStatement.executeUpdate();
-
-            if (connect != null) {
-                connect.close();
+        boolean existErro = false;
+        String[] erros = validateData();
+        for (int i = 0; i < erros.length; i++) {
+            if (erros[i] == null);
+            {
+                existErro = existErro || false;
             }
-        } catch (Exception ex) {
-            Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
         }
+        if (!existErro) {
 
+            //executa driver para ligar à base de dados
+            Statement stmtt = utils.connectDatabase();
+            String query = "INSERT INTO tblInstitutions values(" + _id + "," + '"' + name + '"' + "," + '"' + address + '"' + "," + '"' + image + '"' + ")";
+            stmtt.execute(query);
+
+            ResultSet res = stmtt.getResultSet();
+            while (res.next()) {
+                status = 200;
+            }
+            stmtt.close();
+        }
         return status;
     }
 
+    private String[] validateData() {
+
+        String respostasErro[] = new String[7];
+        boolean valid = false;
+        boolean nameValid = utils.isString(name, true);//1
+        boolean addressValid = utils.isAddressValid(address);//2
+        boolean imageValid = utils.isImageValid(image);//3
+
+        valid = nameValid && addressValid && imageValid;
+        if (!valid) {
+            {
+                if (!nameValid) {
+                    respostasErro[1] = "Nome invalido";
+                }
+                if (!addressValid) {
+                    respostasErro[2] = "Address invalido";
+                }
+                if (!imageValid) {
+                    respostasErro[3] = "Image invalido";
+                }
+            }
+        }
+        return respostasErro;
+    }
 }

@@ -251,7 +251,26 @@ public class utils {
         return Pattern.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
                 + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", email);
     }
-
+    
+    //---------------------------------------------------------------------------------
+    //------------------ Expressoes regulares incompletas -----------------------------
+    //---------------------------------------------------------------------------------
+    public static boolean isAddressValid(String address) {
+        return Pattern.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+                + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", address);
+    }
+    /**
+     *
+     * @param image
+     * @return boolean
+     */
+    public static boolean isImageValid(String image) {
+        return Pattern.matches("[a-zA-Z0-9]+", image);
+    }
+    //---------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------
+    
     /**
      * Devolve o último id da tabela nomeTabela na base de dados "algo" de
      * algoritmi.ipt.pt retorna zero se n existitem dados
