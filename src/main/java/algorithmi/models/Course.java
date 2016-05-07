@@ -57,14 +57,41 @@ public class Course {
 
     }
 
+    public Course(String data, int id) throws Exception {
+
+        //Transforma a string recebida pelo pedido http para json
+        JsonParser jsonParser = new JsonParser();
+        JsonObject Course = (JsonObject) jsonParser.parse(data);
+        //Exibe os dados, em formato json
+        System.out.println(Course.entrySet());
+        /**
+         *
+         * Revalidar TUDO, formatos, campos vazios, TUDO!!
+         *
+         */
+
+        //Associa os dados ao objecto Course
+        this._id = id; //ir buscar o max id da bd + 1
+        this.name = Course.get("name").getAsString();
+        this.image = Course.get("image").getAsString();
+        //tenho de ir buscar o id da escola
+        this.school = Course.get("school").getAsInt();
+
+    }
+
     /**
      * apaga um curso com o _id
      *
      * @param _id
      */
-    public void deleteCourse(int _id) throws Exception {
+    public int deleteCourse(int _id) throws Exception {
+        int status = 400;
         utils utils = new utils();
-        utils.deleteRegist(_id, "tblcourses");
+        boolean deleted = utils.deleteRegist(_id, "tblcourses");
+        if (deleted) {
+            status = 200;
+        }
+        return status;
     }
 
     /**
@@ -129,11 +156,10 @@ public class Course {
      *
      * @return []json
      */
-    public static JsonObject listCourses_WEB() throws Exception {
+    public static String listCourses_WEB() throws Exception {
         String query = "SELECT tblcourses.`name` as Course,tblschools.`name` as School from tblCourses,tblSchools where tblCourses.school=tblSchools._id";
-        JsonObject obj = new JsonObject();
-        obj = utils.querysToJson(query);
-
+        String obj = utils.querysToJson_String(query);
+        System.out.println("list courses  " + obj);
         return obj;
 
     }

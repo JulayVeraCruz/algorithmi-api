@@ -57,9 +57,9 @@ public class UserCourse {
      *
      * @param _id
      */
-    public void updateCourseOf_User(int user_id, int oldCourse_id) {
+    public void updateCourseOf_User(int user_id, int oldCourse_id) throws Exception{
 
-        try {
+        
             //executa driver para ligar à base de dados
             Statement stmtt = utils.connectDatabase();
 
@@ -71,14 +71,7 @@ public class UserCourse {
 
             stmtt.close();
 
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(UserCourse.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            System.out.println("sql error update UserCourse :" + ex);
-            Logger.getLogger(UserCourse.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(UserCourse.class.getName()).log(Level.SEVERE, null, ex);
-        }
+       
 
     }
 
@@ -166,13 +159,13 @@ public class UserCourse {
     /**
      * lista os cursos a que o user _idUser esta ligado
      *
-     * @return JsonObject
+     * @return JsonString
      */
-    public static JsonObject coursesOfUser(int _idUser) throws Exception {
-        String query = "SELECT tblcourses.`name` FROM tblusers,tblcourses,tblusercourses where tblusers.`_id`=" + Integer.toString(_idUser) + " group by tblcourses.`_id` ";
+    public static String coursesOfUser(int _idUser) throws Exception {
+        
+        String query = "SELECT tblcourses.`name` FROM tblusers,tblcourses,tblusercourses where tblusercourses.`userID`=" + Integer.toString(_idUser) + " and tblusers.`_id`=tblusercourses.`userID` and tblcourses.`_id`=tblusercourses.`courseID`";
 
-        JsonObject obj = new JsonObject();
-        obj = utils.querysToJson(query);
+        String obj = utils.querysToJson_String(query);
 
         return obj;
 

@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.*;
 import static org.eclipse.jetty.util.LazyList.add;
+import static org.eclipse.jetty.util.LazyList.add;
 
 /**
  *
@@ -43,8 +44,8 @@ public class utils {
 
         Class.forName("com.mysql.jdbc.Driver").newInstance();
         //faz ligação à base de dados
-//        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/fralgo?zeroDateTimeBehavior=convertToNull", "root", "root");
+        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+//        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/fralgo?zeroDateTimeBehavior=convertToNull", "root", "root");
         Statement stmtt = (Statement) connn.createStatement();
         return stmtt;
     }
@@ -62,7 +63,7 @@ public class utils {
      * @throws IllegalAccessException
      * @throws SQLException
      */
-    public static JsonObject querysToJson(String query) throws Exception {
+    public static String querysToJson_String(String query) throws Exception {
         JsonObject obj = new JsonObject();
         JsonArray jsonArray = new JsonArray();
         Statement stmtt = connectDatabase();
@@ -71,11 +72,9 @@ public class utils {
 
         ResultSet res = stmtt.getResultSet();
 
-        int columnCount = res.getMetaData().getColumnCount();
         ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
 
         Gson gson = new Gson();
-        String tojson = null;
         obj.add("query", jsonArray);
         int total_rows = metadata.getColumnCount();
 
@@ -83,11 +82,21 @@ public class utils {
             JsonObject row = new JsonObject();
             jsonArray.add(row);
             for (int i = 1; i <= total_rows; i++) {
-                System.out.println("col name " + metadata.getColumnLabel(i));
+//                System.out.println("col name " + metadata.getColumnLabel(i));
                 row.add(metadata.getColumnLabel(i), gson.toJsonTree(res.getObject(i)));
             }
         }
-        return obj;
+
+        return obj.toString();
+    }
+
+    @Override
+    public String toString() {
+        Gson gson = new Gson();
+
+        String json = gson.toJson(this);
+        System.out.println("json \n" + json);
+        return json;
     }
 
     /**
@@ -294,18 +303,18 @@ public class utils {
      * @param tabela
      * @return
      */
-    public String deleteRegist(int _id, String tabela) throws Exception {
-
+    public boolean deleteRegist(int _id, String tabela) throws Exception {
+        boolean deleted = false;
         Statement stmtt = connectDatabase();
 
         stmtt.execute("DELETE FROM " + tabela + " where _id=" + _id + "");
         ResultSet res = stmtt.getResultSet();
 
         while (res.next()) {
-
+            deleted = true;
         }
         stmtt.close();
-        return "Regist deleted";
+        return deleted;
     }
 }
 //ajuda sobre regex

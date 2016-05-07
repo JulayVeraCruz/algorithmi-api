@@ -83,6 +83,40 @@ public class User {
 
     }
 
+    public User(String data, int id) throws Exception {
+
+        //Transforma a string recebida pelo pedido http para json
+        JsonParser jsonParser = new JsonParser();
+        JsonObject user = (JsonObject) jsonParser.parse(data);
+        //Exibe os dados, em formato json
+        System.out.println(user.entrySet());
+        /**
+         *
+         * Revalidar TUDO, formatos, campos vazios, TUDO!!
+         *
+         */
+        //Associa os dados ao objecto User
+        this._id = id; //ir buscar o max id da bd + 1
+
+        this.name = user.get("name").getAsString();
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        df.setLenient(false);
+
+        Date datBirth;
+
+        String gg = user.get("dateBirth").getAsString();
+        String dd = gg.substring(0, 2);
+        String mm = gg.substring(3, 5);
+        String yyyy = gg.substring(6, 10);
+
+        datBirth = df.parse(yyyy + "-" + mm + "-" + dd);
+
+        this.birthDate = datBirth;
+        this.email = user.get("email").getAsString();
+        this.type = user.get("type").getAsInt();//Definir o tipo de utilizador, como é registo, deverá ser do tipo aluno 4
+
+    }
+
     /**
      * Insere novos registos na tabela INSERT INTO tabela Values(?,..)
      *
@@ -191,27 +225,26 @@ public class User {
      *
      * @param _id
      */
-    public void updateUser(int _id) {
+    public int updateUser(int _id, boolean alterType) throws Exception {
+        int status = 400;
+        String query = null;
+        if (alterType) {
+            query = "UPDATE tblUsers " + "SET username=" + '"' + user + '"' + ",name=" + '"' + name + '"' + ", birthDate=" + birthDate + ",email=" + '"' + email + '"' + ",password=" + '"' + password + '"' + ",image=" + '"' + image + '"' + ",type=" + type + " where _id=" + _id + ")";
+        } else {
+            query = "UPDATE tblUsers " + "SET username=" + '"' + user + '"' + ",name=" + '"' + name + '"' + ", birthDate=" + birthDate + ",email=" + '"' + email + '"' + ",password=" + '"' + password + '"' + ",image=" + '"' + image + '"' + " where _id=" + _id + ")";
 
-        try {
-            //executa driver para ligar à base de dados
-            Statement stmtt = utils.connectDatabase();
-            stmtt.execute("UPDATE tblUsers " + "SET username=" + '"' + user + '"'
-                    + ",name=" + '"' + name + '"' + ", birthDate=" + birthDate + ",email=" + '"' + email + '"' + ",password=" + '"' + password + '"' + ",image=" + '"' + image + '"' + ",type=" + type + " where _id=" + _id + ")");
+        }//executa driver para ligar à base de dados
+        Statement stmtt = utils.connectDatabase();
+        stmtt.execute(query);
 
-            ResultSet res = stmtt.getResultSet();
+        ResultSet res = stmtt.getResultSet();
 
-            System.out.println("result update user " + res.rowUpdated());
+        System.out.println("result update user " + res.rowUpdated());
+        status = 200;
+        stmtt.close();
+//            return status;
 
-            stmtt.close();
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            System.out.println("sql ex updateuser= " + ex);
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        return status;
     }
 
     /**
@@ -220,13 +253,10 @@ public class User {
      *
      * @return Json[]
      */
-    public static JsonObject listTeacher() throws Exception {
+    public static String listTeacher() throws Exception {
 
         String query = "select tblusers.`Name`,tblusers.image,tblcourses.`name` from tblusers,tblcourses,tblusercourses where tblusers.`type`=3  and tblusers._id=tblusercourses.userID and tblusercourses.courseID=tblcourses._id ";
-
-        JsonObject obj = new JsonObject();
-        obj = utils.querysToJson(query);
-
+        String obj = utils.querysToJson_String(query);
         return obj;
     }
 
@@ -236,15 +266,14 @@ public class User {
      * @return Json[]
      * @throws java.sql.SQLException
      */
-    public static JsonObject listStudents() throws Exception {
+    public static String listStudents() throws Exception {
 
         String query = "select tblUsers._id as userID, tblUsers.name as Name,tblUsers.image as Image,tblCourses.name as Course from tblUsers,tblCourses,tblUserCourses where tblUsers.type=4  and tblUsers._id=tblUserCourses.userID and tblUserCourses.courseID=tblCourses._id ";
 
-        JsonObject jsonObj = new JsonObject();
-//        String news= utils.querysToJson(query);
-        jsonObj = utils.querysToJson(query);
-        System.out.println("obj student " + jsonObj.toString());
-        return jsonObj;
+//        String news= utils.querysToJson_String(query);
+        String obj = utils.querysToJson_String(query);
+        System.out.println("obj student " + obj);
+        return obj;
     }
 
     public int getId_User() {

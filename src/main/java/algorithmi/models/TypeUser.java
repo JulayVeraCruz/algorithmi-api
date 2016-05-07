@@ -164,10 +164,9 @@ public class TypeUser {
  * lista os varios tipos de utilizadores existentes
  * @return JsonObject
  */
-    public static JsonObject listTypesOfUser() throws Exception{
+    public static String listTypesOfUser() throws Exception{
         String query="select tblusertypes.'name' as Name from tblusertypes ";
-        JsonObject obj = new JsonObject();
-        obj = utils.querysToJson(query);
+        String obj = utils.querysToJson_String(query);
        
         return obj;
     }
