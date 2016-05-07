@@ -9,13 +9,8 @@ import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -27,7 +22,7 @@ public class Schools {
     private int institution;
     private String image;
 
-    public Schools(String data) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public Schools(String data) throws Exception {
         
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -41,19 +36,6 @@ public class Schools {
         this.institution = schools.get("institution").getAsInt();
         this.image = schools.get("image").getAsString();
         
-        boolean existErro = false;
-        String[] erros = validateData();
-        for (int i = 0; i < erros.length; i++) {
-            if (erros[i] == null);
-            {
-                existErro = existErro || false;
-            }
-        }
-        if (!existErro) {
-            
-        regist();
-            
-        }
     }
 
     public int getId() {
@@ -88,12 +70,9 @@ public class Schools {
         this.image = image;
     }
     
-    public static int getLastID_Schools() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-        utils getid = new utils();
-        return getid.getLastID("tblSchools");
-    }
-    // converts a java object to JSON format,
-    // and returned as JSON formatted string
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    
     @Override
     public String toString() {
         Gson gson = new Gson();
@@ -102,16 +81,74 @@ public class Schools {
         System.out.println("json \n"+ json);
         return json;
     }
+    
+    //Maximo ID da tabela Escolas
+    public static int getLastID_Schools() throws Exception {
+        utils getid = new utils();
+        return getid.getLastID("tblSchools");
+    }
+    
+    //Registar
+    public int regist() throws Exception {
+        int status = 0;
+        boolean existErro = false;
+        String[] erros = validateData();
+        for (int i = 0; i < erros.length; i++) {
+            if (erros[i] == null);
+            {
+                existErro = existErro || false;
+            }
+        }
+        if (!existErro) {
+            //executa driver para ligar à base de dados
+            Statement stmtt = utils.connectDatabase();
+            String query = "INSERT INTO tblSchools values(" + _id + "," + '"' + name + '"' + "," + '"' + institution + '"' + "," + '"' + image + '"' + ")";
+            stmtt.execute(query);
 
+            ResultSet res = stmtt.getResultSet();
+            while (res.next()) {
+                status = 200;
+            }
+            stmtt.close();
+        }
+        return status;
+    }
+    
+    //Update Schools
+    public int updateSchools(int _id) throws Exception {
+        int status = 0;
+
+        Statement stmtt = utils.connectDatabase();
+        stmtt.execute("UPDATE tblSchools SET name=" + name + ",institution=" + institution + ",image=" + image + " where _id=" + _id + ")");
+
+        ResultSet res = stmtt.getResultSet();
+
+        System.out.println("result update Schools " + res.rowUpdated());
+
+        stmtt.close();
+        return status;
+    }
+    
+    //Apagar Escola
+    public int deleteSchools(int _id) throws Exception {
+        int status = 400;
+        utils utils = new utils();
+        boolean deleted = utils.deleteRegist(_id, "tblSchools");
+        if (deleted) {
+            status = 200;
+        }
+        return status;
+    }
+    
+    //Validar Dados
     private String[] validateData() {
         String respostasErro[] = new String[3];
         boolean valid = false;
-
         boolean nameValid = utils.isString(name,false);//0
         boolean institutionValid = utils.isNumber(Integer.toString(institution),false);//1
-      //  boolean imageValid = utils.isString(image,false);//2
+        boolean imageValid = utils.isImageValid(image);//2
 
-     //   valid = nameValid && institutionValid && imageValid;
+        valid = nameValid && institutionValid && imageValid;
         if (!valid) {
             {
                 if (!nameValid) {
@@ -120,68 +157,15 @@ public class Schools {
                 if (!institutionValid) {
                     respostasErro[1] = "Institution invalida";
                 }
-                //if (!imageValid) {
-                //    respostasErro[2] = "path invalido";
-                //}
+                if (!imageValid) {
+                    respostasErro[2] = "Image invalido";
+                }
             }
         }
         return respostasErro;
     }
+   
+    //FALTA: UPDATE E DELETE
+    //       SABER SE É NECESSÁRIO A SEGUUNDA PUBLIC
     
-    public int regist() {
-        int status = 0;
-        try {
-            //executa driver para ligar à base de dados
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            //faz ligação à base de dados
-            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-
-            Statement stmtt = (Statement) connn.createStatement();
-            System.out.println("antes insert ");
-            
-            stmtt.execute("INSERT INTO tblSchools values(" + _id + "," + '"' + name + '"' + "," + institution + "," + '"' + image + '"' + ")");
-
-            ResultSet res = stmtt.getResultSet();
-            status = 1;//sem erros
-            System.out.println("insert new schools id" + res.getString(1));
-
-            stmtt.close();
-            connn.close();
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            System.out.println("SQL ERROR regist " + ex);
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return status;
-    }
-    
-    public int updateInstitution(int _id){
-         int status = 0;
-         try {
-            //executa driver para ligar à base de dados
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            //faz ligação à base de dados
-            Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-
-            Statement stmtt = (Statement) connn.createStatement();
-            stmtt.execute("UPDATE tblInstitutions " + "SET name=" + name + ", institution=" + institution + ",image=" + image + " where _id=" + _id +")");
-
-            ResultSet res = stmtt.getResultSet();
-
-            System.out.println("result update school " + res);
-            status = 1;
-            stmtt.close();
-            connn.close();
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return status;
-    }
 }

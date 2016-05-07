@@ -7,10 +7,8 @@ package Utils;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mysql.jdbc.ResultSetMetaData;
-import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -18,12 +16,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.regex.*;
-import static org.eclipse.jetty.util.LazyList.add;
-import static org.eclipse.jetty.util.LazyList.add;
 
 /**
  *

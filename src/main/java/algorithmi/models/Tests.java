@@ -7,11 +7,11 @@
 package algorithmi.models;
 
 import Utils.utils;
+import static Utils.utils.connectDatabase;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,12 +23,11 @@ import java.util.logging.Logger;
 public class Tests {
 
     private int _id;
-    private int matrixTest;
     private float quotation;
     private int student;
-    private String image;
+    private int matrixTest;
 
-    public Tests(String data) throws SQLException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+    public Tests(String data) throws Exception {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -41,121 +40,8 @@ public class Tests {
         this.matrixTest = tests.get("matrixTest").getAsInt();
         this.quotation = tests.get("quotation").getAsFloat();
         this.student = tests.get("student").getAsInt();
-        this.image = tests.get("image").getAsString();
-
-        boolean existErro = false;
-        String[] erros = validateData();
-        for (int i = 0; i < erros.length; i++) {
-            if (erros[i] == null);
-            {
-                existErro = existErro || false;
-            }
-        }
-        if (!existErro) {
-
-            regist();
-        }
     }
 
-    /**
-     * obtem o maximo id utilizado na tabela tbltests
-     *
-     * @return int
-     */
-    public static int getLastID_Tests() throws SQLException, ClassNotFoundException, IllegalAccessException, InstantiationException {
-        utils getid = new utils();
-        return getid.getLastID("tbltests");
-    }
-
-    /**
-     * apaga um teste com o _id
-     *
-     * @param _id
-     */
-    public void deleteTest(int _id) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
-        utils utils = new utils();
-        utils.deleteRegist(_id, "tbltests");
-    }
-
-    /**
-     * introduz um novo teste
-     *
-     * @return
-     */
-    public int regist() {
-        int status = 0;
-        try {
-            //executa driver para ligar à base de dados
-            Statement stmtt = utils.connectDatabase();
-
-            stmtt.execute("INSERT INTO tbltests values()");
-
-            ResultSet res = stmtt.getResultSet();
-            status = 1;//sem erros
-            System.out.println("insert test nº " + res.getString(1));
-
-            stmtt.close();
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            System.out.println("SQL ERROR test regist " + ex);
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return status;
-    }
-
-    /**
-     * para actualizar/alterar os dados de um registo na tabela tests
-     *
-     * @param _id
-     * @return
-     */
-    public int updateTest(int _id) {
-        int status = 0;
-        try {
-            //executa driver para ligar à base de dados
-            Statement stmtt = utils.connectDatabase();
-
-            stmtt.execute("UPDATE tbltests SET matrixTest=" + matrixTest + ",quotation=" + quotation + ",student=" + student + ",image=" + image + " where _id=" + _id + ")");
-
-            ResultSet res = stmtt.getResultSet();
-
-            System.out.println("result update course " + res);
-            status = 1;
-            stmtt.close();
-        } catch (Exception ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return status;
-    }
-
-    @Override
-    public String toString() {
-        Gson gson = new Gson();
-
-        String json = gson.toJson(this);
-        System.out.println("json \n" + json);
-        return json;
-    }
-
-    private String[] validateData() {
-        String respostasErro[] = new String[1];
-        boolean valid = false;
-
-        boolean validQuotation = utils.isValidFloat(quotation + "",false);
-
-        valid = validQuotation;
-        if (!valid) {
-            if (!validQuotation) {
-                respostasErro[0] = "Nota invalida";
-            }
-        }
-        return respostasErro;
-    }
-
-    
     public int getId() {
         return _id;
     }
@@ -187,4 +73,98 @@ public class Tests {
     public void setStudent(int student) {
         this.student = student;
     }
+   
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    
+    @Override
+    public String toString() {
+        Gson gson = new Gson();
+
+        String json = gson.toJson(this);
+        System.out.println("json \n" + json);
+        return json;
+    }
+    
+    //Vai buscar oLast ID da tabela Testes
+    public static int getLastID_Tests() throws Exception {
+        utils getid = new utils();
+        return getid.getLastID("tbltests");
+    }
+
+    //Registar
+    public int regist() throws Exception {
+
+        boolean existErro = false;
+        String[] erros = validateData();
+        for (int i = 0; i < erros.length; i++) {
+            if (erros[i] == null);
+            {
+                existErro = existErro || false;
+            }
+        }
+        int status = 400;
+        if (!existErro) {
+
+            Statement stmtt = connectDatabase();
+
+            stmtt.execute("INSERT INTO tblTests values(" + _id + "," + '"' + quotation + '"' + "," + student + "," + '"' + matrixTest + '"' + ")");
+            ResultSet res = stmtt.getResultSet();
+            while (res.next()) {
+                status = 200;
+            }
+            System.out.println(" insert Test nº " + _id);
+
+            stmtt.getConnection().close();
+            stmtt.close();
+        }
+        return status;
+    }
+    
+    //Actualizar
+    public int updateTests(int _id) {
+        int status = 0;
+        try {
+            //executa driver para ligar à base de dados
+            Statement stmtt = utils.connectDatabase();
+
+            stmtt.execute("UPDATE tblTests SET quotation=" + quotation + ",student=" + student + ",matrixTest=" + matrixTest + " where _id=" + _id + ")");
+
+            ResultSet res = stmtt.getResultSet();
+
+            System.out.println("result update Test " + res);
+            status = 1;
+            stmtt.close();
+        } catch (Exception ex) {
+            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return status;
+    }
+    
+    //Apagar Teste
+    public int deleteTests(int _id) throws Exception {
+        int status = 400;
+        utils utils = new utils();
+        boolean deleted = utils.deleteRegist(_id, "tblTests");
+        if (deleted) {
+            status = 200;
+        }
+        return status;
+    }
+
+    //Validar Dados
+    private String[] validateData() {
+        String respostasErro[] = new String[1];
+        boolean valid = false;
+
+        boolean validQuotation = utils.isValidFloat(quotation + "",false);
+
+        valid = validQuotation;
+        if (!valid) {
+            if (!validQuotation) {
+                respostasErro[0] = "Nota invalida";
+            }
+        }
+        return respostasErro;
+    }  
 }

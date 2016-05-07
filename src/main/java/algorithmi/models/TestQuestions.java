@@ -16,6 +16,8 @@ import com.google.gson.JsonParser;
 public class TestQuestions {
     private int testID;
     private int questionID;
+    private float quotation;
+    //private blob submission;
 
     public TestQuestions(String data) {
         
@@ -29,6 +31,7 @@ public class TestQuestions {
         
         this.testID = testQuestions.get("testID").getAsInt();
         this.questionID = testQuestions.get("questionID").getAsInt();
+        this.quotation = testQuestions.get("quotation").getAsFloat();
     }
 
     public int getTestID() {
@@ -51,8 +54,17 @@ public class TestQuestions {
         //Insere na BD
     }
     
-    // converts a java object to JSON format,
-    // and returned as JSON formatted string
+    public float getQuotation() {
+        return quotation;
+    }
+
+    public void setQuotation(float quotation) {
+        this.quotation = quotation;
+    }
+    
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    
     @Override
     public String toString() {
         Gson gson = new Gson();
@@ -66,4 +78,6 @@ public class TestQuestions {
         //Se estiver tudo OK, inserer na BD
         regist();
     }
+
+    
 }

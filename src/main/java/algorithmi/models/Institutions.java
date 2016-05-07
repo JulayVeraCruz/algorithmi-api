@@ -6,20 +6,11 @@
 package algorithmi.models;
 
 import Utils.utils;
-import static algorithmi.models.User.getLastID_Users;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -79,8 +70,9 @@ public class Institutions {
         this.image = image;
     }
 
-    // converts a java object to JSON format,
-    // and returned as JSON formatted string
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    
     @Override
     public String toString() {
         Gson gson = new Gson();
@@ -95,7 +87,8 @@ public class Institutions {
         utils getid = new utils();
         return getid.getLastID("tblInstitutions");
     }
-
+    
+    //Registar
     public int regist() throws Exception {
         int status = 0;
         boolean existErro = false;
@@ -107,7 +100,6 @@ public class Institutions {
             }
         }
         if (!existErro) {
-
             //executa driver para ligar à base de dados
             Statement stmtt = utils.connectDatabase();
             String query = "INSERT INTO tblInstitutions values(" + _id + "," + '"' + name + '"' + "," + '"' + address + '"' + "," + '"' + image + '"' + ")";
@@ -121,10 +113,37 @@ public class Institutions {
         }
         return status;
     }
+    
+    
+    public int updateInstitutions(int _id) throws Exception {
+        int status = 0;
 
+        Statement stmtt = utils.connectDatabase();
+        stmtt.execute("UPDATE tblInstitutions SET name=" + name + ",address=" + address + ",image=" + image + " where _id=" + _id + ")");
+
+        ResultSet res = stmtt.getResultSet();
+
+        System.out.println("result update Institutions " + res.rowUpdated());
+
+        stmtt.close();
+        return status;
+    }
+    
+    //Apagar Institution
+    public int deleteInstitutions(int _id) throws Exception {
+        int status = 400;
+        utils utils = new utils();
+        boolean deleted = utils.deleteRegist(_id, "tblInstitutions");
+        if (deleted) {
+            status = 200;
+        }
+        return status;
+    }
+    
+    //Validar Dados
     private String[] validateData() {
 
-        String respostasErro[] = new String[7];
+        String respostasErro[] = new String[3];
         boolean valid = false;
         boolean nameValid = utils.isString(name, true);//1
         boolean addressValid = utils.isAddressValid(address);//2
@@ -146,4 +165,8 @@ public class Institutions {
         }
         return respostasErro;
     }
+    
+    //FALTA: UPDATE E DELETE
+    //       SABER SE É NECESSÁRIO A SEGUUNDA PUBLIC
+    
 }
