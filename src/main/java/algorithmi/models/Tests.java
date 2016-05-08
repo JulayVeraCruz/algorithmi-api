@@ -136,7 +136,7 @@ public class Tests {
             status = 1;
             stmtt.close();
         } catch (Exception ex) {
-            Logger.getLogger(Course.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Tests.class.getName()).log(Level.SEVERE, null, ex);
         }
         return status;
     }

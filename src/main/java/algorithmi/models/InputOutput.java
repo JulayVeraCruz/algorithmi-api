@@ -31,7 +31,7 @@ public class InputOutput {
     private Connection connect = null;
     PreparedStatement preparedStatement = null;
 
-    public InputOutput(String data) throws ParseException, SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException{
+    public InputOutput(String data) throws Exception{
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
         JsonObject QuestionIO = (JsonObject) jsonParser.parse(data);
@@ -68,7 +68,7 @@ public class InputOutput {
          */
     }
 
-    public static int getLastID() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException{
+    public static int getLastID() throws Exception{
         utils getid = new utils();
         return getid.getLastID("tblQuestions");
     }

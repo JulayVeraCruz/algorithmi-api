@@ -44,7 +44,7 @@ public class Question {
 
 
     // EXEMPLO DE STRING RECEBIDA [title="olol", category="1", description="olololo", difficulty="1", image="", in="9", out="9"]
-    public Question(String data) throws ParseException, SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException{
+    public Question(String data) throws Exception{
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
         JsonObject Question = (JsonObject) jsonParser.parse(data);
@@ -165,7 +165,7 @@ public class Question {
         this.algorithm = algorithm;
     }
 
-    public static int getLastID() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException{
+    public static int getLastID() throws Exception{
         utils getid = new utils();
         return getid.getLastID("tblquestions");
     }

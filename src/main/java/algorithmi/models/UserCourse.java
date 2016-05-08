@@ -141,7 +141,7 @@ public class UserCourse {
      * @param courseID
      * @return
      */
-    public String deleteRegist(int userID, int courseID) throws Exception {
+    public static String deleteRegist(int userID, int courseID) throws Exception {
         String delete = "regist not deleted";
         //executa driver para ligar à base de dados
         Statement stmtt = utils.connectDatabase();

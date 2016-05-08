@@ -274,6 +274,19 @@ public class User {
         String obj = utils.querysToJson_String(query);
         System.out.println("obj student " + obj);
         return obj;
+    }    /**
+     * apaga um user com o _id
+     *
+     * @param _id
+     */
+    public int deleteUser(int _id) throws Exception {
+        int status = 400;
+        utils utils = new utils();
+        boolean deleted = utils.deleteRegist(_id, "tblusers");
+        if (deleted) {
+            status = 200;
+        }
+        return status;
     }
 
     public int getId_User() {

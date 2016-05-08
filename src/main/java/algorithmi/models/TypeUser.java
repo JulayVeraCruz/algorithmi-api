@@ -55,6 +55,24 @@ public class TypeUser {
         this.name = UserType.get("name").getAsString();
 
     }
+ public TypeUser(String data,int _id) throws Exception {
+
+        //Transforma a string recebida pelo pedido http para json
+        JsonParser jsonParser = new JsonParser();
+        JsonObject UserType = (JsonObject) jsonParser.parse(data);
+
+        //Exibe os dados, em formato json
+        System.out.println(UserType.entrySet());
+        /**
+         *
+         * Revalidar TUDO, formatos, campos vazios, TUDO!!
+         *
+         */
+        //Associa os dados ao objecto UserType
+        this._id =_id; //ir buscar o max id da bd + 1 
+        this.name = UserType.get("name").getAsString();
+
+    }
 
     /**
      * Insere novos registos na tabela
@@ -135,9 +153,9 @@ public class TypeUser {
      *
      * @param _id
      */
-    public void updateTypeUser(int _id) {
+    public int updateTypeUser(int _id) throws Exception{
+       int status = 0;
 
-        try {
             //executa driver para ligar à base de dados
             Statement stmtt = utils.connectDatabase();
 
@@ -149,14 +167,7 @@ public class TypeUser {
 
             stmtt.close();
             
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            System.out.println("error sql typeuser update; "+ex);
-            Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        return status;
 
     }
 
@@ -170,7 +181,21 @@ public class TypeUser {
        
         return obj;
     }
-  
+      /**
+     * apaga um tipo de user com o _id
+     *
+     * @param _id
+     */
+    public int deleteType(int _id) throws Exception {
+        int status = 400;
+        utils utils = new utils();
+        boolean deleted = utils.deleteRegist(_id, "tblusertypes");
+        if (deleted) {
+            status = 200;
+        }
+        return status;
+    }
+    
     public TypeUser(int id_Type, String name) {
         this._id = id_Type;
         this.name = name;
