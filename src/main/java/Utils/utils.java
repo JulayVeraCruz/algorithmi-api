@@ -83,6 +83,70 @@ public class utils {
 
         return obj.toString();
     }
+    /**
+     * Devolve o último id da tabela nomeTabela na base de dados "algo" de
+     * algoritmi.ipt.pt retorna zero se n existitem dados
+     *
+     * @param nomeTabela
+     * @return int
+     */
+    public int getLastID(String nomeTabela) throws Exception {
+        int id = 0;
+
+        Statement stmtt = connectDatabase();
+
+        stmtt.execute("select " + nomeTabela + "._id from " + nomeTabela + " order by _id desc limit 1");
+        ResultSet res = stmtt.getResultSet();
+
+        while (res.next()) {
+            id = Integer.parseInt(res.getString("_id"));
+        }
+        return id;
+    }
+
+    /**
+     * retorna o campo name respectivo do _id de uma tabela
+     *
+     * @param _id
+     * @param tabela
+     * @return
+     */
+    public String getName(int _id, String tabela) throws Exception {
+
+        String name = null;
+        Statement stmtt = connectDatabase();
+
+        stmtt.execute("SELECT name FROM `" + tabela + "` where _id=" + _id + "");
+//        ResultSet res = connectDatabase(mySQL);//se for apenas um insert o res=null
+        ResultSet res = stmtt.getResultSet();
+
+        while (res.next()) {
+            name = res.getString("name");
+        }
+        return name;
+    }
+
+    /**
+     * apaga o registo com o _id de uma tabela desde que só possua UM campo
+     * (_id) como chave primaria
+     *
+     * @param _id
+     * @param tabela
+     * @return
+     */
+    public boolean deleteRegist(int _id, String tabela) throws Exception {
+        boolean deleted = false;
+        Statement stmtt = connectDatabase();
+
+        stmtt.execute("DELETE FROM " + tabela + " where _id=" + _id + "");
+        ResultSet res = stmtt.getResultSet();
+
+        while (res.next()) {
+            deleted = true;
+        }
+        stmtt.close();
+        return deleted;
+    }
 
     @Override
     public String toString() {
@@ -92,6 +156,11 @@ public class utils {
         System.out.println("json \n" + json);
         return json;
     }
+    
+    //---------------------------------------------------------------------------------
+    //------------------Expressoes regulares-------------------------------------------
+    //---------------------------------------------------------------------------------
+    
 
     /**
      * verifica se a string é composta apenas por algarismos
@@ -260,74 +329,6 @@ public class utils {
      */
     public static boolean isImageValid(String image) {
         return Pattern.matches("[a-zA-Z0-9]+", image);
-    }
-    //---------------------------------------------------------------------------------
-    //---------------------------------------------------------------------------------
-    //---------------------------------------------------------------------------------
-    
-    /**
-     * Devolve o último id da tabela nomeTabela na base de dados "algo" de
-     * algoritmi.ipt.pt retorna zero se n existitem dados
-     *
-     * @param nomeTabela
-     * @return int
-     */
-    public int getLastID(String nomeTabela) throws Exception {
-        int id = 0;
-
-        Statement stmtt = connectDatabase();
-
-        stmtt.execute("select " + nomeTabela + "._id from " + nomeTabela + " order by _id desc limit 1");
-        ResultSet res = stmtt.getResultSet();
-
-        while (res.next()) {
-            id = Integer.parseInt(res.getString("_id"));
-        }
-        return id;
-    }
-
-    /**
-     * retorna o campo name respectivo do _id de uma tabela
-     *
-     * @param _id
-     * @param tabela
-     * @return
-     */
-    public String getName(int _id, String tabela) throws Exception {
-
-        String name = null;
-        Statement stmtt = connectDatabase();
-
-        stmtt.execute("SELECT name FROM `" + tabela + "` where _id=" + _id + "");
-//        ResultSet res = connectDatabase(mySQL);//se for apenas um insert o res=null
-        ResultSet res = stmtt.getResultSet();
-
-        while (res.next()) {
-            name = res.getString("name");
-        }
-        return name;
-    }
-
-    /**
-     * apaga o registo com o _id de uma tabela desde que só possua UM campo
-     * (_id) como chave primaria
-     *
-     * @param _id
-     * @param tabela
-     * @return
-     */
-    public boolean deleteRegist(int _id, String tabela) throws Exception {
-        boolean deleted = false;
-        Statement stmtt = connectDatabase();
-
-        stmtt.execute("DELETE FROM " + tabela + " where _id=" + _id + "");
-        ResultSet res = stmtt.getResultSet();
-
-        while (res.next()) {
-            deleted = true;
-        }
-        stmtt.close();
-        return deleted;
     }
 }
 //ajuda sobre regex
