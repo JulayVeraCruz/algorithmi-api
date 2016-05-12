@@ -110,10 +110,14 @@ public class Main {
 
                 Course newCourse = new Course(data);
 
-                return newCourse.regist();//devolve um inteiro-> status
+                int registStatus = newCourse.regist(); //devolve um inteiro-> status
+
+                
+                return"{\"resposta\":\"Curso inserido\"}";
 
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println(" course error_ " + ex);
                 return "{\"resposta\":\"Curso nao inserido\"}";
             }
         });
@@ -688,7 +692,7 @@ public class Main {
                 JsonObject user = (JsonObject) jsonParser.parse(data);
 
                 //Exibe os dados, em formato json
-                System.out.println("course.entrySet " + user.entrySet());
+                System.out.println("user.entrySet " + user.entrySet());
 
                 User newUser = new User(data);
 
@@ -741,13 +745,13 @@ public class Main {
 
         delete("/api/userCourses", (request, response) -> {
             try {
-                UserCourse.deleteRegist(Integer.parseInt(request.params(":userID")),Integer.parseInt( request.params(":courseID")) );
+                UserCourse.deleteRegist(Integer.parseInt(request.params(":userID")), Integer.parseInt(request.params(":courseID")));
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            return "Hello World";  
-                    
+
+            return "Hello World";
+
         });
 //------------------------userCourses-------------------------
 

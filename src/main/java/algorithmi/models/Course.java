@@ -100,16 +100,16 @@ public class Course {
      * @param _id
      * @return
      */
-    public int updateCourse(int _id) throws Exception {
+    public int updateCourse(int id) throws Exception {
         int status = 0;
-
+        String update = "UPDATE tblCourses SET name=" + '"' + name + '"' + ",school=" + school + ",image=" + '"' + image + '"' + " where _id=" + id;
         Statement stmtt = utils.connectDatabase();
-        stmtt.execute("UPDATE tblCourse SET name=" + name + ",school=" + school + ",image=" + image + " where _id=" + _id + ")");
+
+        stmtt.execute(update);
 
         ResultSet res = stmtt.getResultSet();
 
-        System.out.println("result update Course " + res.rowUpdated());
-
+//        System.out.println("result update Course " + res.rowUpdated());
         stmtt.close();
         return status;
     }
@@ -140,9 +140,10 @@ public class Course {
 
             stmtt.execute("INSERT INTO tblcourses values(" + _id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")");
             ResultSet res = stmtt.getResultSet();
-            while (res.next()) {
-                status = 200;
-            }
+
+//            while (res.next()) {
+//                status = 200;
+//            }
             System.out.println(" insert course nº " + _id);
 
             stmtt.getConnection().close();

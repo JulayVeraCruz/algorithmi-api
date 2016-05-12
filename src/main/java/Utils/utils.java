@@ -26,25 +26,6 @@ import java.util.regex.*;
 public class utils {
 
     /**
-     * Faz a ligação a base de dados com as devidas credecias de acesso
-     *
-     * @return Statment
-     * @throws ClassNotFoundException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws SQLException
-     */
-    public static Statement connectDatabase() throws Exception {
-
-        Class.forName("com.mysql.jdbc.Driver").newInstance();
-        //faz ligação à base de dados
-        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-//        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/fralgo?zeroDateTimeBehavior=convertToNull", "root", "root");
-        Statement stmtt = (Statement) connn.createStatement();
-        return stmtt;
-    }
-
-    /**
      * Converte em Json Object a query solicitada n sendo apresentados os id
      * necessarios (numTabelas) para uma futura utilizaçao.A query tera de ter
      * nos ultimos campos os id nao sendo apresentados na view
@@ -71,18 +52,42 @@ public class utils {
         Gson gson = new Gson();
         obj.add("query", jsonArray);
         int total_rows = metadata.getColumnCount();
-
-        while (res.next()) {
+        if (!(res == null)) {
+            while (res.next()) {
+                JsonObject row = new JsonObject();
+                jsonArray.add(row);
+                for (int i = 1; i <= total_rows; i++) {
+//                System.out.println("col name " + metadata.getColumnLabel(i));
+                    row.add(metadata.getColumnLabel(i), gson.toJsonTree(res.getObject(i)));
+                }
+            }
+        } else {
             JsonObject row = new JsonObject();
             jsonArray.add(row);
-            for (int i = 1; i <= total_rows; i++) {
-//                System.out.println("col name " + metadata.getColumnLabel(i));
-                row.add(metadata.getColumnLabel(i), gson.toJsonTree(res.getObject(i)));
-            }
+            row.add(null, null);
         }
-
         return obj.toString();
     }
+
+    /**
+     * Faz a ligação a base de dados com as devidas credecias de acesso
+     *
+     * @return Statment
+     * @throws ClassNotFoundException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws SQLException
+     */
+    public static Statement connectDatabase() throws Exception {
+
+        Class.forName("com.mysql.jdbc.Driver").newInstance();
+        //faz ligação à base de dados
+        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
+//        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/fralgo?zeroDateTimeBehavior=convertToNull", "root", "root");
+        Statement stmtt = (Statement) connn.createStatement();
+        return stmtt;
+    }
+
     /**
      * Devolve o último id da tabela nomeTabela na base de dados "algo" de
      * algoritmi.ipt.pt retorna zero se n existitem dados
@@ -141,9 +146,8 @@ public class utils {
         stmtt.execute("DELETE FROM " + tabela + " where _id=" + _id + "");
         ResultSet res = stmtt.getResultSet();
 
-        while (res.next()) {
-            deleted = true;
-        }
+        deleted = (res == null);
+
         stmtt.close();
         return deleted;
     }
@@ -156,12 +160,10 @@ public class utils {
         System.out.println("json \n" + json);
         return json;
     }
-    
+
     //---------------------------------------------------------------------------------
     //------------------Expressoes regulares-------------------------------------------
     //---------------------------------------------------------------------------------
-    
-
     /**
      * verifica se a string é composta apenas por algarismos
      *
@@ -314,7 +316,7 @@ public class utils {
         return Pattern.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
                 + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", email);
     }
-    
+
     //---------------------------------------------------------------------------------
     //------------------ Expressoes regulares incompletas -----------------------------
     //---------------------------------------------------------------------------------
@@ -322,6 +324,7 @@ public class utils {
         return Pattern.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
                 + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", address);
     }
+
     /**
      *
      * @param image
