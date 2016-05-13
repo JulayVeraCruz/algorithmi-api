@@ -289,16 +289,35 @@ public class utils {
 
         return true;
     }
+    
+    //Expressão Regular Horas - Atributo: StartingTime e FinishingTime
+    public static boolean isThisHourValid(String dateToValidate) {
 
-    /**
-     * verifica se o username tem formato válido apenas admite letras e
-     * algarismos
-     *
-     * @param username
-     * @return boolean
-     */
+        if (dateToValidate == null) {
+            return false;
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        sdf.setLenient(false);
+
+        try {
+
+            //if not valid, it will throw ParseException
+            Date date = sdf.parse(dateToValidate);
+
+            System.out.println(date);
+
+        } catch (ParseException e) {
+
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
+    //Expressão Regular Username - Atributo: Username
     public static boolean isUsernameValid(String username) {
-
         //ver se tem espaços ou carateres especiais- se tiver devolve falso
         //X+	X occurs once or more times
         //também funciona para valores nulos
@@ -306,34 +325,26 @@ public class utils {
 
     }
 
-    /**
-     * verifica se o email tem formato válido
-     *
-     * @param email
-     * @return boolean
-     */
+    //Expressão Regular Email - Atributo: Email
     public static boolean isEmailValid(String email) {
         return Pattern.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
                 + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", email);
     }
 
+    //Expressão Regular Address - Atributo: Address
+    public static boolean isAddressValid(String address) {
+        return Pattern.matches("[a-zA-Z0-9/-º.,]+", address);
+    }
     //---------------------------------------------------------------------------------
     //------------------ Expressoes regulares incompletas -----------------------------
     //---------------------------------------------------------------------------------
-    public static boolean isAddressValid(String address) {
-        return Pattern.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
-                + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", address);
-    }
-
-    /**
-     *
-     * @param image
-     * @return boolean
-     */
+    
+    //Expressão Regular Imagem - Atributo: Image
     public static boolean isImageValid(String image) {
         return Pattern.matches("[a-zA-Z0-9]+", image);
     }
 }
+
 //ajuda sobre regex
 //Pattern.matches("[carateresOUconjunto-ADMITIDO]",dadosAcomparar)
 //se nos dados a comparar n existir algo que n esteja em carateresOUconjunto-ADMITIDO devolve falso!

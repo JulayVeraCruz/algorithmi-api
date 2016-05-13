@@ -88,7 +88,7 @@ public class Institutions {
         return getid.getLastID("tblInstitutions");
     }
     
-    //Registar
+    //Registar Instituicao
     public int regist() throws Exception {
         int status = 0;
         boolean existErro = false;
@@ -114,7 +114,7 @@ public class Institutions {
         return status;
     }
     
-    
+    //Update a Instituição
     public int updateInstitutions(int _id) throws Exception {
         int status = 0;
 
@@ -129,7 +129,7 @@ public class Institutions {
         return status;
     }
     
-    //Apagar Institution
+    //Apagar Instituição
     public int deleteInstitutions(int _id) throws Exception {
         int status = 400;
         utils utils = new utils();
@@ -153,20 +153,16 @@ public class Institutions {
         if (!valid) {
             {
                 if (!nameValid) {
-                    respostasErro[1] = "Nome invalido";
+                    respostasErro[1] = "Nome da Instituição inválido";
                 }
                 if (!addressValid) {
-                    respostasErro[2] = "Address invalido";
+                    respostasErro[2] = "Morada da Instituição inválida";
                 }
                 if (!imageValid) {
-                    respostasErro[3] = "Image invalido";
+                    respostasErro[3] = "Imagem da Instituição inválida";
                 }
             }
         }
         return respostasErro;
-    }
-    
-    //FALTA: UPDATE E DELETE
-    //       SABER SE É NECESSÁRIO A SEGUUNDA PUBLIC
-    
+    }   
 }
