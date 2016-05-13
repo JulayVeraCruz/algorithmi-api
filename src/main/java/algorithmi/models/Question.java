@@ -22,6 +22,7 @@ import com.google.gson.JsonParser;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
@@ -170,32 +171,58 @@ public class Question {
         return getid.getLastID("tblquestions");
     }
 
+        /**
+     * apaga um curso com o _id
+     *
+     * @param _id
+     */
+    public int deleteCourse(int _id) throws Exception {
+        int status = 400;
+        utils utils = new utils();
+        boolean deleted = utils.deleteRegist(_id, "tblQuestions");
+        if (deleted) {
+            status = 200;
+        }
+        return status;
+    }
+
+    /**
+     * para actualizar/alterar os dados de um registo na tabela cursos
+     *
+     * @param _id
+     * @return
+     */
+    public int updateCourse(int id) throws Exception {
+        int status = 0;
+        String update = "UPDATE tblQuestions SET "
+                + "name=" + '"' + _id + '"' + ","
+                + "title=" + title + ","
+                + "category=" +'"' + category + '"' +  ","
+                + "description=" + '"' + description + '"' + ","
+                + "image=" + '"' + image + '"' +  " "
+                + "algorithm=" + '"' + algorithm + '"' +  " "
+                + "difficulty=" + '"' + difficulty + '"' +  " "
+                + "where _id=" + id;
+        Statement stmtt = utils.connectDatabase();
+
+        stmtt.execute(update);
+
+        //ResultSet res = stmtt.getResultSet();
+//        System.out.println("result update Course " + res.rowUpdated());
+        stmtt.close();
+        return status;
+    }
+    
     public int regist() {
         int status = 0;
         try {
            //as credenciais de ligaçao estao agora em utils
             Statement stmtt = utils.connectDatabase();
-//            // Load the MySQL driver, each DB has its own driver
-//            Class.forName("com.mysql.jdbc.Driver");
-//            // DB connection setup 
-//            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-//            // PreparedStatements 
-//            preparedStatement = connect.prepareStatement("INSERT INTO tblquestions VALUES (?, ?, ?, ?, ?, ?, ?)");
-//            // Parameters start with 1
-//
-//            //ordem segundo a tabela da bd v3.3
-//            preparedStatement.setString(1, _id + "");
-//            preparedStatement.setString(2, description);
-//            preparedStatement.setString(3, difficulty + "");
-//            preparedStatement.setString(4, image);
-//            preparedStatement.setString(5, algorithm);
-//            preparedStatement.setString(6, title);
-//            preparedStatement.setString(7, category + "");
-//            status = preparedStatement.executeUpdate();
-//
-//            if (connect != null) {
-//                connect.close();
-//            }
+            
+            stmtt.execute("INSERT INTO tblQuestions values(" + _id + "," +  title + "," + category + "," +  description + "," +  image + "," +  algorithm + "," +  difficulty + ")");
+            stmtt.getConnection().close();
+            stmtt.close();
+            
         } catch (Exception ex) {
             Logger.getLogger(algorithmi.models.User.class.getName()).log(Level.SEVERE, null, ex);
         }

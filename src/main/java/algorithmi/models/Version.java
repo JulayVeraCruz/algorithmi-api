@@ -16,7 +16,7 @@ import java.sql.Statement;
  *
  * @author David
  */
-public class Versao {
+public class Version {
     int ver;
     
         public String getVersion() throws Exception {
