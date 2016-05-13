@@ -216,13 +216,6 @@ public class Course {
         return respostasErro;
     }
 
-    public Course(int CodCurse, String name, int scholl) {
-        this._id = _id;
-        this.name = name;
-        this.school = scholl;
-        this.image = image;
-    }
-
     public int getId() {
         return _id;
     }

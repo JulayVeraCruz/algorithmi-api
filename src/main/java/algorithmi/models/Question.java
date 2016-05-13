@@ -54,15 +54,18 @@ public class Question {
         /**
          * Revalidar TUDO, formatos, campos vazios, TUDO!!
          */
-        regist();
-        validateData();
+  
+        //validateData();
         //Associa os dados ao objecto Question
-        this._id = getLastID()+1; //ir buscar o max id da bd + 1 
+        this._id = getLastID()+1; //ir buscar o max id da bd + 1
         this.title = Question.get("title").getAsString();
         this.category = Question.get("category").getAsInt();
         this.description = Question.get("description").getAsString();
         this.image = Question.get("image").getAsString();
         this.algorithm = Question.get("algoritmo").getAsString();
+        this.difficulty = Question.get("difficulty").getAsInt();
+        
+        regist(_id, title, category, description, image, algorithm, difficulty);
     }
 
     // converts a java object to JSON format,
@@ -171,7 +174,7 @@ public class Question {
         return getid.getLastID("tblquestions");
     }
 
-        /**
+     /**
      * apaga um curso com o _id
      *
      * @param _id
@@ -201,7 +204,7 @@ public class Question {
                 + "description=" + '"' + description + '"' + ","
                 + "image=" + '"' + image + '"' +  " "
                 + "algorithm=" + '"' + algorithm + '"' +  " "
-                + "difficulty=" + '"' + difficulty + '"' +  " "
+                + "difficulty=" + '"' + getDifficulty() + '"' +  " "
                 + "where _id=" + id;
         Statement stmtt = utils.connectDatabase();
 
@@ -213,13 +216,13 @@ public class Question {
         return status;
     }
     
-    public int regist() {
+    public int regist(int _id, String title, int category, String description, String image, String algorithm, int difficulty) {
         int status = 0;
         try {
            //as credenciais de ligaçao estao agora em utils
             Statement stmtt = utils.connectDatabase();
             
-            stmtt.execute("INSERT INTO tblQuestions values(" + _id + "," +  title + "," + category + "," +  description + "," +  image + "," +  algorithm + "," +  difficulty + ")");
+            stmtt.execute("INSERT INTO tblQuestions values(" + this._id + "," +  this.title + "," + this.category + "," +  this.description + "," +  this.image + "," +  this.algorithm + "," +  this.getDifficulty() + ")");
             stmtt.getConnection().close();
             stmtt.close();
             
@@ -228,6 +231,20 @@ public class Question {
         }
 
         return status;
+    }
+
+    /**
+     * @return the difficulty
+     */
+    public int getDifficulty() {
+        return difficulty;
+    }
+
+    /**
+     * @param difficulty the difficulty to set
+     */
+    public void setDifficulty(int difficulty) {
+        this.difficulty = difficulty;
     }
 
 }
