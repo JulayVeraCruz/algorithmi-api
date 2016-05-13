@@ -114,7 +114,7 @@ public class Schools {
         return status;
     }
     
-    //Update Schools
+    //Actualizar Escola
     public int updateSchools(int _id) throws Exception {
         int status = 0;
 
@@ -152,20 +152,16 @@ public class Schools {
         if (!valid) {
             {
                 if (!nameValid) {
-                    respostasErro[0] = "Nome invalido";
+                    respostasErro[0] = "Nome da Escola inválido";
                 }
                 if (!institutionValid) {
-                    respostasErro[1] = "Institution invalida";
+                    respostasErro[1] = "Instituição inválida";
                 }
                 if (!imageValid) {
-                    respostasErro[2] = "Image invalido";
+                    respostasErro[2] = "Imagem da Escola inválida";
                 }
             }
         }
         return respostasErro;
     }
-   
-    //FALTA: UPDATE E DELETE
-    //       SABER SE É NECESSÁRIO A SEGUUNDA PUBLIC
-    
 }

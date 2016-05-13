@@ -92,7 +92,7 @@ public class Tests {
         return getid.getLastID("tbltests");
     }
 
-    //Registar
+    //Registar um Teste
     public int regist() throws Exception {
 
         boolean existErro = false;
@@ -121,7 +121,7 @@ public class Tests {
         return status;
     }
     
-    //Actualizar
+    //Actualizar um Teste
     public int updateTests(int _id) {
         int status = 0;
         try {
@@ -154,15 +154,23 @@ public class Tests {
 
     //Validar Dados
     private String[] validateData() {
-        String respostasErro[] = new String[1];
+        String respostasErro[] = new String[3];
         boolean valid = false;
 
-        boolean validQuotation = utils.isValidFloat(quotation + "",false);
+        boolean matrixTestValid = utils.isNumber(Integer.toString(matrixTest),false);//0
+        boolean quotationValid = utils.isValidFloat(quotation + "",false);//1
+        boolean studentValid = utils.isNumber(Integer.toString(student),false);//2
 
-        valid = validQuotation;
+        valid = matrixTestValid && quotationValid && studentValid;
         if (!valid) {
-            if (!validQuotation) {
-                respostasErro[0] = "Nota invalida";
+            if (!matrixTestValid) {
+                respostasErro[0] = "MatrixTest do Teste inválido";
+            }
+            if (!quotationValid) {
+                respostasErro[1] = "Quotação do Teste inválido";
+            }
+            if (!studentValid) {
+                respostasErro[2] = "Estudante inválido";
             }
         }
         return respostasErro;
