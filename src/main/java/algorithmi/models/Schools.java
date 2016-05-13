@@ -140,6 +140,15 @@ public class Schools {
         return status;
     }
     
+    //Listar Schools
+    public static String listSchools_WEB() throws Exception {
+        //FALTA FAZER O SELECT
+        String query = "SELECT tblInstitutions.`name` as Institutions,tblInstitutions.`address` as Institutions,tblSchools where tblCourses.school=tblSchools._id";
+        String obj = utils.querysToJson_String(query);
+        System.out.println("list schools  " + obj);
+        return obj;
+    }
+    
     //Validar Dados
     private String[] validateData() {
         String respostasErro[] = new String[3];

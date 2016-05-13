@@ -204,7 +204,15 @@ public class MatrixTests {
         return status;
     }
 
-
+    //Listar MatrixTests
+    public static String listMatrixTests_WEB() throws Exception {
+        //FALTA FAZER O SELECT
+        String query = "SELECT tblInstitutions.`name` as Institutions,tblInstitutions.`address` as Institutions,tblSchools where tblCourses.school=tblSchools._id";
+        String obj = utils.querysToJson_String(query);
+        System.out.println("list matrixTests  " + obj);
+        return obj;
+    }
+    
     //Validar dados
     private String[] validateData() {
 
