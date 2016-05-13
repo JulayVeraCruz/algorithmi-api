@@ -353,9 +353,12 @@ public class Main {
                 JsonObject question = (JsonObject) jsonParser.parse(data);
 
                 //Exibe os dados, em formato json
-                System.out.println(question.entrySet());
+                //QUANDO SE CRIA UMA PERGUNTA, A STRING VEM PARAR AO question.entrySet()
+                System.out.println(question.entrySet()+ "SO PARA VER SE É MESMO AQUI E NÂO ME ENGANEI");
                 Question questio = new Question(data);
-                return questio.regist();
+                
+                return questio.regist(0, data, Integer.parseInt(data), data, data, data, Integer.parseInt(data));
+               // return questio.regist(0, questio.getTitle(), questio.getCategory(), questio.getDescription(), questio.getImage(), questio.getAlgorithm(), questio.getDifficulty());
 
                 //Exibe o paramentro "name" do objecto json
                 //System.out.println(course.get("name"));
