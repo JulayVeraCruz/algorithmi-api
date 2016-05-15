@@ -24,7 +24,59 @@ import java.util.regex.*;
  * @author Pedro Batista
  */
 public class utils {
+/**
+     * qualquer interacção de insert,update,delete ou select na base de dados
+     * utilizando o @param comandoMySQL retornando o sucesso da operação ou o
+     * resultado da query excepto no caso particular da consulta do ultimo id 
+     * de uma tabela
+     * @return string json 
+     * @throws Exception 
+     */
+    public static String dbMySQL_Interact(String comandoMySQL) throws Exception {
 
+        JsonObject obj = new JsonObject();
+
+        Statement stmtt = connectDatabase();
+        JsonArray jsonArray = new JsonArray();
+
+        String[] bb = comandoMySQL.split(" ");
+
+        stmtt.execute(comandoMySQL);
+        ResultSet res = stmtt.getResultSet();
+        Gson gson = new Gson();
+                
+        switch (bb[0]) {
+            case "INSERT":
+            case "UPDATE":
+            case "DELETE":
+                obj.add("resposta", gson.toJsonTree("Done"));
+                break;
+            default:
+
+                ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
+
+//                Gson gson = new Gson();
+                obj.add("query", jsonArray);
+                int total_rows = metadata.getColumnCount();
+                if (!(res == null)) {
+                    while (res.next()) {
+                        JsonObject row = new JsonObject();
+                        jsonArray.add(row);
+                        for (int i = 1; i <= total_rows; i++) {
+//                System.out.println("col name " + metadata.getColumnLabel(i));
+                            row.add(metadata.getColumnLabel(i), gson.toJsonTree(res.getObject(i)));
+                        }
+                    }
+                } else {
+                    JsonObject row = new JsonObject();
+                    jsonArray.add(row);
+                    row.add(null, null);
+                }
+        }//fim do switch
+        return obj.toString();
+
+    }
+    
     /**
      * Converte em Json Object a query solicitada n sendo apresentados os id
      * necessarios (numTabelas) para uma futura utilizaçao.A query tera de ter
