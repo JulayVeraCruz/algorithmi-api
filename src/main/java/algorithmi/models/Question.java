@@ -19,15 +19,7 @@ import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.ParseException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -64,8 +56,9 @@ public class Question {
         this.image = Question.get("image").getAsString();
         this.algorithm = Question.get("algoritmo").getAsString();
         this.difficulty = Question.get("difficulty").getAsInt();
+        //http://stackoverflow.com/questions/34120882/gson-jelement-getasstring-vs-jelement-tostring
         
-        regist(_id, title, category, description, image, algorithm, difficulty);
+        //regist(_id, title, category, description, image, algorithm, difficulty);
     }
 
     // converts a java object to JSON format,
@@ -83,90 +76,6 @@ public class Question {
         /**
          * Se estiver tudo OK, inserer na BD,
          */
-    }
-
-    /**
-     * @return the _id
-     */
-    public int getId() {
-        return _id;
-    }
-
-    /**
-     * @param _id the _id to set
-     */
-    public void setId(int _id) {
-        this._id = _id;
-    }
-
-    /**
-     * @return the title
-     */
-    public String getTitle() {
-        return title;
-    }
-
-    /**
-     * @param title the title to set
-     */
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    /**
-     * @return the category
-     */
-    public int getCategory() {
-        return category;
-    }
-
-    /**
-     * @param category the category to set
-     */
-    public void setCategory(int category) {
-        this.category = category;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * @return the image
-     */
-    public String getImage() {
-        return image;
-    }
-
-    /**
-     * @param image the image to set
-     */
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    /**
-     * @return the algorithm
-     */
-    public String getAlgorithm() {
-        return algorithm;
-    }
-
-    /**
-     * @param algorithm the algorithm to set
-     */
-    public void setAlgorithm(String algorithm) {
-        this.algorithm = algorithm;
     }
 
     public static int getLastID() throws Exception{
@@ -204,7 +113,7 @@ public class Question {
                 + "description=" + '"' + description + '"' + ","
                 + "image=" + '"' + image + '"' +  " "
                 + "algorithm=" + '"' + algorithm + '"' +  " "
-                + "difficulty=" + '"' + getDifficulty() + '"' +  " "
+                + "difficulty=" + '"' + difficulty + '"' +  " "
                 + "where _id=" + id;
         Statement stmtt = utils.connectDatabase();
 
@@ -216,35 +125,30 @@ public class Question {
         return status;
     }
     
-    public int regist(int _id, String title, int category, String description, String image, String algorithm, int difficulty) {
+    public int regist(int _id, String title, int category, String description, String image, String algorithm, int difficulty) throws Exception {
         int status = 0;
-        try {
+
            //as credenciais de ligaçao estao agora em utils
             Statement stmtt = utils.connectDatabase();
-            
-            stmtt.execute("INSERT INTO tblQuestions values(" + this._id + "," +  this.title + "," + this.category + "," +  this.description + "," +  this.image + "," +  this.algorithm + "," +  this.getDifficulty() + ")");
+            stmtt.execute("INSERT INTO tblquestions VALUES(" + this._id + "," +  this.title + "," + this.category + "," +  this.description + "," +  this.image + "," +  this.algorithm + "," +  this.difficulty + ")");
             stmtt.getConnection().close();
             stmtt.close();
-            
-        } catch (Exception ex) {
-            Logger.getLogger(algorithmi.models.User.class.getName()).log(Level.SEVERE, null, ex);
-        }
 
         return status;
     }
+    
+    public int regist() throws Exception {
+        int status = 0;
 
-    /**
-     * @return the difficulty
-     */
-    public int getDifficulty() {
-        return difficulty;
-    }
+           //as credenciais de ligaçao estao agora em utils
+            Statement stmtt = utils.connectDatabase();
+            stmtt.execute("INSERT INTO tblquestions VALUES(" + _id + "," +  title + "," + category + "," +  description + "," +  image + "," +  algorithm + "," +  difficulty + ")");
+            stmtt.getConnection().close();
+            stmtt.close();
 
-    /**
-     * @param difficulty the difficulty to set
-     */
-    public void setDifficulty(int difficulty) {
-        this.difficulty = difficulty;
+        return status;
     }
+    
+    
 
 }

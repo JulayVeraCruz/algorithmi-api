@@ -11,7 +11,7 @@ import algorithmi.models.User;
 import algorithmi.models.UserCourse;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.sun.xml.internal.messaging.saaj.util.Base64;
+//import com.sun.xml.internal.messaging.saaj.util.Base64;
 import java.net.URLDecoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,10 +40,10 @@ public class Main {
             System.out.println(request.url());
             System.out.println(request.requestMethod());
             if (request.headers("Authorization") != null) {
-                String aux[] = Base64.base64Decode(request.headers("Authorization").split(" ")[1]).split(":");
+             //   String aux[] = Base64.base64Decode(request.headers("Authorization").split(" ")[1]).split(":");
 
-                System.out.println(aux[0]);
-                System.out.println(aux[1]);
+             //   System.out.println(aux[0]);
+             //   System.out.println(aux[1]);
 
                 // halt(401, "You are not welcome here");
             }
@@ -354,12 +354,11 @@ public class Main {
 
                 //Exibe os dados, em formato json
                 //QUANDO SE CRIA UMA PERGUNTA, A STRING VEM PARAR AO question.entrySet()
-                System.out.println(question.entrySet()+ "SO PARA VER SE É MESMO AQUI E NÂO ME ENGANEI");
+                System.out.println(data+"teste");
                 Question questio = new Question(data);
                 
-                return questio.regist(0, data, Integer.parseInt(data), data, data, data, Integer.parseInt(data));
-               // return questio.regist(0, questio.getTitle(), questio.getCategory(), questio.getDescription(), questio.getImage(), questio.getAlgorithm(), questio.getDifficulty());
-
+                //return questio.regist(0, data, Integer.parseInt(data), data, data, data, Integer.parseInt(data));
+                  return questio.regist();
                 //Exibe o paramentro "name" do objecto json
                 //System.out.println(course.get("name"));
             } catch (Exception ex) {
