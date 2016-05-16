@@ -72,6 +72,7 @@ public class utils {
                     row.add(null, null);
                 }
         }//fim do switch
+        stmtt.close();
         return obj.toString();
     }
 
