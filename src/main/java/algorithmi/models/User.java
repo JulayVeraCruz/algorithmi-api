@@ -17,21 +17,13 @@ package algorithmi.models;
 
 import Utils.utils;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.scene.AccessibleAttribute;
 //import javax.json;
 
 /**
@@ -65,6 +57,7 @@ public class User {
         this._id = getLastID_Users() + 1; //ir buscar o max id da bd + 1
 
         this.name = user.get("name").getAsString();
+        this.user = user.get("userName").getAsString();
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         df.setLenient(false);
 
@@ -225,7 +218,7 @@ public class User {
      *
      * @param _id
      */
-    public int updateUser(int _id, boolean alterType) throws Exception {
+    public String updateUser(int _id, boolean alterType) throws Exception {
         int status = 400;
         String query = null;
         if (alterType) {
@@ -234,17 +227,18 @@ public class User {
             query = "UPDATE tblUsers " + "SET username=" + '"' + user + '"' + ",name=" + '"' + name + '"' + ", birthDate=" + birthDate + ",email=" + '"' + email + '"' + ",password=" + '"' + password + '"' + ",image=" + '"' + image + '"' + " where _id=" + _id + ")";
 
         }//executa driver para ligar à base de dados
-        Statement stmtt = utils.connectDatabase();
-        stmtt.execute(query);
-
-        ResultSet res = stmtt.getResultSet();
-
-        System.out.println("result update user " + res.rowUpdated());
-        status = 200;
-        stmtt.close();
+        
+        ;
+//        Statement stmtt = utils.connectDatabase();
+//        stmtt.execute(query);
+//
+//        ResultSet res = stmtt.getResultSet();
+//
+//        status = 200;
+//        stmtt.close();
 //            return status;
 
-        return status;
+        return utils.commandMySQLToJson_String(query);
     }
 
     /**
@@ -256,7 +250,7 @@ public class User {
     public static String listTeacher() throws Exception {
 
         String query = "select tblusers.`Name`,tblusers.image,tblcourses.`name` from tblusers,tblcourses,tblusercourses where tblusers.`type`=3  and tblusers._id=tblusercourses.userID and tblusercourses.courseID=tblcourses._id ";
-        String obj = utils.querysToJson_String(query);
+        String obj = utils.commandMySQLToJson_String(query);
         return obj;
     }
 
@@ -270,19 +264,23 @@ public class User {
 
         String query = "select tblUsers._id as userID, tblUsers.name as Name,tblUsers.image as Image,tblCourses.name as Course from tblUsers,tblCourses,tblUserCourses where tblUsers.type=4  and tblUsers._id=tblUserCourses.userID and tblUserCourses.courseID=tblCourses._id ";
 
-//        String news= utils.querysToJson_String(query);
-        String obj = utils.querysToJson_String(query);
+        String obj= utils.commandMySQLToJson_String(query);
+        
+//        String obj = utils.commandMySQLToJson_String(query);
         System.out.println("obj student " + obj);
+         
         return obj;
     }    /**
      * apaga um user com o _id
      *
      * @param _id
      */
-    public int deleteUser(int _id) throws Exception {
+    public static int deleteUser(int _id) throws Exception {
         int status = 400;
-        utils utils = new utils();
-        boolean deleted = utils.deleteRegist(_id, "tblusers");
+//        utils utils = new utils();
+        
+        String obj=utils.commandMySQLToJson_String("DELETE FROM tblusers where _id=" + _id + "");
+        boolean deleted =true;
         if (deleted) {
             status = 200;
         }

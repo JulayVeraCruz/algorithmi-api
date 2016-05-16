@@ -16,13 +16,9 @@
 package algorithmi.models;
 
 import Utils.utils;
-import static Utils.utils.connectDatabase;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  *
@@ -64,11 +60,7 @@ public class Course {
         JsonObject Course = (JsonObject) jsonParser.parse(data);
         //Exibe os dados, em formato json
         System.out.println(Course.entrySet());
-        /**
-         *
-         * Revalidar TUDO, formatos, campos vazios, TUDO!!
-         *
-         */
+       
 
         //Associa os dados ao objecto Course
         this._id = id; //ir buscar o max id da bd + 1
@@ -83,15 +75,19 @@ public class Course {
      * apaga um curso com o _id
      *
      * @param _id
+     * @return status
+     * @throws java.lang.Exception
      */
-    public int deleteCourse(int _id) throws Exception {
+    public String deleteCourse(int _id) throws Exception {
         int status = 400;
-        utils utils = new utils();
-        boolean deleted = utils.deleteRegist(_id, "tblcourses");
-        if (deleted) {
-            status = 200;
-        }
-        return status;
+        
+        String deleted = utils.deleteRegist(_id, "tblcourses");
+        String del=utils.commandMySQLToJson_String(deleted);
+        
+//        if (deleted) {
+//            status = 200;
+//        }
+        return del;
     }
 
     /**
@@ -103,14 +99,13 @@ public class Course {
     public int updateCourse(int id) throws Exception {
         int status = 0;
         String update = "UPDATE tblCourses SET name=" + '"' + name + '"' + ",school=" + school + ",image=" + '"' + image + '"' + " where _id=" + id;
-        Statement stmtt = utils.connectDatabase();
+        String updated = utils.commandMySQLToJson_String(update);
+//        Statement stmtt = utils.connectDatabase();
 
-        stmtt.execute(update);
-
-        ResultSet res = stmtt.getResultSet();
-
+//        stmtt.execute(update);
+//        ResultSet res = stmtt.getResultSet();
 //        System.out.println("result update Course " + res.rowUpdated());
-        stmtt.close();
+//        stmtt.close();
         return status;
     }
 
@@ -118,10 +113,7 @@ public class Course {
      * Insere novos registos na tabela
      *
      * @return status
-     * @throws java.lang.ClassNotFoundException
-     * @throws java.lang.InstantiationException
-     * @throws java.lang.IllegalAccessException
-     * @throws java.sql.SQLException
+     * @throws Exception
      */
     public int regist() throws Exception {
 
@@ -135,19 +127,21 @@ public class Course {
         }
         int status = 400;
         if (!existErro) {
-
-            Statement stmtt = connectDatabase();
-
-            stmtt.execute("INSERT INTO tblcourses values(" + _id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")");
-            ResultSet res = stmtt.getResultSet();
+            String insert = "INSERT INTO tblcourses values(" + _id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")";
+            String tt = utils.commandMySQLToJson_String(insert);
+//            Statement stmtt = connectDatabase();
+//            String[] bb = insert.split(" ");
+//
+//            stmtt.execute(insert);
+//            ResultSet res = stmtt.getResultSet();
 
 //            while (res.next()) {
 //                status = 200;
 //            }
             System.out.println(" insert course nº " + _id);
-
-            stmtt.getConnection().close();
-            stmtt.close();
+//
+//            stmtt.getConnection().close();
+//            stmtt.close();
         }
         return status;
     }
@@ -156,12 +150,14 @@ public class Course {
      * lista os cursos existentes e as escolas a que pertencem
      *
      * @return []json
+     * @throws java.lang.Exception
      */
     public static String listCourses_WEB() throws Exception {
         String query = "SELECT tblcourses.`name` as Course,tblschools.`name` as School from tblCourses,tblSchools where tblCourses.school=tblSchools._id";
-        String obj = utils.querysToJson_String(query);
-        System.out.println("list courses  " + obj);
-        return obj;
+//        String obj = utils.commandMySQLToJson_String(query);
+        String teste = utils.commandMySQLToJson_String(query);
+//        System.out.println("list courses  " + obj);
+        return teste;
 
     }
 

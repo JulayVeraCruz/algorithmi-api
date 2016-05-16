@@ -32,9 +32,8 @@ public class utils {
      * @return string json 
      * @throws Exception 
      */
-    public static String dbMySQL_Interact(String comandoMySQL) throws Exception {
-
-        JsonObject obj = new JsonObject();
+     public static String commandMySQLToJson_String(String comandoMySQL) throws Exception {
+                JsonObject obj = new JsonObject();
 
         Statement stmtt = connectDatabase();
         JsonArray jsonArray = new JsonArray();
@@ -73,51 +72,6 @@ public class utils {
                     row.add(null, null);
                 }
         }//fim do switch
-        return obj.toString();
-
-    }
-    
-    /**
-     * Converte em Json Object a query solicitada n sendo apresentados os id
-     * necessarios (numTabelas) para uma futura utilizaçao.A query tera de ter
-     * nos ultimos campos os id nao sendo apresentados na view
-     *
-     * @param query
-     * @param numTabelas
-     * @return
-     * @throws ClassNotFoundException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws SQLException
-     */
-    public static String querysToJson_String(String query) throws Exception {
-        JsonObject obj = new JsonObject();
-        JsonArray jsonArray = new JsonArray();
-        Statement stmtt = connectDatabase();
-
-        stmtt.execute(query);
-
-        ResultSet res = stmtt.getResultSet();
-
-        ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
-
-        Gson gson = new Gson();
-        obj.add("query", jsonArray);
-        int total_rows = metadata.getColumnCount();
-        if (!(res == null)) {
-            while (res.next()) {
-                JsonObject row = new JsonObject();
-                jsonArray.add(row);
-                for (int i = 1; i <= total_rows; i++) {
-//                System.out.println("col name " + metadata.getColumnLabel(i));
-                    row.add(metadata.getColumnLabel(i), gson.toJsonTree(res.getObject(i)));
-                }
-            }
-        } else {
-            JsonObject row = new JsonObject();
-            jsonArray.add(row);
-            row.add(null, null);
-        }
         return obj.toString();
     }
 
@@ -191,17 +145,17 @@ public class utils {
      * @param tabela
      * @return
      */
-    public boolean deleteRegist(int _id, String tabela) throws Exception {
-        boolean deleted = false;
-        Statement stmtt = connectDatabase();
+    public static String deleteRegist(int _id, String tabela) throws Exception {
+//        boolean deleted = false;
+//        Statement stmtt = connectDatabase();
 
-        stmtt.execute("DELETE FROM " + tabela + " where _id=" + _id + "");
-        ResultSet res = stmtt.getResultSet();
+        String delete="DELETE FROM " + tabela + " where _id=" + _id + "";
+//        ResultSet res = stmtt.getResultSet();
 
-        deleted = (res == null);
+//        deleted = (res == null);
 
-        stmtt.close();
-        return deleted;
+//        stmtt.close();
+        return delete;
     }
 
     @Override

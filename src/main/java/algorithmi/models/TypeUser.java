@@ -18,15 +18,10 @@ package algorithmi.models;
 
 import Utils.utils;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mysql.jdbc.ResultSetMetaData;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -91,15 +86,10 @@ public class TypeUser {
         }
         if (!existErro) {
             //executa driver para ligar à base de dados
-            Statement stmtt = utils.connectDatabase();
+             String insert = "INSERT INTO tblUserTypes values(" + _id + "," + '"' + name + '"' + ")";
 
-            stmtt.execute("INSERT INTO tblUserTypes values(" + _id + "," + '"' + name + '"' + ")");
-
-            ResultSet res = stmtt.getResultSet();
-
-            System.out.println("result insert Typeuser " + res);
-
-            stmtt.close();}
+             String tt = utils.commandMySQLToJson_String(insert);
+        }
         return status;
     }
 
@@ -157,15 +147,9 @@ public class TypeUser {
        int status = 0;
 
             //executa driver para ligar à base de dados
-            Statement stmtt = utils.connectDatabase();
+            String update="UPDATE tblUserTypes " + "SET name=" + '"' + name + '"' + " where _id=" + _id + ")";
+            String updat=utils.commandMySQLToJson_String(update);
 
-            stmtt.execute("UPDATE tblUserTypes " + "SET name=" + '"' + name + '"' + " where _id=" + _id + ")");
-
-            ResultSet res = stmtt.getResultSet();
-
-            System.out.println("result update usertype " + res);
-
-            stmtt.close();
             
         return status;
 
@@ -177,7 +161,7 @@ public class TypeUser {
  */
     public static String listTypesOfUser() throws Exception{
         String query="select tblusertypes.'name' as Name from tblusertypes ";
-        String obj = utils.querysToJson_String(query);
+        String obj = utils.commandMySQLToJson_String(query);
        
         return obj;
     }
@@ -188,11 +172,9 @@ public class TypeUser {
      */
     public int deleteType(int _id) throws Exception {
         int status = 400;
-        utils utils = new utils();
-        boolean deleted = utils.deleteRegist(_id, "tblusertypes");
-        if (deleted) {
-            status = 200;
-        }
+//        utils utils = new utils();
+        String deleted = utils.deleteRegist(_id, "tblusertypes");
+        
         return status;
     }
     

@@ -19,11 +19,6 @@ import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -57,21 +52,14 @@ public class UserCourse {
      *
      * @param _id
      */
-    public void updateCourseOf_User(int user_id, int oldCourse_id) throws Exception{
+    public void updateCourseOf_User(int user_id, int oldCourse_id) throws Exception {
 
-        
-            //executa driver para ligar à base de dados
-            Statement stmtt = utils.connectDatabase();
+        //executa driver para ligar à base de dados
+        String update = "UPDATE tblUsersCourse " + "SET courseID=" + courseID + " where userID=" + userID + " AND courseID=" + oldCourse_id + ")";
 
-            stmtt.execute("UPDATE tblUsersCourse " + "SET courseID=" + courseID + " where userID=" + userID + " AND courseID=" + oldCourse_id + ")");
+        String upd = utils.commandMySQLToJson_String(update);
 
-            ResultSet res = stmtt.getResultSet();
-
-            System.out.println("result update user's course  " + res.toString());
-
-            stmtt.close();
-
-       
+        System.out.println("result update user's course  " + upd);
 
     }
 
@@ -92,17 +80,10 @@ public class UserCourse {
         }
         if (!existErro) {
             //executa driver para ligar à base de dados
-            Statement stmtt = utils.connectDatabase();
+            String insert = "INSERT INTO tblusercourses values(" + userID + "," + courseID + ")";
+            String tt = utils.commandMySQLToJson_String(insert);
+            System.out.println("result insert user's courses " + tt);
 
-            stmtt.execute("INSERT INTO tblusercourses values(" + userID + "," + courseID + ")");
-
-            ResultSet res = stmtt.getResultSet();
-
-            System.out.println("result insert user's courses " + res.toString());
-            while (res.next()) {
-                status = 200;
-            }
-            stmtt.close();
         }
         return status;
     }
@@ -144,16 +125,9 @@ public class UserCourse {
     public static String deleteRegist(int userID, int courseID) throws Exception {
         String delete = "regist not deleted";
         //executa driver para ligar à base de dados
-        Statement stmtt = utils.connectDatabase();
-
-        stmtt.execute("DELETE FROM `tbluserscourses` where userID=" + userID + " and courseID=" + courseID);
-
-        ResultSet res = stmtt.getResultSet();
-
-        while (res.next()) {
-            delete = "Deleted: " + res.toString();
-        }
-        return delete;
+        String delet = "DELETE FROM `tbluserscourses` where userID=" + userID + " and courseID=" + courseID;
+        String tt = utils.commandMySQLToJson_String(delet);
+        return tt;
     }
 
     /**
@@ -162,10 +136,10 @@ public class UserCourse {
      * @return JsonString
      */
     public static String coursesOfUser(int _idUser) throws Exception {
-        
+
         String query = "SELECT tblcourses.`name` FROM tblusers,tblcourses,tblusercourses where tblusercourses.`userID`=" + Integer.toString(_idUser) + " and tblusers.`_id`=tblusercourses.`userID` and tblcourses.`_id`=tblusercourses.`courseID`";
 
-        String obj = utils.querysToJson_String(query);
+        String obj = utils.commandMySQLToJson_String(query);
 
         return obj;
 

@@ -85,8 +85,11 @@ public class Main {
 
 //-------------courses---------------------------------
         get("/api/courses", (request, response) -> {
-
+            
+            String data = null;
             try {
+//                response.status(200);
+//                response.type("api/courses");
                 return Course.listCourses_WEB();//lista dos cursos existentes
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -112,8 +115,7 @@ public class Main {
 
                 int registStatus = newCourse.regist(); //devolve um inteiro-> status
 
-                
-                return"{\"resposta\":\"Curso inserido\"}";
+                return "{\"resposta\":\"Curso inserido\"}";
 
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -159,10 +161,8 @@ public class Main {
 
                 Course courseDel = new Course(data, id);
 
-                status = courseDel.deleteCourse(id);
-                if (status == 200) {
-                    return "{\"resposta\":\"Curso apagado\"}";
-                }
+                return  courseDel.deleteCourse(id);
+               
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -569,7 +569,7 @@ public class Main {
 
                 User userAlter = new User(data, id);
 
-                status = userAlter.updateUser(id, false);//n se quer alterar o tipo de course
+//                status = userAlter.updateUser(id, false);//n se quer alterar o tipo de course
                 return "{\"resposta\":\"Utilizador actualizado\"}";
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -632,7 +632,7 @@ public class Main {
 
                 User userAlter = new User(data, id);
 
-                status = userAlter.updateUser(id, false);//n se quer alterar o tipo de user
+//                status = userAlter.updateUser(id, false);//n se quer alterar o tipo de user
                 return "{\"resposta\":\"Professor actualizado\"}";
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -673,6 +673,7 @@ public class Main {
         get("/api/students", (request, response) -> {
 
             try {
+                User.deleteUser(9);
                 return User.listStudents();
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
