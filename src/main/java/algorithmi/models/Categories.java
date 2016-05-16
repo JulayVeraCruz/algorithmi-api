@@ -5,9 +5,13 @@
  */
 package algorithmi.models;
 
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -56,7 +60,59 @@ public Categories(String data) {
          */
         }
 
+        /**
+     * apaga um curso com o _id
+     *
+     * @param _id
+     */
+    public int deleteCourse(int _id) throws Exception {
+        int status = 400;
+        utils utils = new utils();
+        boolean deleted = utils.deleteRegist(_id, "tblCategories");
+        if (deleted) {
+            status = 200;
+        }
+        return status;
+    }
+
+    /**
+     * para actualizar/alterar os dados de um registo na tabela cursos
+     *
+     * @param _id
+     * @return
+     */
+    public int updateCourse(int id) throws Exception {
+        int status = 0;
+        String update = "UPDATE tblCategories SET "
+                + "name=" + '"' + _id + '"' + ","
+                + "description=" + description + ","
+                + "where _id=" + id;
+        Statement stmtt = utils.connectDatabase();
+
+        stmtt.execute(update);
+
+        //ResultSet res = stmtt.getResultSet();
+//        System.out.println("result update Course " + res.rowUpdated());
+        stmtt.close();
+        return status;
+    }
     
+    public int regist() {
+        int status = 0;
+        try {
+           //as credenciais de ligaçao estao agora em utils
+            Statement stmtt = utils.connectDatabase();
+            
+            stmtt.execute("INSERT INTO tblCategories values(" + _id + "," +  description + ")");
+            stmtt.getConnection().close();
+            stmtt.close();
+            
+        } catch (Exception ex) {
+            Logger.getLogger(algorithmi.models.User.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return status;
+    }
     
     
     

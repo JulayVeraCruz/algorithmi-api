@@ -11,7 +11,7 @@ import algorithmi.models.User;
 import algorithmi.models.UserCourse;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.sun.xml.internal.messaging.saaj.util.Base64;
+//import com.sun.xml.internal.messaging.saaj.util.Base64;
 import java.net.URLDecoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,16 +40,19 @@ public class Main {
             System.out.println(request.url());
             System.out.println(request.requestMethod());
             if (request.headers("Authorization") != null) {
-                String aux[] = Base64.base64Decode(request.headers("Authorization").split(" ")[1]).split(":");
+             //   String aux[] = Base64.base64Decode(request.headers("Authorization").split(" ")[1]).split(":");
 
-                System.out.println(aux[0]);
-                System.out.println(aux[1]);
+             //   System.out.println(aux[0]);
+             //   System.out.println(aux[1]);
 
                 // halt(401, "You are not welcome here");
             }
         });
 
-//--------------categories-----------------------------
+//----------------------------------------------------------------------------------------
+//-------------------------------------- Categories --------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/categories/:id", (request, response) -> {
             return "Hello World";
         });
@@ -64,9 +67,11 @@ public class Main {
         delete("/api/categories/:id", (request, response) -> {
             return "Hello World";
         });
-//--------------categories----------------------------
 
-//--------------codeLang------------------------------
+//----------------------------------------------------------------------------------------
+//--------------------------------------- CodeLangs --------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/codelang/:id", (request, response) -> {
             return "Hello World";
         });
@@ -81,9 +86,11 @@ public class Main {
         delete("/api/codelang/:id", (request, response) -> {
             return "Hello World";
         });
-//-------------codeLang--------------------------------
 
-//-------------courses---------------------------------
+//----------------------------------------------------------------------------------------
+//------------------------------------ Courses -------------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/courses", (request, response) -> {
             
             String data = null;
@@ -169,8 +176,10 @@ public class Main {
             return "{\"resposta\":\"Curso não apagado\"}";
         });
 
-//---------------------courses---------------------------
-//----------------------details--------------------------
+//----------------------------------------------------------------------------------------
+//-------------------------------------- Details -----------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/details/", (request, response) -> {
             return "Hello World";
         });
@@ -185,9 +194,11 @@ public class Main {
         delete("/api/details", (request, response) -> {
             return "Hello World";
         });
-//----------------------details--------------------------
 
-//----------------------highLevelLangs-------------------
+//----------------------------------------------------------------------------------------
+//---------------------------------- highLevelLangs --------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/highLevelLangs/", (request, response) -> {
             return "Hello World";
         });
@@ -202,9 +213,11 @@ public class Main {
         delete("/api/highLevelLangs", (request, response) -> {
             return "Hello World";
         });
-//----------------------highLevelLangs-------------------
 
-//---------------------inputOutputs-----------------------
+//----------------------------------------------------------------------------------------
+//------------------------------------ inputOutput ---------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/inputOutput/", (request, response) -> {
             return "Hello World";
         });
@@ -219,11 +232,21 @@ public class Main {
         delete("/api/inputOutput", (request, response) -> {
             return "Hello World";
         });
-//---------------------inputOutputs-----------------------
 
-//---------------------institutions----------------------
+//----------------------------------------------------------------------------------------
+//------------------------------------ Institutions---------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/institution/", (request, response) -> {
-            return "Hello World";
+            
+            try {
+                //Listar Instituições
+                return Institutions.listInstitutions_WEB();
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                return "{\"resposta\":\"Sem Instituições para mostrar\"}";
+            }
+            
         });
 
         post("/api/institution/new", (request, response) -> {
@@ -261,10 +284,21 @@ public class Main {
             return "Hello World";
         });
 
-//---------------------institutions----------------------
-//---------------------matrixTests-----------------------
+
+//----------------------------------------------------------------------------------------
+//------------------------------------ MatrixTests ---------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/matrixTests/", (request, response) -> {
-            return "Hello World";
+            
+            try {
+                //Listar MatrixTests
+                return MatrixTests.listMatrixTests_WEB();
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                return "{\"resposta\":\"Sem MatrixTests para mostrar\"}";
+            }
+            
         });
         post("/api/matrixTests", (request, response) -> {
             String data = null;
@@ -297,8 +331,10 @@ public class Main {
             return "Hello World";
         });
 
-//---------------------matrixTests-----------------------
-//---------------------questions-------------------------
+//----------------------------------------------------------------------------------------
+//------------------------------------ Questions -----------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/question/:id", (request, response) -> {
 
             //  Question questionExample = new Question("{'id_Pergunta':'1','titulo':'XPTO','categoria':'decisao','descricao':'xpto decide','imagem':'','algoritmo':''}");
@@ -317,10 +353,12 @@ public class Main {
                 JsonObject question = (JsonObject) jsonParser.parse(data);
 
                 //Exibe os dados, em formato json
-                System.out.println(question.entrySet());
+                //QUANDO SE CRIA UMA PERGUNTA, A STRING VEM PARAR AO question.entrySet()
+                System.out.println(data+"teste");
                 Question questio = new Question(data);
-                return questio.regist();
-
+                
+                //return questio.regist(0, data, Integer.parseInt(data), data, data, data, Integer.parseInt(data));
+                  return questio.regist();
                 //Exibe o paramentro "name" do objecto json
                 //System.out.println(course.get("name"));
             } catch (Exception ex) {
@@ -337,10 +375,20 @@ public class Main {
             return "Hello World";
         });
 
-//---------------------questions-------------------------
-//---------------------schools---------------------------
+//----------------------------------------------------------------------------------------
+//------------------------------------ Schools -------------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/school/", (request, response) -> {
-            return "Hello World";
+            
+            try {
+                //Listar Instituições
+                return Schools.listSchools_WEB();
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                return "{\"resposta\":\"Sem Escolas para mostrar\"}";
+            }
+            
         });
         post("/api/school/new", (request, response) -> {
 
@@ -376,8 +424,10 @@ public class Main {
             return "Hello World";
         });
 
-//---------------------schools---------------------------
-//---------------------testQuestions---------------------------
+//----------------------------------------------------------------------------------------
+//------------------------------------ TestQuestions -------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/testQuestions/", (request, response) -> {
             return "Hello World";
         });
@@ -393,10 +443,20 @@ public class Main {
             return "Hello World";
         });
 
-//---------------------testQuestions---------------------------
-//---------------------tests-----------------------------------
+//----------------------------------------------------------------------------------------
+//---------------------------------------- Tests -----------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/tests/", (request, response) -> {
-            return "Hello World";
+            
+            try {
+                //Listar MatrixTests
+                return Tests.listTests_WEB();
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                return "{\"resposta\":\"Sem Tests para mostrar\"}";
+            }
+            
         });
         post("/api/tests", (request, response) -> {
 
@@ -430,9 +490,11 @@ public class Main {
         delete("/api/tests", (request, response) -> {
             return "Hello World";
         });
-//---------------------tests----------------------------------
 
-//---------------------userType-------------------------------
+//----------------------------------------------------------------------------------------
+//------------------------------------ UserType ------------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/userType/", (request, response) -> {
             try {
                 return TypeUser.listTypesOfUser();//lista dos cursos existentes
@@ -512,9 +574,11 @@ public class Main {
             }
             return "{\"resposta\":\"Tipo não apagado\"}";
         });
-//---------------------userType-------------------------------
 
-//-----------------------users---------------------------------
+//----------------------------------------------------------------------------------------
+//------------------------------------ Users ---------------------------------------------
+//----------------------------------------------------------------------------------------
+        
         //Obtem um utilizador pelo seu id (id_User)
         get("/api/user/:id", (request, response) -> {
 //            try {
@@ -601,8 +665,10 @@ public class Main {
             return "{\"resposta\":\"Utilizador não actualizado\"}";
         });
 
-        //-----------teachers-------
-        //Obtem a lista de todos os professores
+//----------------------------------------------------------------------------------------
+//------------------------------------ Teachers ------------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/teachers", (request, response) -> {
 
             try {
@@ -667,8 +733,10 @@ public class Main {
             return "{\"resposta\":\"User não apagado\"}";
         });
 
-        //-----------teachers-------
-        //-----------students-------
+//----------------------------------------------------------------------------------------
+//------------------------------------ Students ------------------------------------------
+//----------------------------------------------------------------------------------------
+        
         //Obtem a lista de todos os estudantes
         get("/api/students", (request, response) -> {
 
@@ -704,9 +772,11 @@ public class Main {
                 return "{\"resposta\":\"User nao inserido\"}";
             }
         });
-        //-----------students-------
-//-----------------------users---------------------------------
-//------------------------userCourses-------------------------
+
+//----------------------------------------------------------------------------------------
+//------------------------------------ UserCourse ----------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/userCourses/", (request, response) -> {
             int id = Integer.parseInt(request.params(":_id"));
             try {
@@ -754,9 +824,11 @@ public class Main {
             return "Hello World";
 
         });
-//------------------------userCourses-------------------------
 
-//-------------------------versao----------------------------
+//----------------------------------------------------------------------------------------
+//------------------------------------ Versão --------------------------------------------
+//----------------------------------------------------------------------------------------
+        
         get("/api/versao", (request, response) -> {
             return "Hello World";
         });
@@ -783,6 +855,5 @@ public class Main {
             return "Hello World";
         });
 
-//-------------------------versao----------------------------
     }
 }

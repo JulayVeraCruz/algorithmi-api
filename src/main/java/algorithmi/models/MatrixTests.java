@@ -51,8 +51,26 @@ public class MatrixTests {
         }
         this.date = dt;
         this.name = matrixTests.get("name").getAsString();
-        this.startingTime = startingTime;                       //FALTA FAZER ESTES DOIS
-        this.finishingTime = finishingTime;
+        //StartingTime da MatrixTest
+        DateFormat st = new SimpleDateFormat("HH:mm:ss");
+        st.setLenient(false);
+        Date startTime;
+        try {
+            startTime = st.parse(matrixTests.get("startingTime").getAsString());
+        } catch (ParseException ex) {
+            startTime = new Date();
+        }
+        this.startingTime = startTime;  
+        //FinishingTime da MatrixTest
+        DateFormat ft = new SimpleDateFormat("HH:mm:ss");
+        ft.setLenient(false);
+        Date finishTime;
+        try {
+            finishTime = ft.parse(matrixTests.get("finishingTime").getAsString());
+        } catch (ParseException ex) {
+            finishTime = new Date();
+        }
+        this.finishingTime = finishTime;
         this.teacher = matrixTests.get("teacher").getAsInt();
         this.course = matrixTests.get("course").getAsInt();
     }
@@ -131,6 +149,7 @@ public class MatrixTests {
         return getid.getLastID("tblMatrixTests");
     }
 
+    //Registar a MatrixTest
     public int regist() throws Exception {
 
         boolean existErro = false;
@@ -185,30 +204,48 @@ public class MatrixTests {
         return status;
     }
 
-
+    //Listar MatrixTests
+    public static String listMatrixTests_WEB() throws Exception {
+        //FALTA FAZER O SELECT
+        String query = "SELECT tblInstitutions.`name` as Institutions,tblInstitutions.`address` as Institutions,tblSchools where tblCourses.school=tblSchools._id";
+        String obj = utils.querysToJson_String(query);
+        System.out.println("list matrixTests  " + obj);
+        return obj;
+    }
+    
+    //Validar dados
     private String[] validateData() {
 
-        String respostasErro[] = new String[4];
+        String respostasErro[] = new String[6];
         boolean valid = false;
+        
         boolean dateValid = utils.isThisDateValid(date + "");//0
         boolean nameValid = utils.isString(name,false);//1     
-//        boolean startTimeValid = utils.isString(time);//2
-//        boolean finishTimeValid = utils.isString(time);//3
+        boolean startingTimeValid = utils.isThisHourValid(startingTime + "");//2
+        boolean finishingTimeValid = utils.isThisHourValid(finishingTime + "");//3
+        boolean teacherValid = utils.isNumber(Integer.toString(teacher),false);//4
+        boolean courseValid = utils.isNumber(Integer.toString(course),false);//5
 
-        valid = nameValid && dateValid; //&& imageValid;
+        valid = dateValid && nameValid && startingTimeValid && finishingTimeValid && teacherValid && courseValid;
         if (!valid) {
             if (!dateValid) {
-                respostasErro[0] = "Data invalida";
+                respostasErro[0] = "Data da MatrixTest inválido";
             }
             if (!nameValid) {
-                respostasErro[1] = "Nome invalido";
+                respostasErro[1] = "Nome da MatrixTest inválido";
             }
-//            if (!startTimeValid) {
-//                respostasErro[2] = "startTime invalido";
-//            }
-//            if (!finishTimeValid) {
-//                respostasErro[3] = "finishTime invalido";
-//            }
+            if (!startingTimeValid) {
+                respostasErro[2] = "StartingTime da MatrixTest inválido";
+            }
+            if (!finishingTimeValid) {
+                respostasErro[3] = "FinishingTime da MatrixTest inválido";
+            }
+            if (!teacherValid) {
+                respostasErro[4] = "Teacher da MatrixTest inválido";
+            }
+            if (!courseValid) {
+                respostasErro[5] = "Curso da MatrixTest inválido";
+            }
         }
         return respostasErro;
     }

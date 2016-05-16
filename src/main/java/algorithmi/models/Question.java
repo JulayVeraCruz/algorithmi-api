@@ -19,14 +19,7 @@ import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.ParseException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -53,15 +46,19 @@ public class Question {
         /**
          * Revalidar TUDO, formatos, campos vazios, TUDO!!
          */
-        regist();
-        validateData();
+  
+        //validateData();
         //Associa os dados ao objecto Question
-        this._id = getLastID()+1; //ir buscar o max id da bd + 1 
+        this._id = getLastID()+1; //ir buscar o max id da bd + 1
         this.title = Question.get("title").getAsString();
         this.category = Question.get("category").getAsInt();
         this.description = Question.get("description").getAsString();
         this.image = Question.get("image").getAsString();
         this.algorithm = Question.get("algoritmo").getAsString();
+        this.difficulty = Question.get("difficulty").getAsInt();
+        //http://stackoverflow.com/questions/34120882/gson-jelement-getasstring-vs-jelement-tostring
+        
+        //regist(_id, title, category, description, image, algorithm, difficulty);
     }
 
     // converts a java object to JSON format,
@@ -81,126 +78,77 @@ public class Question {
          */
     }
 
-    /**
-     * @return the _id
-     */
-    public int getId() {
-        return _id;
-    }
-
-    /**
-     * @param _id the _id to set
-     */
-    public void setId(int _id) {
-        this._id = _id;
-    }
-
-    /**
-     * @return the title
-     */
-    public String getTitle() {
-        return title;
-    }
-
-    /**
-     * @param title the title to set
-     */
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    /**
-     * @return the category
-     */
-    public int getCategory() {
-        return category;
-    }
-
-    /**
-     * @param category the category to set
-     */
-    public void setCategory(int category) {
-        this.category = category;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * @return the image
-     */
-    public String getImage() {
-        return image;
-    }
-
-    /**
-     * @param image the image to set
-     */
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    /**
-     * @return the algorithm
-     */
-    public String getAlgorithm() {
-        return algorithm;
-    }
-
-    /**
-     * @param algorithm the algorithm to set
-     */
-    public void setAlgorithm(String algorithm) {
-        this.algorithm = algorithm;
-    }
-
     public static int getLastID() throws Exception{
         utils getid = new utils();
         return getid.getLastID("tblquestions");
     }
 
-    public int regist() {
+     /**
+     * apaga um curso com o _id
+     *
+     * @param _id
+     */
+    public int deleteCourse(int _id) throws Exception {
+        int status = 400;
+        utils utils = new utils();
+        boolean deleted = utils.deleteRegist(_id, "tblQuestions");
+        if (deleted) {
+            status = 200;
+        }
+        return status;
+    }
+
+    /**
+     * para actualizar/alterar os dados de um registo na tabela cursos
+     *
+     * @param _id
+     * @return
+     */
+    public int updateCourse(int id) throws Exception {
         int status = 0;
-        try {
+        String update = "UPDATE tblQuestions SET "
+                + "name=" + '"' + _id + '"' + ","
+                + "title=" + title + ","
+                + "category=" +'"' + category + '"' +  ","
+                + "description=" + '"' + description + '"' + ","
+                + "image=" + '"' + image + '"' +  " "
+                + "algorithm=" + '"' + algorithm + '"' +  " "
+                + "difficulty=" + '"' + difficulty + '"' +  " "
+                + "where _id=" + id;
+        Statement stmtt = utils.connectDatabase();
+
+        stmtt.execute(update);
+
+        //ResultSet res = stmtt.getResultSet();
+//        System.out.println("result update Course " + res.rowUpdated());
+        stmtt.close();
+        return status;
+    }
+    
+    public int regist(int _id, String title, int category, String description, String image, String algorithm, int difficulty) throws Exception {
+        int status = 0;
+
            //as credenciais de ligaçao estao agora em utils
             Statement stmtt = utils.connectDatabase();
-//            // Load the MySQL driver, each DB has its own driver
-//            Class.forName("com.mysql.jdbc.Driver");
-//            // DB connection setup 
-//            connect = DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
-//            // PreparedStatements 
-//            preparedStatement = connect.prepareStatement("INSERT INTO tblquestions VALUES (?, ?, ?, ?, ?, ?, ?)");
-//            // Parameters start with 1
-//
-//            //ordem segundo a tabela da bd v3.3
-//            preparedStatement.setString(1, _id + "");
-//            preparedStatement.setString(2, description);
-//            preparedStatement.setString(3, difficulty + "");
-//            preparedStatement.setString(4, image);
-//            preparedStatement.setString(5, algorithm);
-//            preparedStatement.setString(6, title);
-//            preparedStatement.setString(7, category + "");
-//            status = preparedStatement.executeUpdate();
-//
-//            if (connect != null) {
-//                connect.close();
-//            }
-        } catch (Exception ex) {
-            Logger.getLogger(algorithmi.models.User.class.getName()).log(Level.SEVERE, null, ex);
-        }
+            stmtt.execute("INSERT INTO tblquestions VALUES(" + this._id + "," +  this.title + "," + this.category + "," +  this.description + "," +  this.image + "," +  this.algorithm + "," +  this.difficulty + ")");
+            stmtt.getConnection().close();
+            stmtt.close();
 
         return status;
     }
+    
+    public int regist() throws Exception {
+        int status = 0;
+
+           //as credenciais de ligaçao estao agora em utils
+            Statement stmtt = utils.connectDatabase();
+            stmtt.execute("INSERT INTO tblquestions VALUES(" + _id + "," +  title + "," + category + "," +  description + "," +  image + "," +  algorithm + "," +  difficulty + ")");
+            stmtt.getConnection().close();
+            stmtt.close();
+
+        return status;
+    }
+    
+    
 
 }

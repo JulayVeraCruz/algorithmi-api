@@ -114,7 +114,7 @@ public class Schools {
         return status;
     }
     
-    //Update Schools
+    //Actualizar Escola
     public int updateSchools(int _id) throws Exception {
         int status = 0;
 
@@ -140,6 +140,15 @@ public class Schools {
         return status;
     }
     
+    //Listar Schools
+    public static String listSchools_WEB() throws Exception {
+        //FALTA FAZER O SELECT
+        String query = "SELECT tblInstitutions.`name` as Institutions,tblInstitutions.`address` as Institutions,tblSchools where tblCourses.school=tblSchools._id";
+        String obj = utils.querysToJson_String(query);
+        System.out.println("list schools  " + obj);
+        return obj;
+    }
+    
     //Validar Dados
     private String[] validateData() {
         String respostasErro[] = new String[3];
@@ -152,20 +161,16 @@ public class Schools {
         if (!valid) {
             {
                 if (!nameValid) {
-                    respostasErro[0] = "Nome invalido";
+                    respostasErro[0] = "Nome da Escola inválido";
                 }
                 if (!institutionValid) {
-                    respostasErro[1] = "Institution invalida";
+                    respostasErro[1] = "Instituição inválida";
                 }
                 if (!imageValid) {
-                    respostasErro[2] = "Image invalido";
+                    respostasErro[2] = "Imagem da Escola inválida";
                 }
             }
         }
         return respostasErro;
     }
-   
-    //FALTA: UPDATE E DELETE
-    //       SABER SE É NECESSÁRIO A SEGUUNDA PUBLIC
-    
 }
