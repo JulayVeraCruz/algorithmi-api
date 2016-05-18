@@ -238,50 +238,81 @@ public class Main {
 //----------------------------------------------------------------------------------------
         
         get("/api/institution/", (request, response) -> {
-            
+            String data = null;
             try {
                 //Listar Instituições
                 return Institutions.listInstitutions_WEB();
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 return "{\"resposta\":\"Sem Instituições para mostrar\"}";
-            }
-            
+            }           
         });
 
         post("/api/institution/new", (request, response) -> {
 
-            String data;
+            String data = null;
             try {
-                //JSon Puro (Raw)
+                data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+                JsonParser jsonParser = new JsonParser();
+                
+                JsonObject institutions = (JsonObject) jsonParser.parse(data);
+                System.out.println("institutions.entrySet " + institutions.entrySet());
+                Institutions newInstitutions = new Institutions(data);
+                
+                int registStatus = newInstitutions.regist(); //devolve um inteiro-> status
+                return "{\"resposta\":\"Instituição inserida\"}";
+                
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println(" institutions error_ " + ex);
+                return "{\"resposta\":\"Instituição não inserida\"}";
+            }    
+        });
+
+        put("/api/institution/:id", (request, response) -> {
+            
+            int status = 400;
+            String data = null;
+            int id = Integer.parseInt(request.params(":id"));
+            try {
+                data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+
+                JsonParser jsonParser = new JsonParser();
+                JsonObject instituions = (JsonObject) jsonParser.parse(data);
+
+                Institutions institutionsAlter = new Institutions(data, id);
+
+                status = institutionsAlter.updateInstitutions(id);
+                return "{\"resposta\":\"Instituição actualizada\"}";
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return "{\"resposta\":\"Instituição não actualizada\"}";
+        });
+
+        delete("/api/institution/:id", (request, response) -> {
+            int status = 400;
+            boolean deleted = false;
+            String data = null;
+            int id = Integer.parseInt(request.params(":id"));
+            try {
                 data = java.net.URLDecoder.decode(request.body(), "UTF-8");
 
                 //Objecto Jason para aceder aos parametros via Java
                 JsonParser jsonParser = new JsonParser();
-                JsonObject institut = (JsonObject) jsonParser.parse(data);
+                JsonObject institutions = (JsonObject) jsonParser.parse(data);
 
                 //Exibe os dados, em formato json
-                System.out.println(institut.entrySet());
-                Institutions newInstitu = new Institutions(data);
+                System.out.println("user.entrySet " + institutions.entrySet());
 
-                return newInstitu.regist();//devolve um inteiro-> status
+                Institutions institutionsDel = new Institutions(data, id);
 
-                //Exibe o paramentro "name" do objecto json
-                //System.out.println(course.get("name"));
+                return  institutionsDel.deleteInstitutions(id);
+               
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-            return "Hello World";
-        });
-
-        put("/api/institution/:id", (request, response) -> {
-
-            return "Hello World";
-        });
-
-        delete("/api/institution/:id", (request, response) -> {
-            return "Hello World";
+            return "{\"resposta\":\"Instituicao não apagado\"}";
         });
 
 
@@ -380,19 +411,19 @@ public class Main {
 //----------------------------------------------------------------------------------------
         
         get("/api/school/", (request, response) -> {
-            
+            String data = null;
             try {
                 //Listar Instituições
                 return Schools.listSchools_WEB();
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 return "{\"resposta\":\"Sem Escolas para mostrar\"}";
-            }
-            
+            }          
         });
+        
         post("/api/school/new", (request, response) -> {
 
-            String data;
+            String data = null;
             try {
                 //JSon Puro (Raw)
                 data = java.net.URLDecoder.decode(request.body(), "UTF-8");
@@ -402,26 +433,63 @@ public class Main {
                 JsonObject school = (JsonObject) jsonParser.parse(data);
 
                 //Exibe os dados, em formato json
-                System.out.println(school.entrySet());
-                Schools schooll = new Schools(data);
+                System.out.println("schools.entrySet " + school.entrySet());
+                Schools newSchools = new Schools(data);
 
-                return schooll.regist();
-
-                //Exibe o paramentro "name" do objecto json
-                //System.out.println(course.get("name"));
+                int registStatus = newSchools.regist();
+                return "{\"resposta\":\"Escola inserida\"}";
+             
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                return "{\"resposta\":\"Escola nao inserida\"}";
-            }
-
+                System.out.println(" schools error_ " + ex);
+                return "{\"resposta\":\"Escola não inserida\"}";
+            }    
         });
 
         put("/api/school/:id", (request, response) -> {
-            return "Hello World";
+            int status = 400;
+            String data = null;
+            int id = Integer.parseInt(request.params(":id"));
+            try {
+                data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+
+                //Objecto Jason para aceder aos parametros via Java
+                JsonParser jsonParser = new JsonParser();
+                JsonObject schools = (JsonObject) jsonParser.parse(data);
+
+                Schools schoolsAlter = new Schools(data, id);
+
+                status = schoolsAlter.updateSchools(id);
+                return "{\"resposta\":\"Escola actualizada\"}";
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return "{\"resposta\":\"Escola não actualizada\"}";
         });
 
         delete("/api/school/:id", (request, response) -> {
-            return "Hello World";
+            int status = 400;
+            boolean deleted = false;
+            String data = null;
+            int id = Integer.parseInt(request.params(":id"));
+            try {
+                data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+
+                //Objecto Jason para aceder aos parametros via Java
+                JsonParser jsonParser = new JsonParser();
+                JsonObject schools = (JsonObject) jsonParser.parse(data);
+
+                //Exibe os dados, em formato json
+                System.out.println("schools.entrySet " + schools.entrySet());
+
+                Schools schoolsDel = new Schools(data, id);
+
+                return  schoolsDel.deleteSchools(id);
+               
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return "{\"resposta\":\"Escola não apagada\"}";
         });
 
 //----------------------------------------------------------------------------------------
