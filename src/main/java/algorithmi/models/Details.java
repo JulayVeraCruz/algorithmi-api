@@ -5,6 +5,7 @@
  */
 package algorithmi.models;
 
+import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -25,12 +26,10 @@ public class Details {
         JsonObject details = (JsonObject) jsonParser.parse(data);
         //Exibe os dados, em formato json
         System.out.println(details.entrySet());
-        //Revalidar TUDO, formatos, campos vazios, TUDO!!
-        validateData();
-        
-        this.matrixTestID = details.get("matrixTestID").getAsInt();
-        this.categoryID = details.get("categoryID").getAsInt();
+    
         this.numberOfQuestions = details.get("numberOfQuestions").getAsInt();
+        this.matrixTestID = details.get("matrixTestID").getAsInt();
+        this.categoryID = details.get("categoryID").getAsInt();      
     }
 
     public int getMatrixTestID() {
@@ -56,13 +55,10 @@ public class Details {
     public void setNumberOfQuestions(int numberOfQuestions) {
         this.numberOfQuestions = numberOfQuestions;
     }
+ 
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
     
-    public void regist() {
-        //Insere na BD
-    }
-    
-    // converts a java object to JSON format,
-    // and returned as JSON formatted string
     @Override
     public String toString() {
         Gson gson = new Gson();
@@ -72,8 +68,81 @@ public class Details {
         return json;
     }
 
-    private void validateData() {
-        //Se estiver tudo OK, inserer na BD
-        regist();
+//--------------------------------------------------------------------------------------
+//------------------------------- Registar Detalhe -------------------------------------
+//-------------------------------------------------------------------------------------- 
+    
+    public int regist() throws Exception {
+        int status = 400;
+        boolean existErro = false;
+        String[] erros = validateData();
+        for (int i = 0; i < erros.length; i++) {
+            if (erros[i] == null);
+            {
+                existErro = existErro || false;
+            }
+        }
+        if (!existErro) {
+            //executa driver para ligar à base de dados
+            String insert = "INSERT INTO tblDetails values(" + numberOfQuestions + "," + matrixTestID + "," + categoryID +")";
+            String tt = utils.commandMySQLToJson_String(insert);
+            System.out.println("Inseridos os seguintes valores: " + tt);
+
+        }
+        return status;
+    }
+    
+//--------------------------------------------------------------------------------------
+//--------------------------------- Update Detalhes ------------------------------------
+//-------------------------------------------------------------------------------------- 
+
+public void updateDetails(int matrixTestID, int categoryID) throws Exception {
+
+        //executa driver para ligar à base de dados
+        String update = "UPDATE tblDetails " + "SET numberOfQuestions=" + numberOfQuestions + " where matrixTestID=" + matrixTestID + " AND categoryID=" + categoryID + ")";
+        String upd = utils.commandMySQLToJson_String(update);
+        System.out.println("Alterado o número de questões  " + upd);
+    }   
+    
+    
+//--------------------------------------------------------------------------------------
+//--------------------------------- Delete Detalhes ------------------------------------
+//-------------------------------------------------------------------------------------- 
+    
+    public static String deleteDetails(int matrixTestID, int categoryID) throws Exception {
+        String delete = "regist not deleted";
+        //executa driver para ligar à base de dados
+        String delet = "DELETE FROM `tblDetails` where matrixTestID=" + matrixTestID + " and categoryID=" + categoryID;
+        String tt = utils.commandMySQLToJson_String(delet);
+        return tt;
+    }    
+    
+//--------------------------------------------------------------------------------------
+//------------------------------- Validar Dados ----------------------------------------
+//--------------------------------------------------------------------------------------    
+    
+    private String[] validateData() {
+
+        String respostasErro[] = new String[3];
+        boolean valid = false;
+
+        boolean numberOfQuestionsValid = utils.isNumber(numberOfQuestions + "", false);//0
+        boolean matrixTestIDValid = utils.isNumber(matrixTestID + "", false);//1
+        boolean categoryIDValid = utils.isNumber(categoryID + "", false);//2
+        
+
+        valid = numberOfQuestionsValid && matrixTestIDValid && categoryIDValid;
+        if (!valid) {
+            if (!numberOfQuestionsValid) {
+                respostasErro[0] = "Número de Questões Inválida";
+            }
+            if (!matrixTestIDValid) {
+                respostasErro[1] = "MatrixTeste Inválida";
+            }
+            if (!categoryIDValid) {
+                respostasErro[2] = "Categoria Inválida";
+            }
+        }
+        return respostasErro;
     }
 }

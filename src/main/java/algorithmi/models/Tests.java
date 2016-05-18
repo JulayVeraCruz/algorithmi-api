@@ -7,14 +7,9 @@
 package algorithmi.models;
 
 import Utils.utils;
-import static Utils.utils.connectDatabase;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -42,6 +37,19 @@ public class Tests {
         this.student = tests.get("student").getAsInt();
     }
 
+    public Tests(String data, int id) throws Exception {
+
+        JsonParser jsonParser = new JsonParser();
+        JsonObject tests = (JsonObject) jsonParser.parse(data);
+        System.out.println(tests.entrySet());
+        
+        this._id = id; 
+        this.matrixTest = tests.get("matrixTest").getAsInt();
+        this.quotation = tests.get("quotation").getAsFloat();
+        this.student = tests.get("student").getAsInt();
+    }
+
+    
     public int getId() {
         return _id;
     }
@@ -92,7 +100,10 @@ public class Tests {
         return getid.getLastID("tbltests");
     }
 
-    //Registar um Teste
+//--------------------------------------------------------------------------------------
+//------------------------------------ Registar Teste ----------------------------------
+//-------------------------------------------------------------------------------------- 
+    
     public int regist() throws Exception {
 
         boolean existErro = false;
@@ -105,63 +116,115 @@ public class Tests {
         }
         int status = 400;
         if (!existErro) {
-
-            Statement stmtt = connectDatabase();
-
-            stmtt.execute("INSERT INTO tblTests values(" + _id + "," + '"' + quotation + '"' + "," + student + "," + '"' + matrixTest + '"' + ")");
-            ResultSet res = stmtt.getResultSet();
-            while (res.next()) {
-                status = 200;
-            }
-            System.out.println(" insert Test nº " + _id);
-
-            stmtt.getConnection().close();
-            stmtt.close();
+            String insert = "INSERT INTO tblTests values(" + _id + "," + '"' + quotation + '"' + "," + student + "," + '"' + matrixTest + '"' + ")";
+            String tt = utils.commandMySQLToJson_String(insert);
+            System.out.println(" Registo Teste nº " + _id);
         }
         return status;
     }
     
-    //Actualizar um Teste
-    public int updateTests(int _id) {
+    //public int regist() throws Exception {
+
+        //boolean existErro = false;
+        //String[] erros = validateData();
+        //for (int i = 0; i < erros.length; i++) {
+            //if (erros[i] == null);
+            //{
+               //existErro = existErro || false;
+            //}
+        //}
+        //int status = 400;
+        //if (!existErro) {
+
+            //Statement stmtt = connectDatabase();
+
+            //stmtt.execute("INSERT INTO tblTests values(" + _id + "," + '"' + quotation + '"' + "," + student + "," + '"' + matrixTest + '"' + ")");
+            //ResultSet res = stmtt.getResultSet();
+            //while (res.next()) {
+                //status = 200;
+            //}
+            //System.out.println(" insert Test nº " + _id);
+
+            //stmtt.getConnection().close();
+            //stmtt.close();
+        //}
+        //return status;
+    //}
+    
+//--------------------------------------------------------------------------------------
+//-------------------------------------- Update Teste ----------------------------------
+//-------------------------------------------------------------------------------------- 
+    
+    public int updateTests(int _id) throws Exception{
         int status = 0;
-        try {
+   
+            String update = "UPDATE tblTests SET quotation=" + quotation + ",student=" + student + ",matrixTest=" + matrixTest + " where _id=" + _id;
+            String updated = utils.commandMySQLToJson_String(update);
+            return status;
+    }
+    //public int updateTests(int _id) {
+        //int status = 0;
+        //try {
             //executa driver para ligar à base de dados
-            Statement stmtt = utils.connectDatabase();
+            //Statement stmtt = utils.connectDatabase();
 
-            stmtt.execute("UPDATE tblTests SET quotation=" + quotation + ",student=" + student + ",matrixTest=" + matrixTest + " where _id=" + _id + ")");
+            //stmtt.execute("UPDATE tblTests SET quotation=" + quotation + ",student=" + student + ",matrixTest=" + matrixTest + " where _id=" + _id + ")");
 
-            ResultSet res = stmtt.getResultSet();
+            //ResultSet res = stmtt.getResultSet();
 
-            System.out.println("result update Test " + res);
-            status = 1;
-            stmtt.close();
-        } catch (Exception ex) {
-            Logger.getLogger(Tests.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return status;
+            //System.out.println("result update Test " + res);
+            //status = 1;
+            //stmtt.close();
+        //} catch (Exception ex) {
+            //Logger.getLogger(Tests.class.getName()).log(Level.SEVERE, null, ex);
+        //}
+        //return status;
+    //}
+    
+//--------------------------------------------------------------------------------------
+//------------------------------------ Apagar Teste ------------------------------------
+//-------------------------------------------------------------------------------------- 
+    
+    public String deleteTests(int _id) throws Exception {
+        int status = 400;
+        String deleted = utils.deleteRegist(_id, "tblTests");
+        String del=utils.commandMySQLToJson_String(deleted);
+        return del;
     }
     
-    //Apagar Teste
-    public int deleteTests(int _id) throws Exception {
-        int status = 400;
-        utils utils = new utils();
-        boolean deleted = utils.deleteRegist(_id, "tblTests");
-        if (deleted) {
-            status = 200;
-        }
-        return status;
-    }
+    //public int deleteTests(int _id) throws Exception {
+        //int status = 400;
+        //utils utils = new utils();
+        //boolean deleted = utils.deleteRegist(_id, "tblTests");
+        //if (deleted) {
+            //status = 200;
+        //}
+        //return status;
+    //}
 
-    //Listar Tests
+//--------------------------------------------------------------------------------------
+//------------------------------------ Listar Teste ------------------------------------
+//-------------------------------------------------------------------------------------- 
+    
     public static String listTests_WEB() throws Exception {
         //FALTA FAZER O SELECT
         String query = "SELECT tblInstitutions.`name` as Institutions,tblInstitutions.`address` as Institutions,tblSchools where tblCourses.school=tblSchools._id";
-        String obj = utils.querysToJson_String(query);
-        System.out.println("list tests  " + obj);
-        return obj;
+        String teste = utils.commandMySQLToJson_String(query);
+        return teste;
     }
     
-    //Validar Dados
+    //public static String listTests_WEB() throws Exception {
+        //FALTA FAZER O SELECT
+        //String query = "SELECT tblInstitutions.`name` as Institutions,tblInstitutions.`address` as Institutions,tblSchools where tblCourses.school=tblSchools._id";
+        //String obj = utils.querysToJson_String(query);
+        //System.out.println("list tests  " + obj);
+        //return obj;
+    //}
+    
+//--------------------------------------------------------------------------------------
+//--------------------------------- Validar Dados Teste --------------------------------
+//-------------------------------------------------------------------------------------- 
+    
     private String[] validateData() {
         String respostasErro[] = new String[3];
         boolean valid = false;

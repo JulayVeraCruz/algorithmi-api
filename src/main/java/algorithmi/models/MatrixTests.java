@@ -6,12 +6,9 @@
 package algorithmi.models;
 
 import Utils.utils;
-import static Utils.utils.connectDatabase;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -75,6 +72,47 @@ public class MatrixTests {
         this.course = matrixTests.get("course").getAsInt();
     }
 
+    public MatrixTests(String data, int id) throws Exception {
+
+        JsonParser jsonParser = new JsonParser();
+        JsonObject matrixTests = (JsonObject) jsonParser.parse(data);
+        System.out.println(matrixTests.entrySet());
+        
+        this._id = id;
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        df.setLenient(false);
+        Date dt;
+        try {
+            dt = df.parse(matrixTests.get("date").getAsString());
+        } catch (ParseException ex) {
+            dt = new Date();
+        }
+        this.date = dt;
+        this.name = matrixTests.get("name").getAsString();
+        //StartingTime da MatrixTest
+        DateFormat st = new SimpleDateFormat("HH:mm:ss");
+        st.setLenient(false);
+        Date startTime;
+        try {
+            startTime = st.parse(matrixTests.get("startingTime").getAsString());
+        } catch (ParseException ex) {
+            startTime = new Date();
+        }
+        this.startingTime = startTime;  
+        //FinishingTime da MatrixTest
+        DateFormat ft = new SimpleDateFormat("HH:mm:ss");
+        ft.setLenient(false);
+        Date finishTime;
+        try {
+            finishTime = ft.parse(matrixTests.get("finishingTime").getAsString());
+        } catch (ParseException ex) {
+            finishTime = new Date();
+        }
+        this.finishingTime = finishTime;
+        this.teacher = matrixTests.get("teacher").getAsInt();
+        this.course = matrixTests.get("course").getAsInt();
+    }
+    
     public int getId() {
         return _id;
     }
@@ -149,7 +187,10 @@ public class MatrixTests {
         return getid.getLastID("tblMatrixTests");
     }
 
-    //Registar a MatrixTest
+//--------------------------------------------------------------------------------------
+//------------------------------- Registar MatrixTest ----------------------------------
+//--------------------------------------------------------------------------------------  
+    
     public int regist() throws Exception {
 
         boolean existErro = false;
@@ -162,58 +203,111 @@ public class MatrixTests {
         }
         int status = 400;
         if (!existErro) {
-
-            Statement stmtt = connectDatabase();
-
-            stmtt.execute("INSERT INTO tblMatrixTests values(" + _id + "," + '"' + date + '"' + "," + name + "," + '"' + startingTime + '"' + "," + finishingTime + '"' + "," + teacher + '"' + "," + course + '"' + ")");
-            ResultSet res = stmtt.getResultSet();
-            while (res.next()) {
-                status = 200;
-            }
-            System.out.println(" insert matrixTest nº " + _id);
-
-            stmtt.getConnection().close();
-            stmtt.close();
+            String insert = "INSERT INTO tblMatrixTests values(" + _id + "," + '"' + date + '"' + "," + name + "," + '"' + startingTime + '"' + "," + finishingTime + "," + '"' + teacher + '"' + "," + course + '"' + ")";
+            String tt = utils.commandMySQLToJson_String(insert);
+            System.out.println(" Inserido a MatrixTest nº " + _id);
         }
         return status;
     }
 
-    //Update MatrixTests
+    //public int regist() throws Exception {
+
+        //boolean existErro = false;
+        //String[] erros = validateData();
+        //for (int i = 0; i < erros.length; i++) {
+           //if (erros[i] == null);
+            //{
+                //existErro = existErro || false;
+            //}
+        //}
+        //int status = 400;
+        //if (!existErro) {
+
+            //Statement stmtt = connectDatabase();
+
+            //stmtt.execute("INSERT INTO tblMatrixTests values(" + _id + "," + '"' + date + '"' + "," + name + "," + '"' + startingTime + '"' + "," + finishingTime + '"' + "," + teacher + '"' + "," + course + '"' + ")");
+            //ResultSet res = stmtt.getResultSet();
+            //while (res.next()) {
+                //status = 200;
+            //}
+            //System.out.println(" insert matrixTest nº " + _id);
+
+            //stmtt.getConnection().close();
+            //stmtt.close();
+        //}
+        //return status;
+    //}
+    
+//--------------------------------------------------------------------------------------
+//--------------------------------- Update MatrixTest ----------------------------------
+//--------------------------------------------------------------------------------------
+    
     public int updateMatrixTests(int _id) throws Exception {
         int status = 0;
 
-        Statement stmtt = utils.connectDatabase();
-        stmtt.execute("UPDATE tblMatrixTests SET date=" + date + ",name=" + name + ",startingTime=" + startingTime + ",finishingTime=" + finishingTime + ",teacher=" + teacher + ",course=" + course +" where _id=" + _id + ")");
-
-        ResultSet res = stmtt.getResultSet();
-
-        System.out.println("result update MatrixTests " + res.rowUpdated());
-
-        stmtt.close();
+        String update = "UPDATE tblMatrixTests SET date=" + date + ",name=" + name + ",startingTime=" + startingTime + ",finishingTime=" + finishingTime + ",teacher=" + teacher + ",course=" + course +" where _id=" + _id;
+        String updated = utils.commandMySQLToJson_String(update);
         return status;
     } 
     
-    //Apagar MatrixTests
-    public int deleteMatrixTests(int _id) throws Exception {
+    //public int updateMatrixTests(int _id) throws Exception {
+        //int status = 0;
+
+        //Statement stmtt = utils.connectDatabase();
+        //stmtt.execute("UPDATE tblMatrixTests SET date=" + date + ",name=" + name + ",startingTime=" + startingTime + ",finishingTime=" + finishingTime + ",teacher=" + teacher + ",course=" + course +" where _id=" + _id + ")");
+
+        //ResultSet res = stmtt.getResultSet();
+
+        //System.out.println("result update MatrixTests " + res.rowUpdated());
+
+        //stmtt.close();
+        //return status;
+    //} 
+    
+//--------------------------------------------------------------------------------------
+//--------------------------------- Apagar MatrixTest ----------------------------------
+//--------------------------------------------------------------------------------------
+    
+    public String deleteMatrixTests(int _id) throws Exception {
         int status = 400;
-        utils utils = new utils();
-        boolean deleted = utils.deleteRegist(_id, "tblMatrixTests");
-        if (deleted) {
-            status = 200;
-        }
-        return status;
+        String deleted = utils.deleteRegist(_id, "tblMatrixTests");
+        String del=utils.commandMySQLToJson_String(deleted);
+        return del;
     }
 
-    //Listar MatrixTests
+    //public int deleteMatrixTests(int _id) throws Exception {
+        //int status = 400;
+        //utils utils = new utils();
+        //boolean deleted = utils.deleteRegist(_id, "tblMatrixTests");
+        //if (deleted) {
+            //status = 200;
+        //}
+        //return status;
+    //}
+    
+//--------------------------------------------------------------------------------------
+//--------------------------------- Listar MatrixTest ----------------------------------
+//--------------------------------------------------------------------------------------
+    
     public static String listMatrixTests_WEB() throws Exception {
         //FALTA FAZER O SELECT
         String query = "SELECT tblInstitutions.`name` as Institutions,tblInstitutions.`address` as Institutions,tblSchools where tblCourses.school=tblSchools._id";
-        String obj = utils.querysToJson_String(query);
-        System.out.println("list matrixTests  " + obj);
-        return obj;
+        String teste = utils.commandMySQLToJson_String(query);
+        return teste;
     }
     
-    //Validar dados
+    //public static String listMatrixTests_WEB() throws Exception {
+        //FALTA FAZER O SELECT
+        //String query = "SELECT tblInstitutions.`name` as Institutions,tblInstitutions.`address` as Institutions,tblSchools where tblCourses.school=tblSchools._id";
+        //String obj = utils.querysToJson_String(query);
+        //System.out.println("list matrixTests  " + obj);
+        //return obj;
+    //}
+    
+//--------------------------------------------------------------------------------------
+//------------------------------- Validar Dados MatrixTest -----------------------------
+//--------------------------------------------------------------------------------------
+    
     private String[] validateData() {
 
         String respostasErro[] = new String[6];
