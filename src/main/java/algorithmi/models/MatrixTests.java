@@ -290,8 +290,10 @@ public class MatrixTests {
 //--------------------------------------------------------------------------------------
     
     public static String listMatrixTests_WEB() throws Exception {
-        //FALTA FAZER O SELECT
-        String query = "SELECT tblInstitutions.`name` as Institutions,tblInstitutions.`address` as Institutions,tblSchools where tblCourses.school=tblSchools._id";
+        //String query = "SELECT * FROM tblMatrixTests";
+        
+        //NÃO ESTÁ BEM FEITO
+        String query = "SELECT tblMatrixTests.`name` as MatrixTests,tblUser.`type` as User,tblCourses.`name` as Courses FROM tblMatrixTests, tblUsers where tblMatrixTests.teacher=tblUser._id AND tblMatrixTests.course=tblCourse._id";
         String teste = utils.commandMySQLToJson_String(query);
         return teste;
     }

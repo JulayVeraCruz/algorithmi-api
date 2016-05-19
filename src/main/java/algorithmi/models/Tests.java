@@ -207,8 +207,10 @@ public class Tests {
 //-------------------------------------------------------------------------------------- 
     
     public static String listTests_WEB() throws Exception {
-        //FALTA FAZER O SELECT
-        String query = "SELECT tblInstitutions.`name` as Institutions,tblInstitutions.`address` as Institutions,tblSchools where tblCourses.school=tblSchools._id";
+        //String query = "SELECT * FROM tblTests";
+        
+        //NÃO ESTÁ BEM FEITO
+        String query = "SELECT tblTests.`quotation` as Tests,tblUser.`type` as User,tblMatrixTests.`name` as MatrixTests FROM tblTests, tblUsers where tblTests.student=tblUser._id AND tblTests.matrixTests=tblMatrixTests._id";
         String teste = utils.commandMySQLToJson_String(query);
         return teste;
     }

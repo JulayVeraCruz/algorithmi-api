@@ -321,7 +321,7 @@ public class Main {
 //----------------------------------------------------------------------------------------
         
         get("/api/matrixTests/", (request, response) -> {
-            
+            String data = null;
             try {
                 //Listar MatrixTests
                 return MatrixTests.listMatrixTests_WEB();
@@ -332,6 +332,7 @@ public class Main {
             
         });
         post("/api/matrixTests", (request, response) -> {
+            
             String data = null;
             try {
                 //JSon Puro (Raw)
@@ -339,27 +340,79 @@ public class Main {
 
                 //Objecto Jason para aceder aos parametros via Java
                 JsonParser jsonParser = new JsonParser();
-                JsonObject matrix = (JsonObject) jsonParser.parse(data);
+                JsonObject matrixTests = (JsonObject) jsonParser.parse(data);
 
                 //Exibe os dados, em formato json
-                System.out.println("course.entrySet " + matrix.entrySet());
-
-                MatrixTests newMatrix = new MatrixTests(data);
-
-                return newMatrix.regist();//devolve um inteiro-> status
-
+                System.out.println("matrixTests.entrySet " + matrixTests.entrySet());
+                MatrixTests newMatrixTests = new MatrixTests(data);
+                int registStatus = newMatrixTests.regist();
+                return "{\"resposta\":\"MatrixTests inserido\"}";
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                return "{\"resposta\":\"Matriz nao inserida\"}";
+                System.out.println(" matrixTests error_ " + ex);
+                return "{\"resposta\":\"matrixTests não inserido\"}";
             }
-        });
 
+            //String data = null;
+            //try {
+                //data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+                //JsonParser jsonParser = new JsonParser();
+                //JsonObject matrix = (JsonObject) jsonParser.parse(data);
+                //System.out.println("course.entrySet " + matrix.entrySet());
+                //MatrixTests newMatrix = new MatrixTests(data);
+                //return newMatrix.regist();//devolve um inteiro-> status
+            //} catch (Exception ex) {
+                //Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                //return "{\"resposta\":\"Matriz nao inserida\"}";
+            //}
+        });
+     
         put("/api/matrixTests/", (request, response) -> {
-            return "Hello World";
+            
+            int status = 400;
+            String data = null;
+            int id = Integer.parseInt(request.params(":id"));
+            try {
+                data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+
+                //Objecto Jason para aceder aos parametros via Java
+                JsonParser jsonParser = new JsonParser();
+                JsonObject matrixTests = (JsonObject) jsonParser.parse(data);
+
+                MatrixTests matrixTestsAlter = new MatrixTests(data, id);
+
+                status = matrixTestsAlter.updateMatrixTests(id);
+                return "{\"resposta\":\"MatrixTests actualizado\"}";
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return "{\"resposta\":\"MatrixTests não actualizado\"}";
+            
         });
 
         delete("/api/matrixTests", (request, response) -> {
-            return "Hello World";
+            
+            int status = 400;
+            boolean deleted = false;
+            String data = null;
+            int id = Integer.parseInt(request.params(":id"));
+            
+            try {
+                data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+                //Objecto Jason para aceder aos parametros via Java
+                JsonParser jsonParser = new JsonParser();
+                JsonObject matrixTests = (JsonObject) jsonParser.parse(data);
+               
+                //Exibe os dados, em formato json 
+                System.out.println("matrixTests.entrySet " + matrixTests.entrySet());
+                MatrixTests matrixTestsDel = new MatrixTests(data, id);
+                return  matrixTestsDel.deleteMatrixTests(id);
+               
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return "{\"resposta\":\"MatrixTest não apagado\"}";
+            
         });
 
 //----------------------------------------------------------------------------------------
@@ -516,7 +569,7 @@ public class Main {
 //----------------------------------------------------------------------------------------
         
         get("/api/tests/", (request, response) -> {
-            
+            String data = null;
             try {
                 //Listar MatrixTests
                 return Tests.listTests_WEB();
@@ -532,31 +585,83 @@ public class Main {
             try {
                 //JSon Puro (Raw)
                 data = java.net.URLDecoder.decode(request.body(), "UTF-8");
-
                 //Objecto Jason para aceder aos parametros via Java
                 JsonParser jsonParser = new JsonParser();
-                JsonObject course = (JsonObject) jsonParser.parse(data);
+                JsonObject tests = (JsonObject) jsonParser.parse(data);
 
                 //Exibe os dados, em formato json
-                System.out.println("course.entrySet " + course.entrySet());
-
-                Tests newTest = new Tests(data);
-
-                return newTest.regist();//devolve um inteiro-> status
-
+                System.out.println("tests.entrySet " + tests.entrySet());
+                Tests newTests = new Tests(data);
+                int registStatus = newTests.regist(); //devolve um inteiro-> status
+                return "{\"resposta\":\"teste inserido\"}";
+                
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                return "{\"resposta\":\"Teste nao inserido\"}";
+                System.out.println(" teste error_ " + ex);
+                return "{\"resposta\":\"teste não inserido\"}";
             }
-
+            
+            //String data = null;
+            //try {
+                //data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+                //JsonParser jsonParser = new JsonParser();
+                //JsonObject course = (JsonObject) jsonParser.parse(data);
+                //System.out.println("course.entrySet " + course.entrySet());
+                //Tests newTest = new Tests(data);
+                //return newTest.regist();//devolve um inteiro-> status
+            //} catch (Exception ex) {
+                //Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                //return "{\"resposta\":\"Teste nao inserido\"}";
+            //}
+         
         });
 
         put("/api/tests/", (request, response) -> {
-            return "Hello World";
+           
+            int status = 400;
+            String data = null;
+            int id = Integer.parseInt(request.params(":id"));
+            try {
+                data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+
+                //Objecto Jason para aceder aos parametros via Java
+                JsonParser jsonParser = new JsonParser();
+                JsonObject tests = (JsonObject) jsonParser.parse(data);
+
+                Tests testsAlter = new Tests(data, id);
+
+                status = testsAlter.updateTests(id);
+                return "{\"resposta\":\"Teste actualizado\"}";
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return "{\"resposta\":\"Teste não actualizado\"}";
+            
         });
 
         delete("/api/tests", (request, response) -> {
-            return "Hello World";
+            
+            int status = 400;
+            boolean deleted = false;
+            String data = null;
+            int id = Integer.parseInt(request.params(":id"));
+            
+            try {
+                data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+                //Objecto Jason para aceder aos parametros via Java
+                JsonParser jsonParser = new JsonParser();
+                JsonObject tests = (JsonObject) jsonParser.parse(data);
+
+                //Exibe os dados, em formato json
+                System.out.println("tests.entrySet " + tests.entrySet());
+                Tests testsDel = new Tests(data, id);
+                return  testsDel.deleteTests(id);
+               
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return "{\"resposta\":\"Teste não apagado\"}";
+            
         });
 
 //----------------------------------------------------------------------------------------

@@ -195,8 +195,7 @@ public class Institutions {
 //--------------------------------------------------------------------------------------
 
     public static String listInstitutions_WEB() throws Exception {
-        //FALTA FAZER O SELECT
-        String query = "SELECT tblInstitutions.`name` as Institutions,tblInstitutions.`address` as Institutions,tblSchools where tblCourses.school=tblSchools._id";
+        String query = "SELECT * FROM tblInstitutions";
         String teste = utils.commandMySQLToJson_String(query);
         return teste;
     }
