@@ -34,9 +34,10 @@ public class Question {
     private String image;
     private String algorithm;
     private int difficulty;
+    private int in; //isto não devia de estar aqui
+    private int out; //isto não devia de estar aqui
 
-
-    // EXEMPLO DE STRING RECEBIDA [title="olol", category="1", description="olololo", difficulty="1", image="", in="9", out="9"]
+    
     public Question(String data) throws Exception{
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -56,9 +57,12 @@ public class Question {
         this.image = Question.get("image").getAsString();
         this.algorithm = Question.get("algoritmo").getAsString();
         this.difficulty = Question.get("difficulty").getAsInt();
+        this.in = Question.get("in").getAsInt();//isto não devia de estar aqui
+        this.out = Question.get("out").getAsInt();//isto não devia de estar aqui
+        
+        
         //http://stackoverflow.com/questions/34120882/gson-jelement-getasstring-vs-jelement-tostring
         
-        //regist(_id, title, category, description, image, algorithm, difficulty);
     }
 
     // converts a java object to JSON format,
@@ -88,15 +92,15 @@ public class Question {
      *
      * @param _id
      */
-    public int deleteCourse(int _id) throws Exception {
-        int status = 400;
-        utils utils = new utils();
-        boolean deleted = utils.deleteRegist(_id, "tblQuestions");
-        if (deleted) {
-            status = 200;
-        }
-        return status;
-    }
+//    public int deleteCourse(int _id) throws Exception {
+//        int status = 400;
+//        utils utils = new utils();
+//        boolean deleted = utils.deleteRegist(_id, "tblQuestions");
+//        if (deleted) {
+//            status = 200;
+//        }
+//        return status;
+//    }
 
     /**
      * para actualizar/alterar os dados de um registo na tabela cursos
@@ -124,25 +128,21 @@ public class Question {
         stmtt.close();
         return status;
     }
-    
-    public int regist(int _id, String title, int category, String description, String image, String algorithm, int difficulty) throws Exception {
-        int status = 0;
 
-           //as credenciais de ligaçao estao agora em utils
-            Statement stmtt = utils.connectDatabase();
-            stmtt.execute("INSERT INTO tblquestions VALUES(" + this._id + "," +  this.title + "," + this.category + "," +  this.description + "," +  this.image + "," +  this.algorithm + "," +  this.difficulty + ")");
-            stmtt.getConnection().close();
-            stmtt.close();
-
-        return status;
-    }
     
     public int regist() throws Exception {
         int status = 0;
-
+           //                                       tblQ        tblQ           tblQ            tblQ         tblQ      tblIO   tblIO     tbl????
+           // O QUE RECEBO DA VIEW               [title="a", category="1", difficulty="2", description="b", image="", in="d", out="d", language="2"]
+           // O QUE TENHO EM tblquestions        _id, title, category, description, image, algorithm, difficulty
+           // O QUE TENHO EM tblinputoutputs     _id, question, input, output
+           
            //as credenciais de ligaçao estao agora em utils
             Statement stmtt = utils.connectDatabase();
-            stmtt.execute("INSERT INTO tblquestions VALUES(" + _id + "," +  title + "," + category + "," +  description + "," +  image + "," +  algorithm + "," +  difficulty + ")");
+            stmtt.execute("INSERT INTO tblquestions VALUES(" + _id + "," +  title + "," + category + "," +  description + "," +  image + "," +  algorithm + "," +  difficulty + "); "
+                        + "INSERT INTO tblinputoutputs VALUES(" + 0 + "," +  0 + ","+ in + "," +  out + "); ");
+            //                                                meti aqui valores de 0 só para exprimentar inserir algo sem ser
+            //                                                necessario fazer os seus metodos correctos
             stmtt.getConnection().close();
             stmtt.close();
 

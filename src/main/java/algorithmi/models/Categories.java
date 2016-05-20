@@ -65,15 +65,15 @@ public Categories(String data) {
      *
      * @param _id
      */
-    public int deleteCourse(int _id) throws Exception {
-        int status = 400;
-        utils utils = new utils();
-        boolean deleted = utils.deleteRegist(_id, "tblCategories");
-        if (deleted) {
-            status = 200;
-        }
-        return status;
-    }
+//    public int deleteCourse(int _id) throws Exception {
+//        int status = 400;
+//        utils utils = new utils();
+//        boolean deleted = utils.deleteRegist(_id, "tblCategories");
+//        if (deleted) {
+//            status = 200;
+//        }
+//        return status;
+//    }
 
     /**
      * para actualizar/alterar os dados de um registo na tabela cursos
