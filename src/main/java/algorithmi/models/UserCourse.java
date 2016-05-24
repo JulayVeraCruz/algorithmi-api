@@ -50,14 +50,14 @@ public class UserCourse {
      * para actualizar/alterar os dados de um registo na tabela alteração de
      * curso de um user curso atruibuido por engano ou substituicao
      *
-     * @param _id
+     * @param id
      */
-    public void updateCourseOf_User(int user_id, int oldCourse_id) throws Exception {
+    public void updateCourseOf_User(int userid, int oldCourseid) throws Exception {
 
         //executa driver para ligar à base de dados
-        String update = "UPDATE tblUsersCourse " + "SET courseID=" + courseID + " where userID=" + userID + " AND courseID=" + oldCourse_id + ")";
+        String update = "UPDATE tblUsersCourse " + "SET courseID=" + courseID + " where userID=" + userID + " AND courseID=" + oldCourseid + ")";
 
-        String upd = utils.commandMySQLToJson_String(update);
+        String upd = utils.executeSelectCommand(update).toString();
 
         System.out.println("result update user's course  " + upd);
 
@@ -81,7 +81,7 @@ public class UserCourse {
         if (!existErro) {
             //executa driver para ligar à base de dados
             String insert = "INSERT INTO tblusercourses values(" + userID + "," + courseID + ")";
-            String tt = utils.commandMySQLToJson_String(insert);
+            String tt = utils.executeSelectCommand(insert).toString();
             System.out.println("result insert user's courses " + tt);
 
         }
@@ -126,20 +126,20 @@ public class UserCourse {
         String delete = "regist not deleted";
         //executa driver para ligar à base de dados
         String delet = "DELETE FROM `tbluserscourses` where userID=" + userID + " and courseID=" + courseID;
-        String tt = utils.commandMySQLToJson_String(delet);
+        String tt = utils.executeSelectCommand(delet).toString();
         return tt;
     }
 
     /**
-     * lista os cursos a que o user _idUser esta ligado
+     * lista os cursos a que o user idUser esta ligado
      *
      * @return JsonString
      */
-    public static String coursesOfUser(int _idUser) throws Exception {
+    public static String coursesOfUser(int idUser) throws Exception {
 
-        String query = "SELECT tblcourses.`name` FROM tblusers,tblcourses,tblusercourses where tblusercourses.`userID`=" + Integer.toString(_idUser) + " and tblusers.`_id`=tblusercourses.`userID` and tblcourses.`_id`=tblusercourses.`courseID`";
+        String query = "SELECT tblcourses.`name` FROM tblusers,tblcourses,tblusercourses where tblusercourses.`userID`=" + Integer.toString(idUser) + " and tblusers.`id`=tblusercourses.`userID` and tblcourses.`id`=tblusercourses.`courseID`";
 
-        String obj = utils.commandMySQLToJson_String(query);
+        String obj = utils.executeSelectCommand(query).toString();
 
         return obj;
 

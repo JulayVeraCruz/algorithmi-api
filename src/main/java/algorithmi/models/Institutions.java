@@ -7,6 +7,7 @@ package algorithmi.models;
 
 import Utils.utils;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -16,7 +17,7 @@ import com.google.gson.JsonParser;
  */
 public class Institutions {
 
-    private int _id;
+    private int id;
     private String name;
     private String address;
     private String image;
@@ -26,74 +27,46 @@ public class Institutions {
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
         JsonObject institutions = (JsonObject) jsonParser.parse(data);
+
         //Exibe os dados, em formato json
         System.out.println(institutions.entrySet());
         //Revalidar TUDO, formatos, campos vazios, TUDO!!
-       
-        this._id = getLastID_Institutions() + 1; //ir buscar o max id da bd + 1
+
+        //Se o id for nulo (é uma institution nova)
+        if (institutions.get("id") == null) {
+            this.id = getLastID() + 1; //ir buscar o max id da bd + 1
+        } else {
+            this.id = institutions.get("id").getAsInt();
+        }
         this.name = institutions.get("name").getAsString();
         this.address = institutions.get("address").getAsString();
-        this.image = institutions.get("image").getAsString();
-    }
-    
-    public Institutions(String data, int id) throws Exception {
+        //Converte a imagem recebida em b64 e grava-a 
+        this.image = utils.b64ToImage(institutions.get("image").getAsString(), "inst" + id);
 
-        JsonParser jsonParser = new JsonParser();
-        JsonObject institutions = (JsonObject) jsonParser.parse(data);
-        System.out.println(institutions.entrySet());
-       
-        this._id = id;
-        this.name = institutions.get("name").getAsString();
-        this.address = institutions.get("address").getAsString();
-        this.image = institutions.get("image").getAsString();
     }
 
-    public int getId() {
-        return _id;
+    //obtem os dados da instituicao prontos para o update
+    public static String getInstitutionData(String id) {
+
+        try {
+            String query = "select * from tblInstitutions where id=" + id;
+            JsonArray user = utils.executeSelectCommand(query);
+            return user.get(0).getAsJsonObject().toString();
+        } catch (Exception ex) {
+            return "";
+        }
+
     }
 
-    public void setId(int _id) {
-        this._id = _id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    //--------------------------------------------------------------------------
-    //--------------------------------------------------------------------------
-    
     @Override
     public String toString() {
         Gson gson = new Gson();
-
         String json = gson.toJson(this);
-        System.out.println("json \n" + json);
         return json;
     }
 
     //Maximo ID da tabela Institutions
-    public static int getLastID_Institutions() throws Exception {
+    public static int getLastID() throws Exception {
         utils getid = new utils();
         return getid.getLastID("tblInstitutions");
     }
@@ -101,7 +74,6 @@ public class Institutions {
 //--------------------------------------------------------------------------------------
 //------------------------------- Registar Instituicao ---------------------------------
 //--------------------------------------------------------------------------------------  
-   
     public int regist() throws Exception {
         boolean existErro = false;
         String[] erros = validateData();
@@ -113,105 +85,50 @@ public class Institutions {
         }
         int status = 400;
         if (!existErro) {
-            String insert = "INSERT INTO tblInstitutions values(" + _id + "," + '"' + name + '"' + "," + '"' + address + '"' + "," + '"' + image + '"' + ")";
-            String tt = utils.commandMySQLToJson_String(insert);
-            System.out.println(" Inserir Instituição nº " + _id);
+
+            String insert = "INSERT INTO tblInstitutions values(" + id + "," + '"' + name + '"' + "," + '"' + address + '"' + "," + '"' + image + '"' + ")";
+
+            return utils.executeIUDCommand(insert);
+
         }
         return status;
     }
-    
-    //public int regist() throws Exception {
-        //int status = 0;
-        //boolean existErro = false;
-        //String[] erros = validateData();
-       //for (int i = 0; i < erros.length; i++) {
-            //if (erros[i] == null);
-            //{
-               //existErro = existErro || false;
-            //}
-        //}
-        //if (!existErro) {
-            //executa driver para ligar à base de dados
-            //Statement stmtt = utils.connectDatabase();
-            //String query = "INSERT INTO tblInstitutions values(" + _id + "," + '"' + name + '"' + "," + '"' + address + '"' + "," + '"' + image + '"' + ")";
-            //stmtt.execute(query);
 
-            //ResultSet res = stmtt.getResultSet();
-            //while (res.next()) {
-                //status = 200;
-            //}
-            //stmtt.close();
-        //}
-        //return status;
-    //}
 //--------------------------------------------------------------------------------------
 //------------------------------- Update a Instituição ---------------------------------
 //--------------------------------------------------------------------------------------   
-    
-    public int updateInstitutions(int _id) throws Exception {
-        int status = 0;
-        String update = "UPDATE tblInstitutions SET name=" + name + ",address=" + address + ",image=" + image + " where _id=" + _id;
-        String updated = utils.commandMySQLToJson_String(update);
-        return status;
+    public int updateInstitution() throws Exception {
+
+        String update = "UPDATE tblInstitutions SET name='" + name + "',address='" + address + "',image='" + image + "' where id=" + id;
+        return utils.executeIUDCommand(update);
     }
-    
-    //public int updateInstitutions(int _id) throws Exception {
-        //int status = 0;
 
-        //Statement stmtt = utils.connectDatabase();
-        //stmtt.execute("UPDATE tblInstitutions SET name=" + name + ",address=" + address + ",image=" + image + " where _id=" + _id + ")");
-
-        //ResultSet res = stmtt.getResultSet();
-
-       //System.out.println("result update Institutions " + res.rowUpdated());
-
-        //stmtt.close();
-        //return status;
-    //}
-    
 //--------------------------------------------------------------------------------------
 //------------------------------- Apagar Instituição -----------------------------------
 //--------------------------------------------------------------------------------------
+    public static int deleteInstitution(int id) throws Exception {
 
-    public String deleteInstitutions(int _id) throws Exception {
-        int status = 400;
-        String deleted = utils.deleteRegist(_id, "tblInstitutions");
-        String del=utils.commandMySQLToJson_String(deleted);
-        return del;
+        String deleted = utils.deleteRegist(id, "tblInstitutions");
+        return utils.executeIUDCommand(deleted);
     }
-    
-    //public int deleteInstitutions(int _id) throws Exception {
-        //int status = 400;
-        //utils utils = new utils();
-        //boolean deleted = utils.deleteRegist(_id, "tblInstitutions");
-        //if (deleted) {
-            //status = 200;
-        //}
-        //return status;
-    //}
-    
+
 //--------------------------------------------------------------------------------------
 //------------------------------- Listar Instituições ----------------------------------
 //--------------------------------------------------------------------------------------
-
-    public static String listInstitutions_WEB() throws Exception {
-        String query = "SELECT * FROM tblInstitutions";
-        String teste = utils.commandMySQLToJson_String(query);
-        return teste;
+    public static String getAll() {
+        try {
+            String query = "SELECT * FROM tblInstitutions";
+            String result = utils.executeSelectCommand(query).toString();
+            return result;
+        } catch (Exception ex) {
+            System.out.println(ex);
+            return "{\"resposta\":\"Erro ao obter Instituições.\"}";
+        }
     }
-    
-    //public static String listInstitutions_WEB() throws Exception {
-        //FALTA FAZER O SELECT
-        //String query = "SELECT tblInstitutions.`name` as Institutions,tblInstitutions.`address` as Institutions,tblSchools where tblCourses.school=tblSchools._id";
-        //String obj = utils.querysToJson_String(query);
-        //System.out.println("list institutions  " + obj);
-        //return obj;
-    //}
 
 //--------------------------------------------------------------------------------------
 //------------------------------- Validar Dados ----------------------------------------
 //--------------------------------------------------------------------------------------
-
     private String[] validateData() {
 
         String respostasErro[] = new String[3];
@@ -224,16 +141,16 @@ public class Institutions {
         if (!valid) {
             {
                 if (!nameValid) {
-                    respostasErro[1] = "Nome da Instituição inválido";
+                    respostasErro[0] = "Nome da Instituição inválido";
                 }
                 if (!addressValid) {
-                    respostasErro[2] = "Morada da Instituição inválida";
+                    respostasErro[1] = "Morada da Instituição inválida";
                 }
                 if (!imageValid) {
-                    respostasErro[3] = "Imagem da Instituição inválida";
+                    respostasErro[2] = "Imagem da Instituição inválida";
                 }
             }
         }
         return respostasErro;
-    }   
+    }
 }

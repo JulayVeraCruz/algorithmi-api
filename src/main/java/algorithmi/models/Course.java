@@ -26,7 +26,7 @@ import com.google.gson.JsonParser;
  */
 public class Course {
 
-    private int _id;
+    private int id;
     private String name;
     private int school;
     private String image;
@@ -45,7 +45,7 @@ public class Course {
          */
 
         //Associa os dados ao objecto Course
-        this._id = getLastID_Courses() + 1; //ir buscar o max id da bd + 1
+        this.id = getLastID_Courses() + 1; //ir buscar o max id da bd + 1
         this.name = Course.get("name").getAsString();
         this.image = Course.get("image").getAsString();
         //tenho de ir buscar o id da escola
@@ -60,10 +60,9 @@ public class Course {
         JsonObject Course = (JsonObject) jsonParser.parse(data);
         //Exibe os dados, em formato json
         System.out.println(Course.entrySet());
-       
 
         //Associa os dados ao objecto Course
-        this._id = id; //ir buscar o max id da bd + 1
+        this.id = id; //ir buscar o max id da bd + 1
         this.name = Course.get("name").getAsString();
         this.image = Course.get("image").getAsString();
         //tenho de ir buscar o id da escola
@@ -72,18 +71,18 @@ public class Course {
     }
 
     /**
-     * apaga um curso com o _id
+     * apaga um curso com o id
      *
-     * @param _id
+     * @param id
      * @return status
      * @throws java.lang.Exception
      */
-    public String deleteCourse(int _id) throws Exception {
+    public String deleteCourse(int id) throws Exception {
         int status = 400;
-        
-        String deleted = utils.deleteRegist(_id, "tblcourses");
-        String del=utils.commandMySQLToJson_String(deleted);
-        
+
+        String deleted = utils.deleteRegist(id, "tblcourses");
+        String del = utils.executeSelectCommand(deleted).toString();
+
 //        if (deleted) {
 //            status = 200;
 //        }
@@ -93,13 +92,13 @@ public class Course {
     /**
      * para actualizar/alterar os dados de um registo na tabela cursos
      *
-     * @param _id
+     * @param id
      * @return
      */
     public int updateCourse(int id) throws Exception {
         int status = 0;
-        String update = "UPDATE tblCourses SET name=" + '"' + name + '"' + ",school=" + school + ",image=" + '"' + image + '"' + " where _id=" + id;
-        String updated = utils.commandMySQLToJson_String(update);
+        String update = "UPDATE tblCourses SET name=" + '"' + name + '"' + ",school=" + school + ",image=" + '"' + image + '"' + " where id=" + id;
+        String updated = utils.executeSelectCommand(update).toString();
 //        Statement stmtt = utils.connectDatabase();
 
 //        stmtt.execute(update);
@@ -127,8 +126,8 @@ public class Course {
         }
         int status = 400;
         if (!existErro) {
-            String insert = "INSERT INTO tblcourses values(" + _id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")";
-            String tt = utils.commandMySQLToJson_String(insert);
+            String insert = "INSERT INTO tblcourses values(" + id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")";
+            String tt = utils.executeSelectCommand(insert).toString();
 //            Statement stmtt = connectDatabase();
 //            String[] bb = insert.split(" ");
 //
@@ -138,7 +137,7 @@ public class Course {
 //            while (res.next()) {
 //                status = 200;
 //            }
-            System.out.println(" insert course nº " + _id);
+            System.out.println(" insert course nº " + id);
 //
 //            stmtt.getConnection().close();
 //            stmtt.close();
@@ -153,9 +152,10 @@ public class Course {
      * @throws java.lang.Exception
      */
     public static String listCourses_WEB() throws Exception {
-        String query = "SELECT tblcourses.`name` as Course,tblschools.`name` as School from tblCourses,tblSchools where tblCourses.school=tblSchools._id";
+        String query = "SELECT tblcourses.`name` as Course,tblschools.`name` as School from tblCourses,tblSchools where tblCourses.school=tblSchools.id";
 //        String obj = utils.commandMySQLToJson_String(query);
-        String teste = utils.commandMySQLToJson_String(query);
+        String teste = utils.executeSelectCommand(query).toString();;
+        System.out.println(teste);
 //        System.out.println("list courses  " + obj);
         return teste;
 
@@ -213,11 +213,11 @@ public class Course {
     }
 
     public int getId() {
-        return _id;
+        return id;
     }
 
-    public void setId(int _id) {
-        this._id = _id;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {

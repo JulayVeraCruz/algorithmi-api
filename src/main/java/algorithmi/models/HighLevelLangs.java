@@ -14,14 +14,11 @@ import com.google.gson.JsonParser;
  * @author David
  */
 public class HighLevelLangs {
-    
-    
-    
-	private int _id;
-	private String description;
-    
-    
-public HighLevelLangs(String data) {
+
+    private int id;
+    private String description;
+
+    public HighLevelLangs(String data) {
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
         JsonObject HighLevelLangs = (JsonObject) jsonParser.parse(data);
@@ -34,11 +31,10 @@ public HighLevelLangs(String data) {
          */
         validateData();
         //Associa os dados ao objecto Question
-        this._id = HighLevelLangs.get("_id").getAsInt(); //ir buscar o max id da bd + 1 
+        this.id = HighLevelLangs.get("id").getAsInt(); //ir buscar o max id da bd + 1 
         this.description = HighLevelLangs.get("description").getAsString();
-        
-		}
 
+    }
 
     // converts a java object to JSON format,
     // and returned as JSON formatted string
@@ -55,11 +51,6 @@ public HighLevelLangs(String data) {
         /**
          * Se estiver tudo OK, inserer na BD,
          */
-        }
+    }
 
-    
-    
-    
-    
-    
 }

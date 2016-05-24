@@ -18,13 +18,11 @@ import java.util.logging.Logger;
  * @author David
  */
 public class Categories {
-    
-    
-	private int _id;
-	private String description;
-    
-    
-public Categories(String data) {
+
+    private int id;
+    private String description;
+
+    public Categories(String data) {
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
         JsonObject Categories = (JsonObject) jsonParser.parse(data);
@@ -37,11 +35,10 @@ public Categories(String data) {
          */
         validateData();
         //Associa os dados ao objecto Question
-        this._id = Categories.get("_id").getAsInt(); //ir buscar o max id da bd + 1 
+        this.id = Categories.get("id").getAsInt(); //ir buscar o max id da bd + 1 
         this.description = Categories.get("description").getAsString();
-        
-		}
 
+    }
 
     // converts a java object to JSON format,
     // and returned as JSON formatted string
@@ -58,35 +55,35 @@ public Categories(String data) {
         /**
          * Se estiver tudo OK, inserer na BD,
          */
-        }
+    }
 
-        /**
-     * apaga um curso com o _id
+    /**
+     * apaga um curso com o id
      *
-     * @param _id
+     * @param id
      */
-    public int deleteCourse(int _id) throws Exception {
+    public int deleteCourse(int id) throws Exception {
         int status = 400;
         utils utils = new utils();
-        boolean deleted = utils.deleteRegist(_id, "tblCategories");
-        if (deleted) {
-            status = 200;
-        }
+        /*        boolean deleted = utils.deleteRegist(id, "tblCategories");
+         if (deleted) {
+         status = 200;
+         }*/
         return status;
     }
 
     /**
      * para actualizar/alterar os dados de um registo na tabela cursos
      *
-     * @param _id
+     * @param id
      * @return
      */
     public int updateCourse(int id) throws Exception {
         int status = 0;
         String update = "UPDATE tblCategories SET "
-                + "name=" + '"' + _id + '"' + ","
+                + "name=" + '"' + id + '"' + ","
                 + "description=" + description + ","
-                + "where _id=" + id;
+                + "where id=" + id;
         Statement stmtt = utils.connectDatabase();
 
         stmtt.execute(update);
@@ -96,24 +93,22 @@ public Categories(String data) {
         stmtt.close();
         return status;
     }
-    
+
     public int regist() {
         int status = 0;
         try {
-           //as credenciais de ligaçao estao agora em utils
+            //as credenciais de ligaçao estao agora em utils
             Statement stmtt = utils.connectDatabase();
-            
-            stmtt.execute("INSERT INTO tblCategories values(" + _id + "," +  description + ")");
+
+            stmtt.execute("INSERT INTO tblCategories values(" + id + "," + description + ")");
             stmtt.getConnection().close();
             stmtt.close();
-            
+
         } catch (Exception ex) {
             Logger.getLogger(algorithmi.models.User.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return status;
     }
-    
-    
-    
+
 }

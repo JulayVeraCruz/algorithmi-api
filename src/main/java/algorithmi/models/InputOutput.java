@@ -11,9 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,7 +21,7 @@ import java.util.logging.Logger;
  */
 public class InputOutput {
 
-    private int _id;
+    private int id;
     private int question;
     private String input;
     private String output;
@@ -31,7 +29,7 @@ public class InputOutput {
     private Connection connect = null;
     PreparedStatement preparedStatement = null;
 
-    public InputOutput(String data) throws Exception{
+    public InputOutput(String data) throws Exception {
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
         JsonObject QuestionIO = (JsonObject) jsonParser.parse(data);
@@ -44,7 +42,7 @@ public class InputOutput {
          */
         validateData();
         //Associa os dados ao objecto Question
-        this._id = getLastID() + 1; //ir buscar o max id da bd + 1 
+        this.id = getLastID() + 1; //ir buscar o max id da bd + 1 
         this.question = QuestionIO.get("title").getAsInt();
         this.input = QuestionIO.get("in").getAsString();
         this.output = QuestionIO.get("out").getAsString();
@@ -68,7 +66,7 @@ public class InputOutput {
          */
     }
 
-    public static int getLastID() throws Exception{
+    public static int getLastID() throws Exception {
         utils getid = new utils();
         return getid.getLastID("tblQuestions");
     }
@@ -88,7 +86,7 @@ public class InputOutput {
             // Parameters start with 1
 
             //ordem segundo a tabela da bd v3.3
-            preparedStatement.setString(1, _id + "");
+            preparedStatement.setString(1, id + "");
             preparedStatement.setString(2, question + "");
             preparedStatement.setString(3, input);
             preparedStatement.setString(4, output);

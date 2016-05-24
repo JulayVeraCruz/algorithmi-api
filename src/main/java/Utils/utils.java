@@ -9,6 +9,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mysql.jdbc.ResultSetMetaData;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -17,63 +20,76 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.regex.*;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import javax.imageio.ImageIO;
 
 /**
  *
  * @author Pedro Batista
  */
 public class utils {
-/**
+
+    /**
      * qualquer interacção de insert,update,delete ou select na base de dados
      * utilizando o @param comandoMySQL retornando o sucesso da operação ou o
-     * resultado da query excepto no caso particular da consulta do ultimo id 
-     * de uma tabela
-     * @return string json 
-     * @throws Exception 
+     * resultado da query excepto no caso particular da consulta do ultimo id de
+     * uma tabela
+     *
+     * @return string json
+     * @throws Exception
      */
-     public static String commandMySQLToJson_String(String comandoMySQL) throws Exception {
-                JsonObject obj = new JsonObject();
+    public static JsonArray executeSelectCommand(String comandoMySQL) throws Exception {
+        JsonArray obj = new JsonArray();
 
         Statement stmtt = connectDatabase();
-        JsonArray jsonArray = new JsonArray();
 
-        String[] bb = comandoMySQL.split(" ");
-
-        stmtt.execute(comandoMySQL);
-        ResultSet res = stmtt.getResultSet();
         Gson gson = new Gson();
-                
-        switch (bb[0]) {
-            case "INSERT":
-            case "UPDATE":
-            case "DELETE":
-                obj.add("resposta", gson.toJsonTree("Done"));
-                break;
-            default:
 
-                ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
-
-//                Gson gson = new Gson();
-                obj.add("query", jsonArray);
-                int total_rows = metadata.getColumnCount();
-                if (!(res == null)) {
-                    while (res.next()) {
-                        JsonObject row = new JsonObject();
-                        jsonArray.add(row);
-                        for (int i = 1; i <= total_rows; i++) {
+        System.out.println("State \n" + stmtt.execute(comandoMySQL));
+        ResultSet res = stmtt.getResultSet();
+        ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
+        int total_rows = metadata.getColumnCount();
+        if (!(res == null)) {
+            while (res.next()) {
+                JsonObject row = new JsonObject();
+                obj.add(row);
+                for (int i = 1; i <= total_rows; i++) {
 //                System.out.println("col name " + metadata.getColumnLabel(i));
-                            row.add(metadata.getColumnLabel(i), gson.toJsonTree(res.getObject(i)));
-                        }
-                    }
-                } else {
-                    JsonObject row = new JsonObject();
-                    jsonArray.add(row);
-                    row.add(null, null);
+                    row.add(metadata.getColumnLabel(i), gson.toJsonTree(res.getObject(i)));
                 }
-        }//fim do switch
+            }
+        } else {
+            JsonObject row = new JsonObject();
+            obj.add(row);
+            row.add(null, null);
+        }
+
         stmtt.close();
-        return obj.toString();
+        return obj;
+    }
+
+    public static int executeIUDCommand(String comandoMySQL) throws Exception {
+        JsonArray obj = new JsonArray();
+
+        Statement stmtt = connectDatabase();
+
+        //1 == ok, 0== NOK
+        int status = stmtt.executeUpdate(comandoMySQL);
+        switch (status) {
+            case 0:
+                System.out.println(comandoMySQL.split(" ")[0] + " fail");
+                status = 400; //NOK
+                break;
+            case 1:
+                System.out.println(comandoMySQL.split(" ")[0] + " success");
+                status = 200; //OK
+                break;
+        }
+        stmtt.close();
+        return status;
     }
 
     /**
@@ -102,33 +118,33 @@ public class utils {
      * @param nomeTabela
      * @return int
      */
-    public int getLastID(String nomeTabela) throws Exception {
+    public static int getLastID(String nomeTabela) throws Exception {
         int id = 0;
 
         Statement stmtt = connectDatabase();
 
-        stmtt.execute("select " + nomeTabela + "._id from " + nomeTabela + " order by _id desc limit 1");
+        stmtt.execute("select " + nomeTabela + ".id from " + nomeTabela + " order by id desc limit 1");
         ResultSet res = stmtt.getResultSet();
 
         while (res.next()) {
-            id = Integer.parseInt(res.getString("_id"));
+            id = Integer.parseInt(res.getString("id"));
         }
         return id;
     }
 
     /**
-     * retorna o campo name respectivo do _id de uma tabela
+     * retorna o campo name respectivo do id de uma tabela
      *
-     * @param _id
+     * @param id
      * @param tabela
      * @return
      */
-    public String getName(int _id, String tabela) throws Exception {
+    public String getName(int id, String tabela) throws Exception {
 
         String name = null;
         Statement stmtt = connectDatabase();
 
-        stmtt.execute("SELECT name FROM `" + tabela + "` where _id=" + _id + "");
+        stmtt.execute("SELECT name FROM `" + tabela + "` where id=" + id + "");
 //        ResultSet res = connectDatabase(mySQL);//se for apenas um insert o res=null
         ResultSet res = stmtt.getResultSet();
 
@@ -139,23 +155,15 @@ public class utils {
     }
 
     /**
-     * apaga o registo com o _id de uma tabela desde que só possua UM campo
-     * (_id) como chave primaria
+     * apaga o registo com o id de uma tabela desde que só possua UM campo (id)
+     * como chave primaria
      *
-     * @param _id
+     * @param id
      * @param tabela
      * @return
      */
-    public static String deleteRegist(int _id, String tabela) throws Exception {
-//        boolean deleted = false;
-//        Statement stmtt = connectDatabase();
-
-        String delete="DELETE FROM " + tabela + " where _id=" + _id + "";
-//        ResultSet res = stmtt.getResultSet();
-
-//        deleted = (res == null);
-
-//        stmtt.close();
+    public static String deleteRegist(int id, String tabela) throws Exception {
+        String delete = "DELETE FROM " + tabela + " where id=" + id + "";
         return delete;
     }
 
@@ -296,7 +304,7 @@ public class utils {
 
         return true;
     }
-    
+
     //Expressão Regular Horas - Atributo: StartingTime e FinishingTime
     public static boolean isThisHourValid(String dateToValidate) {
 
@@ -345,10 +353,44 @@ public class utils {
     //---------------------------------------------------------------------------------
     //------------------ Expressoes regulares incompletas -----------------------------
     //---------------------------------------------------------------------------------
-    
+
     //Expressão Regular Imagem - Atributo: Image
     public static boolean isImageValid(String image) {
         return Pattern.matches("[a-zA-Z0-9]+", image);
+    }
+
+    public static String b64ToImage(String imageDataString, String table) {
+        try {
+            String imageName = table + getRandomHexString(10);
+            String base64Image = imageDataString.split(",")[1];
+
+            // Convert the image code to bytes.
+            byte[] imageBytes = javax.xml.bind.DatatypeConverter.parseBase64Binary(base64Image);
+
+            BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
+
+            File imageFile = new File("../algorithmi-web/images/" + imageName + ".jpeg");
+
+            ImageIO.write(bufferedImage, "jpeg", imageFile);
+            return imageName + ".jpeg";
+        } catch (Exception ex) {
+            System.out.println("Image error" + ex.getMessage());
+            Logger
+                    .getLogger(utils.class
+                            .getName()).log(Level.SEVERE, null, ex);
+
+            return "noInstitution.jpeg";
+        }
+    }
+
+    private static String getRandomHexString(int numchars) {
+        Random r = new Random();
+        StringBuffer sb = new StringBuffer();
+        while (sb.length() < numchars) {
+            sb.append(Integer.toHexString(r.nextInt()));
+        }
+
+        return sb.toString().substring(0, numchars);
     }
 }
 
@@ -356,3 +398,4 @@ public class utils {
 //Pattern.matches("[carateresOUconjunto-ADMITIDO]",dadosAcomparar)
 //se nos dados a comparar n existir algo que n esteja em carateresOUconjunto-ADMITIDO devolve falso!
 //fonte: http://www.javatpoint.com/java-regex
+

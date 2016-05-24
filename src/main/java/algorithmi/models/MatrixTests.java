@@ -20,14 +20,14 @@ import java.util.Date;
  */
 public class MatrixTests {
 
-    private int _id;
+    private int id;
     private Date date;
     private String name;
     private Date startingTime;
     private Date finishingTime;
     private int teacher;
     private int course;
-    
+
     public MatrixTests(String data) throws Exception {
 
         //Transforma a string recebida pelo pedido http para json
@@ -36,8 +36,8 @@ public class MatrixTests {
         //Exibe os dados, em formato json
         System.out.println(matrixTests.entrySet());
         //Revalidar TUDO, formatos, campos vazios, TUDO!!
-        
-        this._id = getLastID_MatrixTests() + 1; //ir buscar o max id da bd + 1
+
+        this.id = getLastID_MatrixTests() + 1; //ir buscar o max id da bd + 1
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         df.setLenient(false);
         Date dt;
@@ -57,7 +57,7 @@ public class MatrixTests {
         } catch (ParseException ex) {
             startTime = new Date();
         }
-        this.startingTime = startTime;  
+        this.startingTime = startTime;
         //FinishingTime da MatrixTest
         DateFormat ft = new SimpleDateFormat("HH:mm:ss");
         ft.setLenient(false);
@@ -77,8 +77,8 @@ public class MatrixTests {
         JsonParser jsonParser = new JsonParser();
         JsonObject matrixTests = (JsonObject) jsonParser.parse(data);
         System.out.println(matrixTests.entrySet());
-        
-        this._id = id;
+
+        this.id = id;
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         df.setLenient(false);
         Date dt;
@@ -98,7 +98,7 @@ public class MatrixTests {
         } catch (ParseException ex) {
             startTime = new Date();
         }
-        this.startingTime = startTime;  
+        this.startingTime = startTime;
         //FinishingTime da MatrixTest
         DateFormat ft = new SimpleDateFormat("HH:mm:ss");
         ft.setLenient(false);
@@ -112,13 +112,13 @@ public class MatrixTests {
         this.teacher = matrixTests.get("teacher").getAsInt();
         this.course = matrixTests.get("course").getAsInt();
     }
-    
+
     public int getId() {
-        return _id;
+        return id;
     }
 
-    public void setId(int _id) {
-        this._id = _id;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -168,10 +168,9 @@ public class MatrixTests {
     public void setFinishingTime(Date finishingTime) {
         this.finishingTime = finishingTime;
     }
-    
+
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
-    
     @Override
     public String toString() {
         Gson gson = new Gson();
@@ -180,7 +179,7 @@ public class MatrixTests {
         System.out.println("json \n" + json);
         return json;
     }
-    
+
     //Buscar o Last ID da Tabela MatrixTests
     public static int getLastID_MatrixTests() throws Exception {
         utils getid = new utils();
@@ -190,7 +189,6 @@ public class MatrixTests {
 //--------------------------------------------------------------------------------------
 //------------------------------- Registar MatrixTest ----------------------------------
 //--------------------------------------------------------------------------------------  
-    
     public int regist() throws Exception {
 
         boolean existErro = false;
@@ -203,124 +201,108 @@ public class MatrixTests {
         }
         int status = 400;
         if (!existErro) {
-            String insert = "INSERT INTO tblMatrixTests values(" + _id + "," + '"' + date + '"' + "," + name + "," + '"' + startingTime + '"' + "," + finishingTime + "," + '"' + teacher + '"' + "," + course + '"' + ")";
-            String tt = utils.commandMySQLToJson_String(insert);
-            System.out.println(" Inserido a MatrixTest nº " + _id);
+            String insert = "INSERT INTO tblMatrixTests values(" + id + "," + '"' + date + '"' + "," + name + "," + '"' + startingTime + '"' + "," + finishingTime + "," + '"' + teacher + '"' + "," + course + '"' + ")";
+            String tt = utils.executeSelectCommand(insert).toString();;
+            System.out.println(" Inserido a MatrixTest nº " + id);
         }
         return status;
     }
 
     //public int regist() throws Exception {
-
         //boolean existErro = false;
-        //String[] erros = validateData();
-        //for (int i = 0; i < erros.length; i++) {
-           //if (erros[i] == null);
-            //{
-                //existErro = existErro || false;
-            //}
-        //}
-        //int status = 400;
-        //if (!existErro) {
-
-            //Statement stmtt = connectDatabase();
-
-            //stmtt.execute("INSERT INTO tblMatrixTests values(" + _id + "," + '"' + date + '"' + "," + name + "," + '"' + startingTime + '"' + "," + finishingTime + '"' + "," + teacher + '"' + "," + course + '"' + ")");
-            //ResultSet res = stmtt.getResultSet();
-            //while (res.next()) {
-                //status = 200;
-            //}
-            //System.out.println(" insert matrixTest nº " + _id);
-
-            //stmtt.getConnection().close();
-            //stmtt.close();
-        //}
-        //return status;
+    //String[] erros = validateData();
+    //for (int i = 0; i < erros.length; i++) {
+    //if (erros[i] == null);
+    //{
+    //existErro = existErro || false;
     //}
-    
+    //}
+    //int status = 400;
+    //if (!existErro) {
+            //Statement stmtt = connectDatabase();
+            //stmtt.execute("INSERT INTO tblMatrixTests values(" + id + "," + '"' + date + '"' + "," + name + "," + '"' + startingTime + '"' + "," + finishingTime + '"' + "," + teacher + '"' + "," + course + '"' + ")");
+    //ResultSet res = stmtt.getResultSet();
+    //while (res.next()) {
+    //status = 200;
+    //}
+    //System.out.println(" insert matrixTest nº " + id);
+            //stmtt.getConnection().close();
+    //stmtt.close();
+    //}
+    //return status;
+    //}
 //--------------------------------------------------------------------------------------
 //--------------------------------- Update MatrixTest ----------------------------------
 //--------------------------------------------------------------------------------------
-    
-    public int updateMatrixTests(int _id) throws Exception {
+    public int updateMatrixTests(int id) throws Exception {
         int status = 0;
 
-        String update = "UPDATE tblMatrixTests SET date=" + date + ",name=" + name + ",startingTime=" + startingTime + ",finishingTime=" + finishingTime + ",teacher=" + teacher + ",course=" + course +" where _id=" + _id;
-        String updated = utils.commandMySQLToJson_String(update);
+        String update = "UPDATE tblMatrixTests SET date=" + date + ",name=" + name + ",startingTime=" + startingTime + ",finishingTime=" + finishingTime + ",teacher=" + teacher + ",course=" + course + " where id=" + id;
+        String updated = utils.executeSelectCommand(update).toString();;
         return status;
-    } 
-    
-    //public int updateMatrixTests(int _id) throws Exception {
-        //int status = 0;
+    }
 
+    //public int updateMatrixTests(int id) throws Exception {
+    //int status = 0;
         //Statement stmtt = utils.connectDatabase();
-        //stmtt.execute("UPDATE tblMatrixTests SET date=" + date + ",name=" + name + ",startingTime=" + startingTime + ",finishingTime=" + finishingTime + ",teacher=" + teacher + ",course=" + course +" where _id=" + _id + ")");
-
+    //stmtt.execute("UPDATE tblMatrixTests SET date=" + date + ",name=" + name + ",startingTime=" + startingTime + ",finishingTime=" + finishingTime + ",teacher=" + teacher + ",course=" + course +" where id=" + id + ")");
         //ResultSet res = stmtt.getResultSet();
-
         //System.out.println("result update MatrixTests " + res.rowUpdated());
-
         //stmtt.close();
-        //return status;
+    //return status;
     //} 
-    
 //--------------------------------------------------------------------------------------
 //--------------------------------- Apagar MatrixTest ----------------------------------
 //--------------------------------------------------------------------------------------
-    
-    public String deleteMatrixTests(int _id) throws Exception {
+    public String deleteMatrixTests(int id) throws Exception {
         int status = 400;
-        String deleted = utils.deleteRegist(_id, "tblMatrixTests");
-        String del=utils.commandMySQLToJson_String(deleted);
+        String deleted = utils.deleteRegist(id, "tblMatrixTests");
+        String del = utils.executeSelectCommand(deleted).toString();;
         return del;
     }
 
-    //public int deleteMatrixTests(int _id) throws Exception {
-        //int status = 400;
-        //utils utils = new utils();
-        //boolean deleted = utils.deleteRegist(_id, "tblMatrixTests");
-        //if (deleted) {
-            //status = 200;
-        //}
-        //return status;
+    //public int deleteMatrixTests(int id) throws Exception {
+    //int status = 400;
+    //utils utils = new utils();
+    //boolean deleted = utils.deleteRegist(id, "tblMatrixTests");
+    //if (deleted) {
+    //status = 200;
     //}
-    
+    //return status;
+    //}
 //--------------------------------------------------------------------------------------
 //--------------------------------- Listar MatrixTest ----------------------------------
 //--------------------------------------------------------------------------------------
-    
     public static String listMatrixTests_WEB() throws Exception {
         //String query = "SELECT * FROM tblMatrixTests";
-        
+
         //NÃO ESTÁ BEM FEITO
-        String query = "SELECT tblMatrixTests.`name` as MatrixTests,tblUser.`type` as User,tblCourses.`name` as Courses FROM tblMatrixTests, tblUsers where tblMatrixTests.teacher=tblUser._id AND tblMatrixTests.course=tblCourse._id";
-        String teste = utils.commandMySQLToJson_String(query);
+        String query = "SELECT tblMatrixTests.`name` as MatrixTests,tblUser.`type` as User,tblCourses.`name` as Courses FROM tblMatrixTests, tblUsers where tblMatrixTests.teacher=tblUser.id AND tblMatrixTests.course=tblCourse.id";
+        String teste = utils.executeSelectCommand(query).toString();;
         return teste;
     }
-    
+
     //public static String listMatrixTests_WEB() throws Exception {
-        //FALTA FAZER O SELECT
-        //String query = "SELECT tblInstitutions.`name` as Institutions,tblInstitutions.`address` as Institutions,tblSchools where tblCourses.school=tblSchools._id";
-        //String obj = utils.querysToJson_String(query);
-        //System.out.println("list matrixTests  " + obj);
-        //return obj;
+    //FALTA FAZER O SELECT
+    //String query = "SELECT tblInstitutions.`name` as Institutions,tblInstitutions.`address` as Institutions,tblSchools where tblCourses.school=tblSchools.id";
+    //String obj = utils.querysToJson_String(query);
+    //System.out.println("list matrixTests  " + obj);
+    //return obj;
     //}
-    
 //--------------------------------------------------------------------------------------
 //------------------------------- Validar Dados MatrixTest -----------------------------
 //--------------------------------------------------------------------------------------
-    
     private String[] validateData() {
 
         String respostasErro[] = new String[6];
         boolean valid = false;
-        
+
         boolean dateValid = utils.isThisDateValid(date + "");//0
-        boolean nameValid = utils.isString(name,false);//1     
+        boolean nameValid = utils.isString(name, false);//1     
         boolean startingTimeValid = utils.isThisHourValid(startingTime + "");//2
         boolean finishingTimeValid = utils.isThisHourValid(finishingTime + "");//3
-        boolean teacherValid = utils.isNumber(Integer.toString(teacher),false);//4
-        boolean courseValid = utils.isNumber(Integer.toString(course),false);//5
+        boolean teacherValid = utils.isNumber(Integer.toString(teacher), false);//4
+        boolean courseValid = utils.isNumber(Integer.toString(course), false);//5
 
         valid = dateValid && nameValid && startingTimeValid && finishingTimeValid && teacherValid && courseValid;
         if (!valid) {

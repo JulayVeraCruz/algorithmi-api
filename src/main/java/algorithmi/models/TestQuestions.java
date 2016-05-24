@@ -85,7 +85,7 @@ public class TestQuestions {
         if (!existErro) {
             //executa driver para ligar à base de dados
             String insert = "INSERT INTO tblTestQuestions values(" + questionID + "," + testID + "," + quotation +")";
-            String tt = utils.commandMySQLToJson_String(insert);
+            String tt = utils.executeSelectCommand(insert).toString();;
             System.out.println("Inseridos os seguintes valores: " + tt);
         }
         return status;
@@ -100,7 +100,7 @@ public void updateTestQuestions(int testID, int questionID) throws Exception {
         //executa driver para ligar à base de dados
         String update = "UPDATE tblTestQuestions " + "SET quotation=" + quotation + " where questionID=" + questionID + " AND testID=" + testID + ")";
 
-        String upd = utils.commandMySQLToJson_String(update);
+        String upd = utils.executeSelectCommand(update).toString();;
 
         System.out.println("Alterado a quotação:  " + upd);
     }   
@@ -114,7 +114,7 @@ public void updateTestQuestions(int testID, int questionID) throws Exception {
         String delete = "regist not deleted";
         //executa driver para ligar à base de dados
         String delet = "DELETE FROM `tblTestQuestions` where questionID=" + questionID + " and testID=" + testID;
-        String tt = utils.commandMySQLToJson_String(delet);
+        String tt = utils.executeSelectCommand(delet).toString();;
         return tt;
     }    
     

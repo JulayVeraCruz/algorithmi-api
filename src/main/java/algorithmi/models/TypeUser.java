@@ -20,8 +20,6 @@ import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.sql.ResultSet;
-import java.sql.Statement;
 
 /**
  *
@@ -29,7 +27,7 @@ import java.sql.Statement;
  */
 public class TypeUser {
 
-    private int _id;
+    private int id;
     private String name;
 
     public TypeUser(String data) throws Exception {
@@ -46,11 +44,12 @@ public class TypeUser {
          *
          */
         //Associa os dados ao objecto UserType
-        this._id = getLastID_UserTypes() + 1; //ir buscar o max id da bd + 1 
+        this.id = getLastID_UserTypes() + 1; //ir buscar o max id da bd + 1 
         this.name = UserType.get("name").getAsString();
 
     }
- public TypeUser(String data,int _id) throws Exception {
+
+    public TypeUser(String data, int id) throws Exception {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -64,7 +63,7 @@ public class TypeUser {
          *
          */
         //Associa os dados ao objecto UserType
-        this._id =_id; //ir buscar o max id da bd + 1 
+        this.id = id; //ir buscar o max id da bd + 1 
         this.name = UserType.get("name").getAsString();
 
     }
@@ -76,7 +75,7 @@ public class TypeUser {
      */
     public int regist() throws Exception {
         int status = 0;
-         boolean existErro = false;
+        boolean existErro = false;
         String[] erros = validateData();
         for (int i = 0; i < erros.length; i++) {
             if (erros[i] == null);
@@ -86,9 +85,9 @@ public class TypeUser {
         }
         if (!existErro) {
             //executa driver para ligar à base de dados
-             String insert = "INSERT INTO tblUserTypes values(" + _id + "," + '"' + name + '"' + ")";
+            String insert = "INSERT INTO tblUserTypes values(" + id + "," + '"' + name + '"' + ")";
 
-             String tt = utils.commandMySQLToJson_String(insert);
+            String tt = utils.executeSelectCommand(insert).toString();
         }
         return status;
     }
@@ -122,8 +121,8 @@ public class TypeUser {
         String respostasErro[] = new String[2];
         boolean valid;
 
-        boolean idValid = utils.isNumber(_id + "",false);//0
-        boolean nameValid = utils.isString(name,true);//1
+        boolean idValid = utils.isNumber(id + "", false);//0
+        boolean nameValid = utils.isString(name, true);//1
 
         valid = nameValid && idValid;
 
@@ -141,54 +140,55 @@ public class TypeUser {
     /**
      * para actualizar/alterar os dados de um registo na tabela usertypes
      *
-     * @param _id
+     * @param id
      */
-    public int updateTypeUser(int _id) throws Exception{
-       int status = 0;
+    public int updateTypeUser(int id) throws Exception {
+        int status = 0;
 
-            //executa driver para ligar à base de dados
-            String update="UPDATE tblUserTypes " + "SET name=" + '"' + name + '"' + " where _id=" + _id + ")";
-            String updat=utils.commandMySQLToJson_String(update);
+        //executa driver para ligar à base de dados
+        String update = "UPDATE tblUserTypes " + "SET name=" + '"' + name + '"' + " where id=" + id + ")";
+        String updat = utils.executeSelectCommand(update).toString();
 
-            
         return status;
 
     }
 
     /**
- * lista os varios tipos de utilizadores existentes
- * @return JsonObject
- */
-    public static String listTypesOfUser() throws Exception{
-        String query="select tblusertypes.'name' as Name from tblusertypes ";
-        String obj = utils.commandMySQLToJson_String(query);
-       
+     * lista os varios tipos de utilizadores existentes
+     *
+     * @return JsonObject
+     */
+    public static String listTypesOfUser() throws Exception {
+        String query = "select tblusertypes.'name' as Name from tblusertypes ";
+        String obj = utils.executeSelectCommand(query).toString();
+
         return obj;
     }
-      /**
-     * apaga um tipo de user com o _id
+
+    /**
+     * apaga um tipo de user com o id
      *
-     * @param _id
+     * @param id
      */
-    public int deleteType(int _id) throws Exception {
+    public int deleteType(int id) throws Exception {
         int status = 400;
 //        utils utils = new utils();
-        String deleted = utils.deleteRegist(_id, "tblusertypes");
-        
+        String deleted = utils.deleteRegist(id, "tblusertypes");
+
         return status;
     }
-    
+
     public TypeUser(int id_Type, String name) {
-        this._id = id_Type;
+        this.id = id_Type;
         this.name = name;
     }
 
     public int getId() {
-        return _id;
+        return id;
     }
 
-    public void setId(int _id) {
-        this._id = _id;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
