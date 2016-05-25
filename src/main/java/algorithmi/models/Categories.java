@@ -105,7 +105,7 @@ public class Categories {
             stmtt.close();
 
         } catch (Exception ex) {
-            Logger.getLogger(algorithmi.models.User.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(algorithmi.models.Users.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return status;

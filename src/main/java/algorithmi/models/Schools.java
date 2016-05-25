@@ -44,7 +44,7 @@ public class Schools {
     //--------------------------------------------------------------------------------------
     public static String getAll() {
         try {
-            String query = "SELECT tblSchools.id,  tblSchools.name, tblInstitutions.name as institution FROM tblSchools, tblInstitutions WHERE tblSchools.institution=tblInstitutions.id";
+            String query = "SELECT tblSchools.id,  tblSchools.name, tblInstitutions.id as institutionID, tblInstitutions.name as institutionName FROM tblSchools, tblInstitutions WHERE tblSchools.institution=tblInstitutions.id";
             String result = utils.executeSelectCommand(query).toString();
             return result;
         } catch (Exception ex) {

@@ -1,8 +1,9 @@
 package algorithmi;
 
+import algorithmi.models.Courses;
 import algorithmi.models.Institutions;
 import algorithmi.models.Schools;
-import algorithmi.models.User;
+import algorithmi.models.Users;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.xml.internal.messaging.saaj.util.Base64;
@@ -44,7 +45,78 @@ public class Main {
                 // System.out.println(request.headers("Content-Type"));
             }
         });
+//----------------------------------------------------------------------------------------
+//-------------------------------------- Courses -----------------------------------------
+//----------------------------------------------------------------------------------------
+        get("/api/courses", (request, response) -> {
+            //Listar Cursos
+            System.out.println("course : " + Courses.getAll());
+            return Courses.getAll();
 
+        });
+        post("/api/courses", (request, response) -> {
+
+            try {
+                //Converte o body recebido da view
+                String data = new String(request.body().getBytes(), "UTF-8");
+                //Cria uma nova instituicao
+                Courses newCourse = new Courses(data);
+                //guarda-a na BD
+                response.status(newCourse.regist());
+                // E uma mensagem
+                return "{\"text\":\"Curso inserido com sucesso!\"}";
+
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println(" Curso error_ " + ex);
+                //Devolve 'NOK'
+                response.status(400);
+                return response;
+            }
+        });
+        put("/api/courses/:id", (request, response) -> {
+            try {
+                String data = new String(request.body().getBytes(), "UTF-8");
+                //Obtem os dados da instituição
+                Courses course = new Courses(data);
+                System.out.println(course.toString());
+                //Actualiza os dados
+                //Devolve estado
+                response.status(course.updateCourse());
+                // E uma mensagem
+                return "{\"text\":\"Curso alteradao com sucesso!\"}";
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println(" Curso error_ " + ex);
+                //Devolve 'NOK'
+                response.status(400);
+                return response;
+            }
+
+        });
+        get("/api/courses/:id", (request, response) -> {
+            //Obtem o id mandado pela view
+            String id = request.params(":id");
+            //Obtem os dados dessa instituicao e devolve-o à view
+            return Courses.getCourseData(id);
+
+        });
+        delete("/api/courses/:id", (request, response) -> {
+            //Obtem o id enviado pela view
+
+            int id = Integer.parseInt(request.params(":id"));
+            try {
+                response.status(Courses.deleteCourse(id));
+                return "{\"text\":\"Curso apagado com sucesso!\"}";
+
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                //Devolve 'NOK'
+                response.status(400);
+                return "{\"text\":\"Curso não apagado\"}";
+            }
+
+        });
 //----------------------------------------------------------------------------------------
 //------------------------------------ Institutions---------------------------------------
 //----------------------------------------------------------------------------------------
@@ -175,8 +247,8 @@ public class Main {
         get("/api/students", (request, response) -> {
 
             try {
-                User.deleteUser(9);
-                return User.listStudents();
+                Users.deleteUser(9);
+                return Users.listStudents();
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 return "{\"resposta\":\"Sem alunos para mostrar\"}";
@@ -191,7 +263,7 @@ public class Main {
 
                 //Obtem os dados desse utilizador
                 //Devolve-o à view
-                return User.getUser(id);
+                return Users.getUser(id);
 
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -206,9 +278,9 @@ public class Main {
                 //Obtem o id mandado pela view
                 String id = request.params(":id");
 
-                System.out.println("PUT" + User.getUserData(id));
+                System.out.println("PUT" + Users.getUserData(id));
                 //Obtem os dados desse utilizador
-                User user = new User(User.getUserData(id));
+                Users user = new Users(Users.getUserData(id));
                 System.out.println("user " + user);
                 //Faz as devidas alteraçoes
                 user.updateUser(java.net.URLDecoder.decode(request.body(), "UTF-8"));
@@ -235,7 +307,7 @@ public class Main {
                 //Exibe os dados, em formato json
                 System.out.println("user.entrySet " + user.entrySet());
 
-                User newUser = new User(data);
+                Users newUser = new Users(data);
                 System.out.println(newUser);
                 return newUser.regist();//devolve um inteiro-> status
 
@@ -244,5 +316,15 @@ public class Main {
                 return "{\"resposta\":\"User nao inserido\"}";
             }
         });
+
+        //----------------------------------------------------------------------------------------
+        //------------------------------------ Teachers---------------------------------------
+        //----------------------------------------------------------------------------------------
+        get("/api/teachers", (request, response) -> {
+            //Listar Instituições
+            return Users.getAllTeachers();
+
+        });
+
     }
 }
