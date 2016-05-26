@@ -118,7 +118,7 @@ public class Courses {
      */
     public static String getAll() {
         try {
-            String query = "SELECT tblCourses.id,  tblCourses.image, tblCourses.name, tblSchools.name as school FROM tblSchools, tblCourses WHERE tblSchools.id=tblCourses.school";
+            String query = "SELECT tblCourses.id,  tblCourses.image, tblCourses.name, tblCourses.school as schoolID, tblSchools.name as schoolName FROM tblSchools, tblCourses WHERE tblSchools.id=tblCourses.school";
             String result = utils.executeSelectCommand(query).toString();
             return result;
         } catch (Exception ex) {

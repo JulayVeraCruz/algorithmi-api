@@ -17,8 +17,6 @@ package algorithmi.models;
 
 import Utils.utils;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 /**
  *
@@ -29,21 +27,10 @@ public class UserCourse {
     private int userID;
     private int courseID;
 
-    public UserCourse(String data) {
+    public UserCourse(int userID, int courseID) {
 
-        //Transforma a string recebida pelo pedido http para json
-        JsonParser jsonParser = new JsonParser();
-        JsonObject UserCourse = (JsonObject) jsonParser.parse(data);
-        //Exibe os dados, em formato json
-        System.out.println(UserCourse.entrySet());
-        /**
-         *
-         * Revalidar TUDO, formatos, campos vazios, TUDO!!
-         *
-         */
-        this.userID = UserCourse.get("userID").getAsInt();
-
-        this.courseID = UserCourse.get("courseID").getAsInt();
+        this.userID = userID;
+        this.courseID = courseID;
     }
 
     /**
@@ -81,8 +68,8 @@ public class UserCourse {
         if (!existErro) {
             //executa driver para ligar à base de dados
             String insert = "INSERT INTO tblusercourses values(" + userID + "," + courseID + ")";
-            String tt = utils.executeSelectCommand(insert).toString();
-            System.out.println("result insert user's courses " + tt);
+
+            return utils.executeIUDCommand(insert);
 
         }
         return status;
@@ -143,27 +130,6 @@ public class UserCourse {
 
         return obj;
 
-    }
-
-    public UserCourse(int user, int curse) {
-        this.userID = user;
-        this.courseID = curse;
-    }
-
-    public int getUserID() {
-        return userID;
-    }
-
-    public void setUserID(int userID) {
-        this.userID = userID;
-    }
-
-    public int getCourseID() {
-        return courseID;
-    }
-
-    public void setCourseID(int courseID) {
-        this.courseID = courseID;
     }
 
     // converts a java object to JSON format,

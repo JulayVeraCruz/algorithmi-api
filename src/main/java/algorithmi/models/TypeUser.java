@@ -20,11 +20,15 @@ import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author FilipeRosa
+ *
  */
+//0 = root ; 1 = root ; 2 = admin ; 3 = teacher ; 4 = student ; 5 = waiting
 public class TypeUser {
 
     private int id;
@@ -158,11 +162,14 @@ public class TypeUser {
      *
      * @return JsonObject
      */
-    public static String listTypesOfUser() throws Exception {
-        String query = "select tblusertypes.'name' as Name from tblusertypes ";
-        String obj = utils.executeSelectCommand(query).toString();
-
-        return obj;
+    public static String listTypesOfUser() {
+        try {
+            String query = "select * from tblusertypes ";
+            return utils.executeSelectCommand(query).toString();
+        } catch (Exception ex) {
+            Logger.getLogger(TypeUser.class.getName()).log(Level.SEVERE, null, ex);
+            return "{\"resposta\":\"Erro ao obter Tipos de Utilizadores.\"}";
+        }
     }
 
     /**

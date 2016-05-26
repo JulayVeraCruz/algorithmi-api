@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  *
  * @author Pedro Dias
  */
-public class Users {
+public class Students {
 
     private int id;
     private String name;
@@ -42,7 +42,7 @@ public class Users {
     private String properties;
     private String image;
 
-    public Users(String data) throws Exception {
+    public Students(String data) throws Exception {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
@@ -67,7 +67,8 @@ public class Users {
 
         Date datBirth;
 
-        String gg = user.get("birthDate").getAsString();
+        //String gg = user.get("dateBirth").getAsString();
+        String gg = "12/03/2012";
 
         String dd = gg.substring(0, 2);
         String mm = gg.substring(3, 5);
@@ -78,7 +79,7 @@ public class Users {
         this.birthDate = datBirth;
         this.email = user.get("email").getAsString();
         this.type = user.get("type").getAsInt();
-        this.properties = user.get("course").getAsString();
+        this.type = user.get("type").getAsInt();
     }
 
     /**
@@ -111,21 +112,6 @@ public class Users {
             return utils.executeIUDCommand(insert);
         }
         return status;
-    }
-
-    //Procura o utilizador cuja password e username ou email correspondam
-    public static int exist(String username, String password) {
-        try {
-            String query = "select * from tblUsers where password ='" + password + "' and (username='" + username + "' or email='" + username + "')";
-            System.out.println(query);
-
-            return utils.executeSelectCommand(query).get(0).getAsJsonObject().getAsJsonPrimitive("type").getAsInt();
-        } catch (Exception ex) {
-            // Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("user not found :" + ex);
-            //Se nao encontrar o utilizador, devolte 5=sem privilegios
-            return 5;
-        }
     }
 
     //--------------------------------------------------------------------------------------
@@ -262,7 +248,7 @@ public class Users {
 
             return obj;
         } catch (Exception ex) {
-            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Students.class.getName()).log(Level.SEVERE, null, ex);
             return "{\"resposta\":\"Erro ao obter Utilizadores.\"}";
         }
     }
@@ -272,13 +258,16 @@ public class Users {
      *
      * @param id
      */
-    public static int delete(int id) throws Exception {
+    public static int deleteUser(int id) throws Exception {
+        int status = 400;
+//        utils utils = new utils();
 
-        //Apaga a associacoes dos users-cursos
-        utils.executeIUDCommand("DELETE FROM tblusercourses where userID=" + id + "");
-        //Apaga o utilizador
-        return utils.executeIUDCommand("DELETE FROM tblusers where id=" + id + "");
-
+        String obj = utils.executeSelectCommand("DELETE FROM tblusers where id=" + id + "").toString();
+        boolean deleted = true;
+        if (deleted) {
+            status = 200;
+        }
+        return status;
     }
 
     //Obtem os dados do utilizador prontos para a view
@@ -303,11 +292,48 @@ public class Users {
         }
     }
 
-    public int getID() {
-        return id;
+    public void setUser(String user) {
+        this.user = user;
     }
 
-    public String getProperties() {
-        return properties;
+    public String getName() {
+        return name;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Date getDateBirth() {
+        return birthDate;
+    }
+
+    public void setDateBirth(Date dateBirth) {
+        this.birthDate = dateBirth;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
 }

@@ -80,11 +80,11 @@ public class utils {
         int status = stmtt.executeUpdate(comandoMySQL);
         switch (status) {
             case 0:
-                System.out.println(comandoMySQL.split(" ")[0] + " fail");
+                System.out.println(comandoMySQL + " fail");
                 status = 400; //NOK
                 break;
             case 1:
-                System.out.println(comandoMySQL.split(" ")[0] + " success");
+                System.out.println(comandoMySQL + " success");
                 status = 200; //OK
                 break;
         }

@@ -3,9 +3,9 @@ package algorithmi;
 import algorithmi.models.Courses;
 import algorithmi.models.Institutions;
 import algorithmi.models.Schools;
+import algorithmi.models.TypeUser;
+import algorithmi.models.UserCourse;
 import algorithmi.models.Users;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.sun.xml.internal.messaging.saaj.util.Base64;
 import java.net.URLDecoder;
 import java.util.logging.Level;
@@ -23,6 +23,8 @@ import static spark.SparkBase.externalStaticFileLocation;
  */
 public class Main {
 
+    static int userType = 5;
+
     public static void main(String[] args) {
         try {
             //staticFileLocation("/api/public");
@@ -36,15 +38,15 @@ public class Main {
             System.out.println(request.requestMethod());
             if (request.headers("Authorization") != null) {
                 String aux[] = Base64.base64Decode(request.headers("Authorization").split(" ")[1]).split(":");
+                //Obtem o tipo de utilizador
+                userType = Users.exist(aux[0], aux[1]);
 
-                //      System.out.println(aux[0]);
-                //     System.out.println(aux[1]);
-//
-                //  System.out.println(request.headers("Authorization"));
-                // System.out.println(request.headers("Accept"));
-                // System.out.println(request.headers("Content-Type"));
             }
         });
+        //----------------------------------------------------------------------------------------
+        //-------------------------------------- LOGIN -----------------------------------------
+        //----------------------------------------------------------------------------------------
+
 //----------------------------------------------------------------------------------------
 //-------------------------------------- Courses -----------------------------------------
 //----------------------------------------------------------------------------------------
@@ -245,9 +247,7 @@ public class Main {
 //----------------------------------------------------------------------------------------
         //Obtem a lista de todos os estudantes
         get("/api/students", (request, response) -> {
-
             try {
-                Users.deleteUser(9);
                 return Users.listStudents();
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -255,66 +255,49 @@ public class Main {
             }
 
         });
-        get("/api/students/:id", (request, response) -> {
+        post("/api/students", (request, response) -> {
 
             try {
-                //Obtem o id mandado pela view
-                String id = request.params(":id");
-
-                //Obtem os dados desse utilizador
-                //Devolve-o à view
-                return Users.getUser(id);
-
-            } catch (Exception ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                return "{\"resposta\":\"Sem alunos para mostrar\"}";
-            }
-
-        });
-
-        put("/api/students/:id", (request, response) -> {
-
-            try {
-                //Obtem o id mandado pela view
-                String id = request.params(":id");
-
-                System.out.println("PUT" + Users.getUserData(id));
-                //Obtem os dados desse utilizador
-                Users user = new Users(Users.getUserData(id));
-                System.out.println("user " + user);
-                //Faz as devidas alteraçoes
-                user.updateUser(java.net.URLDecoder.decode(request.body(), "UTF-8"));
-
-                return user;
-
-            } catch (Exception ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                return "{\"resposta\":\"Sem alunos para mostrar\"}";
-            }
-
-        });
-
-        post("api/students", (request, response) -> {
-            String data = null;
-            try {
-                //JSon Puro (Raw)
-                data = java.net.URLDecoder.decode(request.body(), "UTF-8");
-
-                //Objecto Jason para aceder aos parametros via Java
-                JsonParser jsonParser = new JsonParser();
-                JsonObject user = (JsonObject) jsonParser.parse(data);
-
-                //Exibe os dados, em formato json
-                System.out.println("user.entrySet " + user.entrySet());
-
+                //Converte o body recebido da view
+                String data = new String(request.body().getBytes(), "UTF-8");
+                //Cria uma nova instituicao
                 Users newUser = new Users(data);
-                System.out.println(newUser);
-                return newUser.regist();//devolve um inteiro-> status
+
+                UserCourse newUserCourse = new UserCourse(newUser.getID(), Integer.parseInt(newUser.getProperties()));
+
+                newUser.regist();
+
+                newUserCourse.regist();
+                response.status(200);
+                //response.status(newUser.regist());
+                //guarda-a na BD
+                // response.status(newSchool.insert());
+                // E uma mensagem
+                return "{\"text\":\"Utilizador inserida com sucesso!\"}";
 
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                return "{\"resposta\":\"User nao inserido\"}";
+                System.out.println(" institutions error_ " + ex);
+                //Devolve 'NOK'
+                response.status(400);
+                return response;
             }
+        });
+        delete("/api/students/:id", (request, response) -> {
+            //Obtem o id enviado pela view
+
+            int id = Integer.parseInt(request.params(":id"));
+            try {
+                response.status(Users.delete(id));
+                return "{\"text\":\"Aluno apagado com sucesso!\"}";
+
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                //Devolve 'NOK'
+                response.status(400);
+                return "{\"text\":\"Aluno não apagado\"}";
+            }
+
         });
 
         //----------------------------------------------------------------------------------------
@@ -323,8 +306,14 @@ public class Main {
         get("/api/teachers", (request, response) -> {
             //Listar Instituições
             return Users.getAllTeachers();
-
         });
 
+//----------------------------------------------------------------------------------------
+//------------------------------------ UserType ------------------------------------------
+//----------------------------------------------------------------------------------------
+        get("/api/userType", (request, response) -> {
+            return TypeUser.listTypesOfUser();//lista dos cursos existentes
+
+        });
     }
 }
