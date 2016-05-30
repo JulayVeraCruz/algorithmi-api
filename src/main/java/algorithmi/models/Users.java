@@ -42,43 +42,48 @@ public class Users {
     private String properties;
     private String image;
 
-    public Users(String data) throws Exception {
+    public Users(String data) {
 
-        //Transforma a string recebida pelo pedido http para json
-        JsonParser jsonParser = new JsonParser();
-        JsonObject user = (JsonObject) jsonParser.parse(data);
-        //Exibe os dados, em formato json
-        System.out.println(user.entrySet());
+        try {
+            //Transforma a string recebida pelo pedido http para json
+            JsonParser jsonParser = new JsonParser();
+            JsonObject user = (JsonObject) jsonParser.parse(data);
+            //Exibe os dados, em formato json
+            //System.out.println("SET:" + user.entrySet());
 
-        //Associa os dados ao objecto User
-        //Se o id for nulo (é um user novo)
-        if (user.get("id") == null) {
-            this.id = getLastID_Users() + 1; //ir buscar o max id da bd + 1
-        } else {
-            this.id = user.get("id").getAsInt();
+            //Associa os dados ao objecto User
+            //Se o id for nulo (é um user novo)
+            if (user.get("id") == null) {
+                this.id = getLastID_Users() + 1; //ir buscar o max id da bd + 1
+            } else {
+                this.id = user.get("id").getAsInt();
+            }
+            this.name = user.get("name").getAsString();
+            this.user = user.get("username").getAsString();
+            this.password = user.get("password").getAsString();
+            //Converte a imagem recebida em b64 e grava-a
+            this.image = user.get("image").getAsString();
+
+            /*
+             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+             df.setLenient(false);
+
+             Date datBirth;
+             String gg = user.get("birthDate").getAsString();
+             String dd = gg.substring(0, 2);
+             String mm = gg.substring(3, 5);
+             String yyyy = gg.substring(6, 10);
+
+             datBirth = df.parse(yyyy + "-" + mm + "-" + dd);
+
+             this.birthDate = datBirth;
+             */
+            this.email = user.get("email").getAsString();
+            this.type = user.get("type").getAsInt();
+            this.properties = user.get("properties").getAsString();
+        } catch (Exception ex) {
+            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
         }
-        this.name = user.get("name").getAsString();
-        this.user = user.get("username").getAsString();
-        this.password = user.get("password").getAsString();
-        //Converte a imagem recebida em b64 e grava-a 
-        this.image = utils.b64ToImage(user.get("image").getAsString(), "user" + id);
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        df.setLenient(false);
-
-        Date datBirth;
-
-        String gg = user.get("birthDate").getAsString();
-
-        String dd = gg.substring(0, 2);
-        String mm = gg.substring(3, 5);
-        String yyyy = gg.substring(6, 10);
-
-        datBirth = df.parse(yyyy + "-" + mm + "-" + dd);
-
-        this.birthDate = datBirth;
-        this.email = user.get("email").getAsString();
-        this.type = user.get("type").getAsInt();
-        this.properties = user.get("course").getAsString();
     }
 
     /**
@@ -90,6 +95,7 @@ public class Users {
      * @return status
      */
     public int regist() throws Exception {
+        this.image = utils.b64ToImage(this.image, "user" + id);
         int status = 0;
         boolean existErro = false;
         String[] erros = validateData();
@@ -104,9 +110,10 @@ public class Users {
             //executa driver para ligar à base de dados
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
             df.setLenient(false);
-            String bb = df.format(birthDate);
 
-            String insert = "INSERT INTO tblUsers values(" + id + "," + '"' + name + '"' + "," + '"' + bb + '"' + "," + '"' + email + '"' + ", " + type + "," + '"' + image + '"' + "," + '"' + password + '"' + "," + '"' + user + '"' + ",'NOK')";
+            String bb = df.format(new Date(12 / 05 / 1992));
+
+            String insert = "INSERT INTO tblUsers values(" + id + "," + '"' + name + '"' + "," + '"' + bb + '"' + "," + '"' + email + '"' + ", " + getType() + "," + '"' + image + '"' + "," + '"' + password + '"' + "," + '"' + user + '"' + ",'',false)";
 
             return utils.executeIUDCommand(insert);
         }
@@ -114,17 +121,30 @@ public class Users {
     }
 
     //Procura o utilizador cuja password e username ou email correspondam
-    public static int exist(String username, String password) {
+    public static String exist(String username, String password) {
         try {
             String query = "select * from tblUsers where password ='" + password + "' and (username='" + username + "' or email='" + username + "')";
             System.out.println(query);
 
-            return utils.executeSelectCommand(query).get(0).getAsJsonObject().getAsJsonPrimitive("type").getAsInt();
+            return utils.executeSelectCommand(query).get(0).getAsJsonObject().toString();
         } catch (Exception ex) {
             // Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("user not found :" + ex);
             //Se nao encontrar o utilizador, devolte 5=sem privilegios
-            return 5;
+            return null;
+        }
+    }
+
+    public JsonArray getMyData(int id) {
+        try {
+            String query = "select * from tblUsers where id=" + id;
+            JsonArray myData = utils.executeSelectCommand(query);
+            return myData;
+        } catch (Exception ex) {
+            // Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("user not found :" + ex);
+            //Se nao encontrar o utilizador, devolte 5=sem privilegios
+            return null;
         }
     }
 
@@ -179,7 +199,7 @@ public class Users {
 //        boolean imageValid = utils.isString(image);//4
 
         boolean passwordValid = utils.isString(password, true);//5
-        boolean typeValid = utils.isNumber(Integer.toString(type), false);//6
+        boolean typeValid = utils.isNumber(Integer.toString(getType()), false);//6
 
         valid = nameValid && emailValid && passwordValid && typeValid && userValid;//&& dateValid && imageValid &&;
         if (!valid) {
@@ -215,7 +235,7 @@ public class Users {
      *
      * @param id
      */
-    public String updateUser(String data) throws Exception {
+    public int updateUser(String data) throws Exception {
         int status = 400;
 
         //Transforma a string das alteraçoes para json
@@ -228,7 +248,7 @@ public class Users {
 
         System.out.println(query);
 
-        return utils.executeSelectCommand(query).toString().toString();
+        return utils.executeIUDCommand(query);
     }
 
     /**
@@ -251,9 +271,8 @@ public class Users {
      * @throws java.sql.SQLException
      */
     public static String listStudents() {
-
         try {
-            String query = "select * from tblUsers where type = 4";
+            String query = "select tblUsers.*, tblusercourses.courseID as courseId, tblcourses.name as courseName from tblUsers, tblusercourses, tblcourses where type = 4 and userID = tblUsers.id and tblcourses.id = courseID";
 
             String obj = utils.executeSelectCommand(query).toString();
 
@@ -263,6 +282,7 @@ public class Users {
             return obj;
         } catch (Exception ex) {
             Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Exception" + ex.getMessage());
             return "{\"resposta\":\"Erro ao obter Utilizadores.\"}";
         }
     }
@@ -309,5 +329,16 @@ public class Users {
 
     public String getProperties() {
         return properties;
+    }
+
+    /**
+     * @return the type
+     */
+    public int getType() {
+        return type;
+    }
+
+    public String getUsername() {
+        return user;
     }
 }

@@ -48,7 +48,7 @@ public class utils {
 
         Gson gson = new Gson();
 
-        System.out.println("State \n" + stmtt.execute(comandoMySQL));
+        System.out.println("State :" + stmtt.execute(comandoMySQL));
         ResultSet res = stmtt.getResultSet();
         ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
         int total_rows = metadata.getColumnCount();
@@ -72,7 +72,6 @@ public class utils {
     }
 
     public static int executeIUDCommand(String comandoMySQL) throws Exception {
-        JsonArray obj = new JsonArray();
 
         Statement stmtt = connectDatabase();
 

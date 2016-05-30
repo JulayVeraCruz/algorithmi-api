@@ -17,6 +17,8 @@ package algorithmi.models;
 
 import Utils.utils;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  *
@@ -27,10 +29,14 @@ public class UserCourse {
     private int userID;
     private int courseID;
 
-    public UserCourse(int userID, int courseID) {
+    public UserCourse(int userID, String data) throws Exception {
+
+        //Transforma a string recebida pelo pedido http para json
+        JsonParser jsonParser = new JsonParser();
+        JsonObject userCourse = (JsonObject) jsonParser.parse(data);
 
         this.userID = userID;
-        this.courseID = courseID;
+        this.courseID = userCourse.get("course").getAsInt();
     }
 
     /**

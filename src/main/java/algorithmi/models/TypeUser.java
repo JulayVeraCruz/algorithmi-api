@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  * @author FilipeRosa
  *
  */
-//0 = root ; 1 = root ; 2 = admin ; 3 = teacher ; 4 = student ; 5 = waiting
+//; 1 = root ; 2 = admin ; 3 = teacher ; 4 = student ; 5 = waiting
 public class TypeUser {
 
     private int id;

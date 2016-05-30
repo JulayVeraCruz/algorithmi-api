@@ -106,7 +106,7 @@ public class Institutions {
 //--------------------------------------------------------------------------------------
 //------------------------------- Apagar Instituição -----------------------------------
 //--------------------------------------------------------------------------------------
-    public static int deleteInstitution(int id) throws Exception {
+    public static int delete(int id) throws Exception {
 
         String deleted = utils.deleteRegist(id, "tblInstitutions");
         return utils.executeIUDCommand(deleted);
