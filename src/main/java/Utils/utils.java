@@ -41,53 +41,63 @@ public class utils {
      * @return string json
      * @throws Exception
      */
-    public static JsonArray executeSelectCommand(String comandoMySQL) throws Exception {
+    public static JsonArray executeSelectCommand(String comandoMySQL) {
         JsonArray obj = new JsonArray();
+        try {
 
-        Statement stmtt = connectDatabase();
+            Statement stmtt = connectDatabase();
 
-        Gson gson = new Gson();
+            Gson gson = new Gson();
 
-        System.out.println("State :" + stmtt.execute(comandoMySQL));
-        ResultSet res = stmtt.getResultSet();
-        ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
-        int total_rows = metadata.getColumnCount();
-        if (!(res == null)) {
-            while (res.next()) {
+            System.out.println("State :" + stmtt.execute(comandoMySQL));
+            ResultSet res = stmtt.getResultSet();
+            ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
+            int total_rows = metadata.getColumnCount();
+            if (!(res == null)) {
+                while (res.next()) {
+                    JsonObject row = new JsonObject();
+                    obj.add(row);
+                    for (int i = 1; i <= total_rows; i++) {
+//                System.out.println("col name " + metadata.getColumnLabel(i));
+                        row.add(metadata.getColumnLabel(i), gson.toJsonTree(res.getObject(i)));
+                    }
+                }
+            } else {
                 JsonObject row = new JsonObject();
                 obj.add(row);
-                for (int i = 1; i <= total_rows; i++) {
-//                System.out.println("col name " + metadata.getColumnLabel(i));
-                    row.add(metadata.getColumnLabel(i), gson.toJsonTree(res.getObject(i)));
-                }
+                row.add(null, null);
             }
-        } else {
-            JsonObject row = new JsonObject();
-            obj.add(row);
-            row.add(null, null);
-        }
 
-        stmtt.close();
+            stmtt.close();
+            return obj;
+        } catch (Exception ex) {
+            Logger.getLogger(utils.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return obj;
     }
 
-    public static int executeIUDCommand(String comandoMySQL) throws Exception {
+    public static int executeIUDCommand(String comandoMySQL) {
+        int status = 400;
+        try {
+            Statement stmtt = connectDatabase();
 
-        Statement stmtt = connectDatabase();
+            //1 == ok, 0== NOK
+            status = stmtt.executeUpdate(comandoMySQL);
+            switch (status) {
+                case 0:
+                    System.out.println(comandoMySQL + " fail");
+                    status = 400; //NOK
+                    break;
+                case 1:
+                    System.out.println(comandoMySQL + " success");
+                    status = 200; //OK
+                    break;
+            }
+            stmtt.close();
 
-        //1 == ok, 0== NOK
-        int status = stmtt.executeUpdate(comandoMySQL);
-        switch (status) {
-            case 0:
-                System.out.println(comandoMySQL + " fail");
-                status = 400; //NOK
-                break;
-            case 1:
-                System.out.println(comandoMySQL + " success");
-                status = 200; //OK
-                break;
+        } catch (Exception ex) {
+            Logger.getLogger(utils.class.getName()).log(Level.SEVERE, null, ex);
         }
-        stmtt.close();
         return status;
     }
 

@@ -74,7 +74,7 @@ public class Institutions {
 //--------------------------------------------------------------------------------------
 //------------------------------- Registar Instituicao ---------------------------------
 //--------------------------------------------------------------------------------------  
-    public int regist() throws Exception {
+    public int insert() throws Exception {
         boolean existErro = false;
         String[] erros = validateData();
         for (int i = 0; i < erros.length; i++) {

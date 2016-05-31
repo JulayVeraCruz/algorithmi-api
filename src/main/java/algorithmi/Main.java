@@ -1,5 +1,6 @@
 package algorithmi;
 
+import algorithmi.Models.Questions;
 import algorithmi.models.Categories;
 import algorithmi.models.Courses;
 import algorithmi.models.HighLevelLangs;
@@ -8,8 +9,8 @@ import algorithmi.models.Schools;
 import algorithmi.models.TypeUser;
 import algorithmi.models.UserCourse;
 import algorithmi.models.Users;
-import com.sun.xml.internal.messaging.saaj.util.Base64;
 import java.net.URLDecoder;
+import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static spark.Spark.before;
@@ -37,15 +38,31 @@ public class Main {
 
         before("/api/*", (request, response) -> {
             System.out.println(request.requestMethod() + "----" + request.url());
-            if (request.headers("Authorization") != null) {
-                String aux[] = Base64.base64Decode(request.headers("Authorization").split(" ")[1]).split(":");
-                //Obtem os dados do utilizador loggado
-                actualUser = new Users(Users.exist(aux[0], aux[1]));
+
+            String auth = request.headers("Authorization");
+            if (auth != null && auth.startsWith("Basic")) {
+                String b64Credentials = auth.substring("Basic".length()).trim();
+                String credentials[] = new String(Base64.getDecoder().decode(b64Credentials)).split(":");
+                System.out.println(credentials);
+                actualUser = new Users(Users.exist(credentials[0], credentials[1]));
                 System.out.println("EU : " + actualUser.getUsername());
 
-                // String query = "SELECT * FROM tblHighLevelLangs";
-                //    String result = utils.executeSelectCommand(query).toString();
-                //    System.out.println(result);
+                // String query = "Insert into tblinputoutputs values(3, 1,'','10, 11, 12, 13, 14, 15')";
+                // utils.executeIUDCommand(query);
+                // query = "Insert into tblinputoutputs values(2, 2,'','5, 4, 3, 2, 1, 0')";
+                ///  utils.executeIUDCommand(query);
+                //   String query = "Insert into tblcodelangs values(1, 2,' for i = 0 ; i<5 bla bla bla')";
+                //  utils.executeIUDCommand(query);
+                //  query = "Insert into tblcodelangs values(1, 3,' for i = 0 ; i<5 ble ble ble')";
+                //  utils.executeIUDCommand(query);
+                // query = "Insert into tblcodelangs values(2, 3,' for i = 5 ; i<0 bla bla bla')";
+                //  utils.executeIUDCommand(query);
+                //   query = "Insert into tblcodelangs values(2, 1,' for i = 5 ; i<0 ble ble ble')";
+                ///  utils.executeIUDCommand(query);
+                //    String query = "select * from tblquestions join tblinputoutputs on tblquestions.id=tblinputoutputs.question";
+                //   String query = "select * from  tblcodelangs";
+                //String result = utils.executeSelectCommand(query).toString();
+                //  System.out.println(result);
             }
         });
         //----------------------------------------------------------------------------------------
@@ -279,7 +296,7 @@ public class Main {
                     //Cria uma nova instituicao
                     Institutions newInstitutions = new Institutions(data);
                     //guarda-a na BD
-                    response.status(newInstitutions.regist());
+                    response.status(newInstitutions.insert());
                     // E uma mensagem
                     return "{\"text\":\"Instituição inserida com sucesso!\"}";
 
@@ -360,7 +377,37 @@ public class Main {
             return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
 
         });
+        get("/api/questions", (request, response) -> {
+            //Se tiver permissões
+            if (isAllowed(3)) {
+                //Lista e devolve os Cursos
+                return Questions.getAll();
+            }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
+        });
+        post("/api/questions", (request, response) -> {
 
+            try {
+                //Converte o body recebido da view
+                String data = new String(request.body().getBytes(), "UTF-8");
+                //Cria uma nova instituicao
+                Questions newQuestion = new Questions(data);
+                // System.out.println(newQuestion);
+                //guarda-a na BD
+                response.status(newQuestion.insert(data));
+                // E uma mensagem
+                return "{\"text\":\"Pergunta inserida com sucesso!\"}";
+
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println(" Questions error_ " + ex);
+                //Devolve 'NOK'
+                response.status(400);
+                return response;
+            }
+        });
 //----------------------------------------------------------------------------------------
 //------------------------------------ Institutions---------------------------------------
 //----------------------------------------------------------------------------------------
