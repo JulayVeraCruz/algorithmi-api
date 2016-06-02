@@ -57,7 +57,7 @@ public class Courses {
     public static String getCourseData(String id) {
 
         try {
-            String query = "select * from tblCourses where id=" + id;
+            String query = "select tblCourses.*,tblSchools.institution from tblCourses join tblSchools on tblSchools.id=tblCourses.school where tblCourses.id=" + id;
             JsonArray user = utils.executeSelectCommand(query);
             return user.get(0).getAsJsonObject().toString();
         } catch (Exception ex) {

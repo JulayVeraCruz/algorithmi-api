@@ -34,57 +34,13 @@ public class Users {
 
     private int id;
     private String name;
-    private String user;
-    private Date birthDate;
+    private String username;
+    private String birthDate;
     private String email;
     private int type;
     private String password;
     private String properties;
     private String image;
-
-    public Users(String data) {
-
-        try {
-            //Transforma a string recebida pelo pedido http para json
-            JsonParser jsonParser = new JsonParser();
-            JsonObject user = (JsonObject) jsonParser.parse(data);
-            //Exibe os dados, em formato json
-            //System.out.println("SET:" + user.entrySet());
-
-            //Associa os dados ao objecto User
-            //Se o id for nulo (é um user novo)
-            if (user.get("id") == null) {
-                this.id = getLastID_Users() + 1; //ir buscar o max id da bd + 1
-            } else {
-                this.id = user.get("id").getAsInt();
-            }
-            this.name = user.get("name").getAsString();
-            this.user = user.get("username").getAsString();
-            this.password = user.get("password").getAsString();
-            //Converte a imagem recebida em b64 e grava-a
-            this.image = user.get("image").getAsString();
-
-            /*
-             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-             df.setLenient(false);
-
-             Date datBirth;
-             String gg = user.get("birthDate").getAsString();
-             String dd = gg.substring(0, 2);
-             String mm = gg.substring(3, 5);
-             String yyyy = gg.substring(6, 10);
-
-             datBirth = df.parse(yyyy + "-" + mm + "-" + dd);
-
-             this.birthDate = datBirth;
-             */
-            this.email = user.get("email").getAsString();
-            this.type = user.get("type").getAsInt();
-            this.properties = user.get("properties").getAsString();
-        } catch (Exception ex) {
-            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
 
     /**
      * Insere novos registos na tabela INSERT INTO tabela Values(?,..) o campo
@@ -95,7 +51,15 @@ public class Users {
      * @return status
      */
     public int regist() throws Exception {
+        this.id = utils.getLastID("tblUsers") + 1;
         this.image = utils.b64ToImage(this.image, "user" + id);
+
+        //Impede que se registem com admins, so aceita prof e aluno
+        if (type <= 2) {
+            //No caso de nao ser nenhum, fica como aluno
+            type = 4;
+        }
+
         int status = 0;
         boolean existErro = false;
         String[] erros = validateData();
@@ -111,9 +75,9 @@ public class Users {
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
             df.setLenient(false);
 
-            String bb = df.format(new Date(12 / 05 / 1992));
+            String bb = df.format(new Date(birthDate));
 
-            String insert = "INSERT INTO tblUsers values(" + id + "," + '"' + name + '"' + "," + '"' + bb + '"' + "," + '"' + email + '"' + ", " + getType() + "," + '"' + image + '"' + "," + '"' + password + '"' + "," + '"' + user + '"' + ",'',false)";
+            String insert = "INSERT INTO tblUsers values(" + id + "," + '"' + name + '"' + "," + '"' + bb + '"' + "," + '"' + email + '"' + ", " + getType() + "," + '"' + image + '"' + "," + '"' + password + '"' + "," + '"' + username + '"' + ",'',false)";
 
             return utils.executeIUDCommand(insert);
         }
@@ -125,14 +89,18 @@ public class Users {
         try {
             String query = "select * from tblUsers where password ='" + password + "' and (username='" + username + "' or email='" + username + "')";
             System.out.println(query);
+            JsonArray ja = utils.executeSelectCommand(query);
+            if (ja.size() > 0) {
+                return ja.get(0).getAsJsonObject().toString();
+            }
 
-            return utils.executeSelectCommand(query).get(0).getAsJsonObject().toString();
         } catch (Exception ex) {
-            // Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("user not found :" + ex);
             //Se nao encontrar o utilizador, devolte 5=sem privilegios
-            return null;
+
         }
+        return new JsonArray().toString();
     }
 
     public JsonArray getMyData(int id) {
@@ -192,7 +160,7 @@ public class Users {
         String respostasErro[] = new String[7];
         boolean valid = false;
 
-        boolean userValid = utils.isUsernameValid(user);//0
+        boolean userValid = utils.isUsernameValid(username);//0
         boolean nameValid = utils.isString(name, true);//1
 //        boolean dateValid = utils.isThisDateValid(myString);//2
         boolean emailValid = utils.isEmailValid(email);//3
@@ -241,9 +209,9 @@ public class Users {
         //Transforma a string das alteraçoes para json
         JsonParser jsonParser = new JsonParser();
         JsonObject userr = (JsonObject) jsonParser.parse(data);
-        this.user = userr.get("user").getAsString();
+        this.username = userr.get("user").getAsString();
 
-        String query = "UPDATE tblUsers " + "SET username='" + user + "' where id=" + id;
+        String query = "UPDATE tblUsers " + "SET username='" + username + "' where id=" + id;
         //executa driver para ligar à base de dados
 
         System.out.println(query);
@@ -335,10 +303,40 @@ public class Users {
      * @return the type
      */
     public int getType() {
+
         return type;
+
     }
 
     public String getUsername() {
-        return user;
+        return username;
+    }
+
+    public String getMyAdminData() {
+        JsonParser jsonParser = new JsonParser();
+        JsonObject myData = (JsonObject) jsonParser.parse(this.toString());
+        //Recolhe a lista de professores pendentes
+        String querySch = "select * from tblUsers where state=false and type=3";
+        JsonArray pendingTeachers = utils.executeSelectCommand(querySch);
+        myData.add("pendingUsers", pendingTeachers);
+
+        return myData.toString();
+    }
+
+    public String getMyTeacherData() {
+        /*
+         Refazer o select para que apenas os alunos dos cursos a que o prof da aulas sejam listadaos
+         No momento recolhe todos
+         */
+        JsonParser jsonParser = new JsonParser();
+        JsonObject myData = (JsonObject) jsonParser.parse(this.toString());
+        //Recolhe a lista de alunos pendentes dos cursos a quem dá aulas
+        String querySch = "select a.* from tblusers a, tblusercourses b "
+                + "where b.userID = a.id and a.type = 4 "
+                + "and b.courseID = any(select b.courseID from tblusers a, tblusercourses b where b.userID =" + id + ")";
+        JsonArray pendingUsers = utils.executeSelectCommand(querySch);
+        myData.add("pendingUsers", pendingUsers);
+
+        return myData.toString();
     }
 }

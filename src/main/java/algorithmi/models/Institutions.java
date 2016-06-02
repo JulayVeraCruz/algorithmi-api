@@ -8,8 +8,8 @@ package algorithmi.models;
 import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 /**
  *
@@ -22,59 +22,15 @@ public class Institutions {
     private String address;
     private String image;
 
-    public Institutions(String data) throws Exception {
-
-        //Transforma a string recebida pelo pedido http para json
-        JsonParser jsonParser = new JsonParser();
-        JsonObject institutions = (JsonObject) jsonParser.parse(data);
-
-        //Exibe os dados, em formato json
-        System.out.println(institutions.entrySet());
-        //Revalidar TUDO, formatos, campos vazios, TUDO!!
-
-        //Se o id for nulo (é uma institution nova)
-        if (institutions.get("id") == null) {
-            this.id = getLastID() + 1; //ir buscar o max id da bd + 1
-        } else {
-            this.id = institutions.get("id").getAsInt();
-        }
-        this.name = institutions.get("name").getAsString();
-        this.address = institutions.get("address").getAsString();
-        //Converte a imagem recebida em b64 e grava-a 
-        this.image = utils.b64ToImage(institutions.get("image").getAsString(), "inst" + id);
-
-    }
-
-    //obtem os dados da instituicao prontos para o update
-    public static String getInstitutionData(String id) {
-
-        try {
-            String query = "select * from tblInstitutions where id=" + id;
-            JsonArray user = utils.executeSelectCommand(query);
-            return user.get(0).getAsJsonObject().toString();
-        } catch (Exception ex) {
-            return "";
-        }
-
-    }
-
-    @Override
-    public String toString() {
-        Gson gson = new Gson();
-        String json = gson.toJson(this);
-        return json;
-    }
-
-    //Maximo ID da tabela Institutions
-    public static int getLastID() throws Exception {
-        utils getid = new utils();
-        return getid.getLastID("tblInstitutions");
-    }
-
-//--------------------------------------------------------------------------------------
-//------------------------------- Registar Instituicao ---------------------------------
-//--------------------------------------------------------------------------------------  
+    //--------------------------------------------------------------------------------------
+    //------------------------------- Inserir Instituicao ---------------------------------
+    //--------------------------------------------------------------------------------------  
     public int insert() throws Exception {
+
+        this.id = utils.getLastID("tblInstitutions") + 1;
+        //converte a imagem em b64 para ficheiro e guarda o nome
+        this.image = utils.b64ToImage(image, "inst" + id);
+
         boolean existErro = false;
         String[] erros = validateData();
         for (int i = 0; i < erros.length; i++) {
@@ -94,20 +50,47 @@ public class Institutions {
         return status;
     }
 
-//--------------------------------------------------------------------------------------
-//------------------------------- Update a Instituição ---------------------------------
-//--------------------------------------------------------------------------------------   
+    //--------------------------------------------------------------------------------------
+    //------------------------------- Update a Instituição ---------------------------------
+    //--------------------------------------------------------------------------------------   
     public int updateInstitution() throws Exception {
-
+        //converte a imagem em b64 para ficheiro e guarda o nome
+        this.image = utils.b64ToImage(image, "inst" + id);
         String update = "UPDATE tblInstitutions SET name='" + name + "',address='" + address + "',image='" + image + "' where id=" + id;
         return utils.executeIUDCommand(update);
     }
 
-//--------------------------------------------------------------------------------------
-//------------------------------- Apagar Instituição -----------------------------------
-//--------------------------------------------------------------------------------------
-    public static int delete(int id) throws Exception {
+    //--------------------------------------------------------------------------------------
+    //-------------------------- Obter  dados de uma Instituição ---------------------------
+    //--------------------------------------------------------------------------------------   
+    public static String getInstitutionData(String id) {
 
+        try {
+            //Obtem a instituicao
+            String queryIns = "select * from tblInstitutions where id=" + id;
+            JsonObject institution = utils.executeSelectCommand(queryIns).get(0).getAsJsonObject();
+            //Obtem as escolas da instituicao
+            String querySch = "select * from tblSchools where institution=" + id;
+            JsonArray schools = utils.executeSelectCommand(querySch);
+            //Por cada escola obtem os cursos
+            for (JsonElement school : schools) {
+                //Obtem o id da escola
+                int schoolID = school.getAsJsonObject().get("id").getAsInt();
+                //Adiciona o array de io dessa pergunta
+                JsonArray coursesList = utils.executeSelectCommand("select * from tblCourses where school=" + schoolID);
+                school.getAsJsonObject().add("courses", coursesList);
+            }
+            institution.getAsJsonObject().add("schools", schools);
+            return institution.toString();
+        } catch (Exception ex) {
+            return "";
+        }
+    }
+
+    //--------------------------------------------------------------------------------------
+    //------------------------------- Apagar Instituição -----------------------------------
+    //--------------------------------------------------------------------------------------
+    public static int delete(int id) throws Exception {
         String deleted = utils.deleteRegist(id, "tblInstitutions");
         return utils.executeIUDCommand(deleted);
     }
@@ -152,5 +135,12 @@ public class Institutions {
             }
         }
         return respostasErro;
+    }
+
+    @Override
+    public String toString() {
+        Gson gson = new Gson();
+        String json = gson.toJson(this);
+        return json;
     }
 }

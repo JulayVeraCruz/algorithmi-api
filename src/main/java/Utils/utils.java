@@ -67,7 +67,7 @@ public class utils {
                 obj.add(row);
                 row.add(null, null);
             }
-
+            System.out.println("close");
             stmtt.close();
             return obj;
         } catch (Exception ex) {

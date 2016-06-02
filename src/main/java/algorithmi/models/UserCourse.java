@@ -48,7 +48,7 @@ public class UserCourse {
     public void updateCourseOf_User(int userid, int oldCourseid) throws Exception {
 
         //executa driver para ligar à base de dados
-        String update = "UPDATE tblUsersCourse " + "SET courseID=" + courseID + " where userID=" + userID + " AND courseID=" + oldCourseid + ")";
+        String update = "UPDATE tblusercourses " + "SET courseID=" + courseID + " where userID=" + userID + " AND courseID=" + oldCourseid + ")";
 
         String upd = utils.executeSelectCommand(update).toString();
 

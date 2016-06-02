@@ -9,6 +9,7 @@ import algorithmi.models.Schools;
 import algorithmi.models.TypeUser;
 import algorithmi.models.UserCourse;
 import algorithmi.models.Users;
+import com.google.gson.Gson;
 import java.net.URLDecoder;
 import java.util.Base64;
 import java.util.logging.Level;
@@ -27,6 +28,7 @@ import static spark.SparkBase.externalStaticFileLocation;
 public class Main {
 
     static Users actualUser;
+    static Gson gson = new Gson();
 
     public static void main(String[] args) {
         try {
@@ -41,18 +43,24 @@ public class Main {
 
             String auth = request.headers("Authorization");
             if (auth != null && auth.startsWith("Basic")) {
+
+                //String query = "select * tblUsers ";
+                // System.out.println(Utils.utils.executeSelectCommand(query));
                 String b64Credentials = auth.substring("Basic".length()).trim();
                 String credentials[] = new String(Base64.getDecoder().decode(b64Credentials)).split(":");
                 System.out.println(credentials);
-                actualUser = new Users(Users.exist(credentials[0], credentials[1]));
+
+                String data = Users.exist(credentials[0], credentials[1]);
+                System.out.println("Data" + data);
+                //Transforma os dados recebidos na class e obtem os dados do utilizador loggado
+                actualUser = gson.fromJson(data, Users.class);
+
+                System.out.println(": " + actualUser.toString());
                 System.out.println("EU : " + actualUser.getUsername());
 
-                // String query = "Insert into tblinputoutputs values(3, 1,'','10, 11, 12, 13, 14, 15')";
-                // utils.executeIUDCommand(query);
-                // query = "Insert into tblinputoutputs values(2, 2,'','5, 4, 3, 2, 1, 0')";
                 ///  utils.executeIUDCommand(query);
-                //   String query = "Insert into tblcodelangs values(1, 2,' for i = 0 ; i<5 bla bla bla')";
-                //  utils.executeIUDCommand(query);
+                // String query = "update tblusers set type=3 where id=16";
+                // utils.executeIUDCommand(query);
                 //  query = "Insert into tblcodelangs values(1, 3,' for i = 0 ; i<5 ble ble ble')";
                 //  utils.executeIUDCommand(query);
                 // query = "Insert into tblcodelangs values(2, 3,' for i = 5 ; i<0 bla bla bla')";
@@ -66,12 +74,19 @@ public class Main {
             }
         });
         //----------------------------------------------------------------------------------------
-        //-------------------------------------- LOGIN -----------------------------------------
+        //----------------------------------- Os meus dados --------------------------------------
         //----------------------------------------------------------------------------------------
         get("/api/me", (request, response) -> {
-            //Listar Cursos
-
-            return actualUser;
+            //Listar os dados do admin
+            if (actualUser.getType() == 2) {
+                return actualUser.getMyAdminData();
+                //Listar os dados do teacher
+            } else if (actualUser.getType() == 3) {
+                return actualUser.getMyTeacherData();
+                //Listar os dados do alino
+            } else {
+                return actualUser;
+            }
         });
 
         //----------------------------------------------------------------------------------------
@@ -138,15 +153,11 @@ public class Main {
         //----------------------------------------------------------------------------------------
         //-------------------------------------- Courses -----------------------------------------
         //----------------------------------------------------------------------------------------
-        get("/api/courses", (request, response) -> {
-            //Se tiver permissões
-            if (isAllowed(3)) {
-                //Lista e devolve os Cursos
-                return Courses.getAll();
-            }
-            //Senao devolve um Forbidden
-            response.status(401);
-            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
+        get("/courses", (request, response) -> {
+
+            //Lista e devolve os Cursos
+            return Courses.getAll();
+
         });
         post("/api/courses", (request, response) -> {
 
@@ -275,16 +286,11 @@ public class Main {
         //----------------------------------------------------------------------------------------
         //------------------------------------ Institutions---------------------------------------
         //----------------------------------------------------------------------------------------
-        get("/api/institutions", (request, response) -> {
+        get("/institutions", (request, response) -> {
 
-            //Se tiver permissões
-            if (isAllowed(3)) {
-                //Lista e devolve as instituicoes
-                return Institutions.getAll();
-            }
-            //Senao devolve um Forbidden
-            response.status(401);
-            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
+            //Lista e devolve as instituicoes
+            return Institutions.getAll();
+
         });
 
         post("/api/institutions", (request, response) -> {
@@ -293,8 +299,8 @@ public class Main {
                 try {
                     //Converte o body recebido da view
                     String data = new String(request.body().getBytes(), "UTF-8");
-                    //Cria uma nova instituicao
-                    Institutions newInstitutions = new Institutions(data);
+                    //Transforma os dados recebidos na class
+                    Institutions newInstitutions = gson.fromJson(data, Institutions.class);
                     //guarda-a na BD
                     response.status(newInstitutions.insert());
                     // E uma mensagem
@@ -321,12 +327,11 @@ public class Main {
                     //Obtem o id mandado pela view
                     String id = request.params(":id");
                     String data = new String(request.body().getBytes(), "UTF-8");
-                    //Obtem os dados da instituição
-                    Institutions insti = new Institutions(data);
-                    System.out.println(insti.toString());
+                    //Transforma os dados recebidos na class
+                    Institutions institution = gson.fromJson(data, Institutions.class);
                     //Actualiza os dados
                     //Devolve estado
-                    response.status(insti.updateInstitution());
+                    response.status(institution.updateInstitution());
                     // E uma mensagem
                     return "{\"text\":\"Instituição alterada com sucesso!\"}";
                 } catch (Exception ex) {
@@ -411,7 +416,7 @@ public class Main {
 //----------------------------------------------------------------------------------------
 //------------------------------------ Institutions---------------------------------------
 //----------------------------------------------------------------------------------------
-        get("/api/schools", (request, response) -> {
+        get("/schools", (request, response) -> {
             //Listar Instituições
             return Schools.getAll();
 
@@ -466,14 +471,14 @@ public class Main {
             }
 
         });
-        post("/api/students", (request, response) -> {
+        post("/user", (request, response) -> {
 
             try {
                 //Converte o body recebido da view
                 String data = new String(request.body().getBytes(), "UTF-8");
                 System.out.println("__" + data);
                 //Cria um novo user
-                Users newUser = new Users(data);
+                Users newUser = gson.fromJson(data, Users.class);
                 newUser.regist();
                 //Envia o id do user e do curso para o associar
                 UserCourse newUserCourse = new UserCourse(newUser.getID(), data);
