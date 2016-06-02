@@ -10,6 +10,7 @@ import algorithmi.models.TypeUser;
 import algorithmi.models.UserCourse;
 import algorithmi.models.Users;
 import com.google.gson.Gson;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Base64;
 import java.util.logging.Level;
@@ -48,18 +49,16 @@ public class Main {
                 // System.out.println(Utils.utils.executeSelectCommand(query));
                 String b64Credentials = auth.substring("Basic".length()).trim();
                 String credentials[] = new String(Base64.getDecoder().decode(b64Credentials)).split(":");
-                System.out.println(credentials);
+                // System.out.println(credentials);
 
                 String data = Users.exist(credentials[0], credentials[1]);
-                System.out.println("Data" + data);
                 //Transforma os dados recebidos na class e obtem os dados do utilizador loggado
                 actualUser = gson.fromJson(data, Users.class);
 
-                System.out.println(": " + actualUser.toString());
-                System.out.println("EU : " + actualUser.getUsername());
+                System.out.println("EU: " + actualUser.toString());
 
                 ///  utils.executeIUDCommand(query);
-                // String query = "update tblusers set type=3 where id=16";
+                //  String query = "update tblusers set state=0 where id=0 or id=14 or id=15 or id=16 or id=17";
                 // utils.executeIUDCommand(query);
                 //  query = "Insert into tblcodelangs values(1, 3,' for i = 0 ; i<5 ble ble ble')";
                 //  utils.executeIUDCommand(query);
@@ -518,6 +517,40 @@ public class Main {
         get("/api/teachers", (request, response) -> {
             //Listar Instituições
             return Users.getAllTeachers();
+        });
+        post("/api/userStatus/:id", (request, response) -> {
+            try {
+                //Converte o body recebido da view para obter o estado
+                String state = new String(request.body().getBytes(), "UTF-8");
+
+                //Obtem o id mandado pela view
+                String id = request.params(":id");
+
+                System.out.println(Users.getUser(id));
+                Users user = gson.fromJson(Users.getUser(id), Users.class);
+
+                System.out.println("User to update: " + user.toString());
+                System.out.println("My type: " + actualUser.getType() + " user type:  " + user.getType());
+                System.out.println(actualUser.getType() < user.getType());
+
+                //Se as permissoes do user que vou alterar, forem menores do que as minhas
+                if (user.getType() > actualUser.getType()) {
+                    //Devolve estado
+                    response.status(user.changeState(state));
+                    // E uma mensagem
+                    return "{\"text\":\"Estado alterado com sucesso!\"}";
+                } else {
+                    response.status(400);
+                    return "{\"text\":\"Não tem permissões para alterar o estado deste user!\"}";
+                }
+
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                response.status(400);
+                return "{\"text\":\"Não foi possível alterar o estado!\"}";
+
+            }
+
         });
 
 //----------------------------------------------------------------------------------------

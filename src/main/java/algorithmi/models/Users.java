@@ -88,7 +88,6 @@ public class Users {
     public static String exist(String username, String password) {
         try {
             String query = "select * from tblUsers where password ='" + password + "' and (username='" + username + "' or email='" + username + "')";
-            System.out.println(query);
             JsonArray ja = utils.executeSelectCommand(query);
             if (ja.size() > 0) {
                 return ja.get(0).getAsJsonObject().toString();
@@ -273,7 +272,7 @@ public class Users {
     public static String getUser(String id) {
         try {
             String query = "select tblusers.*,tblcourses.`name` as 'course' from tblusers,tblcourses,tblusercourses where tblusers.`id`=" + id + "  and tblusers.id=tblusercourses.userID and tblusercourses.courseID=tblcourses.id ";
-            String user = utils.executeSelectCommand(query).toString();
+            String user = utils.executeSelectCommand(query).get(0).getAsJsonObject().toString();
             return user;
         } catch (Exception e) {
         }
@@ -332,11 +331,25 @@ public class Users {
         JsonObject myData = (JsonObject) jsonParser.parse(this.toString());
         //Recolhe a lista de alunos pendentes dos cursos a quem dá aulas
         String querySch = "select a.* from tblusers a, tblusercourses b "
-                + "where b.userID = a.id and a.type = 4 "
+                + "where b.userID = a.id and a.type = 4 and state=0 "
                 + "and b.courseID = any(select b.courseID from tblusers a, tblusercourses b where b.userID =" + id + ")";
         JsonArray pendingUsers = utils.executeSelectCommand(querySch);
         myData.add("pendingUsers", pendingUsers);
 
         return myData.toString();
+    }
+
+    //Altera o estado de um user (activo/inactivo)
+    public int changeState(String state) {
+        String query = "";
+        System.out.println("");
+        if (state.equals("true")) {
+            query = "UPDATE tblUsers SET state=1 where id=" + id;
+        } else {
+            query = "UPDATE tblUsers SET state=0 where id=" + id;
+
+        }
+        System.out.println(query);
+        return utils.executeIUDCommand(query);
     }
 }

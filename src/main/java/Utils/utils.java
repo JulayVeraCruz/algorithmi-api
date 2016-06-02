@@ -49,7 +49,7 @@ public class utils {
 
             Gson gson = new Gson();
 
-            System.out.println("State :" + stmtt.execute(comandoMySQL));
+            stmtt.execute(comandoMySQL);
             ResultSet res = stmtt.getResultSet();
             ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
             int total_rows = metadata.getColumnCount();
@@ -67,7 +67,6 @@ public class utils {
                 obj.add(row);
                 row.add(null, null);
             }
-            System.out.println("close");
             stmtt.close();
             return obj;
         } catch (Exception ex) {
