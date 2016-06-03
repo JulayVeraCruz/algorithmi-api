@@ -44,12 +44,12 @@ public class utils {
     public static JsonArray executeSelectCommand(String comandoMySQL) throws Exception {
         JsonArray obj = new JsonArray();
 
-        Statement stmtt = connectDatabase();
+        SQL sql = connectDatabase();
 
         Gson gson = new Gson();
 
-        System.out.println("State \n" + stmtt.execute(comandoMySQL));
-        ResultSet res = stmtt.getResultSet();
+        sql.st.execute(comandoMySQL);
+        ResultSet res = sql.st.getResultSet();
         ResultSetMetaData metadata = (ResultSetMetaData) res.getMetaData();
         int total_rows = metadata.getColumnCount();
         if (!(res == null)) {
@@ -66,29 +66,27 @@ public class utils {
             obj.add(row);
             row.add(null, null);
         }
+        sql.close();
 
-        stmtt.close();
         return obj;
     }
 
     public static int executeIUDCommand(String comandoMySQL) throws Exception {
-        JsonArray obj = new JsonArray();
-
-        Statement stmtt = connectDatabase();
-
+        int status = 400;
+        SQL sql = connectDatabase();
         //1 == ok, 0== NOK
-        int status = stmtt.executeUpdate(comandoMySQL);
+        status = sql.st.executeUpdate(comandoMySQL);
         switch (status) {
             case 0:
-                System.out.println(comandoMySQL.split(" ")[0] + " fail");
+                System.out.println(comandoMySQL + " fail");
                 status = 400; //NOK
                 break;
             case 1:
-                System.out.println(comandoMySQL.split(" ")[0] + " success");
+                System.out.println(comandoMySQL + " success");
                 status = 200; //OK
                 break;
         }
-        stmtt.close();
+        sql.close();
         return status;
     }
 
@@ -101,14 +99,14 @@ public class utils {
      * @throws IllegalAccessException
      * @throws SQLException
      */
-    public static Statement connectDatabase() throws Exception {
+    public static SQL connectDatabase() throws Exception {
 
         Class.forName("com.mysql.jdbc.Driver").newInstance();
         //faz ligação à base de dados
         Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://algoritmi.ipt.pt/algo", "algo", "alg0alg0alg0");
 //        Connection connn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/fralgo?zeroDateTimeBehavior=convertToNull", "root", "root");
         Statement stmtt = (Statement) connn.createStatement();
-        return stmtt;
+        return new SQL(connn, stmtt);
     }
 
     /**
@@ -121,10 +119,10 @@ public class utils {
     public static int getLastID(String nomeTabela) throws Exception {
         int id = 0;
 
-        Statement stmtt = connectDatabase();
+        SQL sql = connectDatabase();
 
-        stmtt.execute("select " + nomeTabela + ".id from " + nomeTabela + " order by id desc limit 1");
-        ResultSet res = stmtt.getResultSet();
+        sql.st.execute("select " + nomeTabela + ".id from " + nomeTabela + " order by id desc limit 1");
+        ResultSet res = sql.st.getResultSet();
 
         while (res.next()) {
             id = Integer.parseInt(res.getString("id"));
@@ -142,15 +140,16 @@ public class utils {
     public String getName(int id, String tabela) throws Exception {
 
         String name = null;
-        Statement stmtt = connectDatabase();
+        SQL sql = connectDatabase();
 
-        stmtt.execute("SELECT name FROM `" + tabela + "` where id=" + id + "");
+        sql.st.execute("SELECT name FROM `" + tabela + "` where id=" + id + "");
 //        ResultSet res = connectDatabase(mySQL);//se for apenas um insert o res=null
-        ResultSet res = stmtt.getResultSet();
+        ResultSet res = sql.st.getResultSet();
 
         while (res.next()) {
             name = res.getString("name");
         }
+        sql.close();
         return name;
     }
 

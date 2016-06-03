@@ -1,9 +1,15 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package algorithmi.models;
 
 import Utils.utils;
 import algorithmi.Main;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import spark.Response;
@@ -12,17 +18,17 @@ import spark.Response;
  *
  * @author David
  */
-public class Categories {
+public class Languages {
 
     private int id;
     private String description;
 
     //--------------------------------------------------------------------------------------
-    //-------------------------------- Listar Categorias -----------------------------------
+    //------------------------------- Listar Linguagens ----------------------------------
     //--------------------------------------------------------------------------------------
     public static String getAll(Response response) {
         try {
-            String query = "SELECT * from tblCategories";
+            String query = "SELECT * FROM tblHighLevelLangs";
             //Devolve 'Ok'
             response.status(200);
             //E a lista de instituicoes
@@ -30,38 +36,40 @@ public class Categories {
         } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             response.status(400);
-            return "{\"text\":\"Não foi possível obter as Categorias.\"}";
+            return "{\"text\":\"Não foi possível obter as Linguagens.\"}";
         }
     }
 
     //--------------------------------------------------------------------------------------
-    //-----------------------*--- Obter  dados de uma Categoria -----------*----------------
+    //-------------------------- Obter  dados de uma Linguagem ---------------------------
     //--------------------------------------------------------------------------------------   
-    public static String getCategoryData(Response response, String id) {
+    public static String getLanguageData(Response response, String id) {
 
         try {
             //Obtem a instituicao
-            String queryCategory = "select * from tblCategories where id=" + id;
-            JsonObject category = utils.executeSelectCommand(queryCategory).get(0).getAsJsonObject();
+            String queryLang = "select * from tblHighLevelLangs where id=" + id;
+            JsonObject language = utils.executeSelectCommand(queryLang).get(0).getAsJsonObject();
+
             //Devolve 'OK'
             response.status(200);
             //E uma mensagem
-            return category.toString();
+            return language.toString();
         } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             response.status(400);
-            return "{\"text\":\"Não foi possível obter a Categoria com o id:" + id + ".\"}";
+            return "{\"text\":\"Não foi possível obter a Linguagem com o id:" + id + ".\"}";
         }
     }
 
     //--------------------------------------------------------------------------------------
-    //------------------------------- Inserir Categoria ---------------------------------
+    //------------------------------- Inserir Linguagem ---------------------------------
     //--------------------------------------------------------------------------------------  
     public String insert(Response response) {
 
         try {
             //Obtém o ultimo ID
-            this.id = utils.getLastID("tblCategories") + 1;
+            this.id = utils.getLastID("tblHighLevelLangs") + 1;
+
             boolean existErro = false;
             String[] erros = validateData();
             for (int i = 0; i < erros.length; i++) {
@@ -71,51 +79,72 @@ public class Categories {
                 }
             }
             if (!existErro) {
-                String insert = "INSERT INTO tblCategories values(" + id + ",'" + description + "')";
+                String insert = "INSERT INTO tblHighLevelLangs values(" + id + ",'" + description + "')";
                 //Insere, devolve o estado
                 response.status(utils.executeIUDCommand(insert));
                 // E uma mensagem
-                return "{\"text\":\"Categoria inserida com sucesso!\"}";
+                return "{\"text\":\"Linguagem inserida com sucesso!\"}";
             }
 
         } catch (Exception ex) {
             Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
         }
         response.status(400);
-        return "{\"text\":\"Não foi possível inserir a Categoria.\"}";
+        return "{\"text\":\"Não foi possível inserir a Linguagem.\"}";
     }
 
     //--------------------------------------------------------------------------------------
-    //------------------------------- Update a Categoria ---------------------------------
+    //------------------------------- Update a Linguagem ---------------------------------
     //--------------------------------------------------------------------------------------   
-    public String updateCategory(Response response) {
+    public String updateInstitution(Response response) {
         try {
-            String update = "UPDATE tblCategories SET description='" + description + "' where id=" + id;
+
+            String update = "UPDATE tblHighLevelLangs SET description='" + description + "' where id=" + id;
             response.status(utils.executeIUDCommand(update));
-            return "{\"text\":\"Categoria alterada com sucesso!\"}";
+            return "{\"text\":\"Linguagem alterada com sucesso!\"}";
+        } catch (MySQLIntegrityConstraintViolationException ex) {
+            response.status(400);
+            return "{\"text\":\"Não é possível editar a Linguagem  (" + id + ") porque existem dados associados.\"}";
         } catch (Exception ex) {
             Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
             response.status(400);
-            return "{\"text\":\"Não foi possível alterar a Categoria.\"}";
+            return "{\"text\":\"Não foi possível alterar a Linguagem.\"}";
         }
     }
 
     //--------------------------------------------------------------------------------------
-    //------------------------------- Apagar Instituição -----------------------------------
+    //------------------------------- Apagar Linguagem -----------------------------------
     //--------------------------------------------------------------------------------------
     public static String delete(Response response, int id) {
         try {
 
-            String deleted = utils.deleteRegist(id, "tblCategories");
+            String deleted = utils.deleteRegist(id, "tblHighLevelLangs");
             response.status(utils.executeIUDCommand(deleted));
-            return "{\"text\":\"Categoria apagada com sucesso.\"}";
+            return "{\"text\":\"Linguagem apagada com sucesso.\"}";
 
+        } catch (MySQLIntegrityConstraintViolationException ex) {
+            response.status(400);
+            return "{\"text\":\"Não é possível apagar a Linguagem  (" + id + ") porque existem dados associados.\"}";
         } catch (Exception ex) {
             Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
         }
         response.status(400);
-        return "{\"text\":\"Não foi possível apagar a Categoria.\"}";
+        return "{\"text\":\"Não foi possível apagar a Linguagem.\"}";
 
+    }
+
+    private String[] validateData() {
+
+        String respostasErro[] = new String[3];
+        boolean valid = false;
+        boolean nameValid = utils.isString(description, true);//1
+        valid = nameValid;
+        if (!valid) {
+            if (!nameValid) {
+                respostasErro[0] = "Nome da linguagem inválido";
+            }
+        }
+        return respostasErro;
     }
 
     // converts a java object to JSON format,
@@ -127,23 +156,6 @@ public class Categories {
         String json = gson.toJson(this);
         System.out.println("json \n" + json);
         return json;
-    }
-
-    //--------------------------------------------------------------------------------------
-    //------------------------------- Validar Dados ----------------------------------------
-    //--------------------------------------------------------------------------------------
-    private String[] validateData() {
-
-        String respostasErro[] = new String[3];
-        boolean valid = false;
-        boolean nameValid = utils.isString(description, true);//1
-        valid = nameValid;
-        if (!valid) {
-            if (!nameValid) {
-                respostasErro[0] = "Nome da categoria inválido";
-            }
-        }
-        return respostasErro;
     }
 
 }

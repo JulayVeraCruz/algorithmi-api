@@ -5,33 +5,33 @@
  */
 package algorithmi.models;
 
-import Utils.utils;
+import Utils.SQL;
 import static Utils.utils.connectDatabase;
-import com.google.gson.JsonObject;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  *
  * @author David
  */
 public class Version {
+
     int ver;
-    
-        public String getVersion() throws Exception {
+
+    public String getVersion() throws Exception {
 
         String name = null;
-        Statement stmtt = connectDatabase();
+        SQL sql = connectDatabase();
 
-        stmtt.execute("SELECT ver FROM tblVersion");
+        sql.st.execute("SELECT ver FROM tblVersion");
 //        ResultSet res = connectDatabase(mySQL);//se for apenas um insert o res=null
-        ResultSet res = stmtt.getResultSet();
+        ResultSet res = sql.st.getResultSet();
 
         while (res.next()) {
             name = res.getString("ver");
         }
+
+        sql.close();
         return name;
     }
-    
+
 }

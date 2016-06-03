@@ -29,21 +29,14 @@ public class UserCourse {
     private int userID;
     private int courseID;
 
-    public UserCourse(String data) {
+    public UserCourse(int userID, String data) throws Exception {
 
         //Transforma a string recebida pelo pedido http para json
         JsonParser jsonParser = new JsonParser();
-        JsonObject UserCourse = (JsonObject) jsonParser.parse(data);
-        //Exibe os dados, em formato json
-        System.out.println(UserCourse.entrySet());
-        /**
-         *
-         * Revalidar TUDO, formatos, campos vazios, TUDO!!
-         *
-         */
-        this.userID = UserCourse.get("userID").getAsInt();
+        JsonObject userCourse = (JsonObject) jsonParser.parse(data);
 
-        this.courseID = UserCourse.get("courseID").getAsInt();
+        this.userID = userID;
+        this.courseID = userCourse.get("course").getAsInt();
     }
 
     /**
@@ -55,7 +48,7 @@ public class UserCourse {
     public void updateCourseOf_User(int userid, int oldCourseid) throws Exception {
 
         //executa driver para ligar à base de dados
-        String update = "UPDATE tblUsersCourse " + "SET courseID=" + courseID + " where userID=" + userID + " AND courseID=" + oldCourseid + ")";
+        String update = "UPDATE tblusercourses " + "SET courseID=" + courseID + " where userID=" + userID + " AND courseID=" + oldCourseid + ")";
 
         String upd = utils.executeSelectCommand(update).toString();
 
@@ -81,8 +74,8 @@ public class UserCourse {
         if (!existErro) {
             //executa driver para ligar à base de dados
             String insert = "INSERT INTO tblusercourses values(" + userID + "," + courseID + ")";
-            String tt = utils.executeSelectCommand(insert).toString();
-            System.out.println("result insert user's courses " + tt);
+
+            return utils.executeIUDCommand(insert);
 
         }
         return status;
@@ -143,27 +136,6 @@ public class UserCourse {
 
         return obj;
 
-    }
-
-    public UserCourse(int user, int curse) {
-        this.userID = user;
-        this.courseID = curse;
-    }
-
-    public int getUserID() {
-        return userID;
-    }
-
-    public void setUserID(int userID) {
-        this.userID = userID;
-    }
-
-    public int getCourseID() {
-        return courseID;
-    }
-
-    public void setCourseID(int courseID) {
-        this.courseID = courseID;
     }
 
     // converts a java object to JSON format,
