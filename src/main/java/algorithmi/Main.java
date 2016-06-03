@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import static spark.Spark.before;
 import static spark.Spark.delete;
 import static spark.Spark.get;
+import static spark.Spark.halt;
 import static spark.Spark.post;
 import static spark.Spark.put;
 import static spark.SparkBase.externalStaticFileLocation;
@@ -45,46 +46,82 @@ public class Main {
             String auth = request.headers("Authorization");
             if (auth != null && auth.startsWith("Basic")) {
 
-                //String query = "select * tblUsers ";
-                // System.out.println(Utils.utils.executeSelectCommand(query));
                 String b64Credentials = auth.substring("Basic".length()).trim();
                 String credentials[] = new String(Base64.getDecoder().decode(b64Credentials)).split(":");
-                // System.out.println(credentials);
+                // Obtem os dados do user
+                String data = Users.exist(credentials[0], response);
+                //se encontrar
+                if (data != null) {
+                    //Transforma os dados recebidos na class e obtem os dados do utilizador loggado
+                    actualUser = gson.fromJson(data, Users.class);
+                    //Se a password estiver correcta
+                    if (actualUser.getPassword() == null ? credentials[1] != null : !actualUser.getPassword().equals(credentials[1])) {
+                        actualUser = null;
+                        halt(401, "{\"text\":\"Login inválido. Palavra-passe incorrecta!\"}");
+                    }
+                    //Se o utilizador estiver inactivo
+                    if (!actualUser.getState()) {
+                        actualUser = null;
+                        halt(401, "{\"text\":\"Lamentamos mas a sua conta não está activa. Se o problema persistir, contacte o administrador!\"}");
+                    }
+                    System.out.println("EU: " + actualUser.toString());
+                } else {
+                    halt(401, "{\"text\":\"Login inválido. O username ou e-mail inseridos não estão registados!\"}");
+                }
+            } else {
+                halt(401, "{\"text\":\"Login inválido. Por favor, efectue login ou registe-se para continuar!\"}");
 
-                String data = Users.exist(credentials[0], credentials[1]);
-                //Transforma os dados recebidos na class e obtem os dados do utilizador loggado
-                actualUser = gson.fromJson(data, Users.class);
-
-                System.out.println("EU: " + actualUser.toString());
-
-                ///  utils.executeIUDCommand(query);
-                //  String query = "update tblusers set state=0 where id=0 or id=14 or id=15 or id=16 or id=17";
-                // utils.executeIUDCommand(query);
-                //  query = "Insert into tblcodelangs values(1, 3,' for i = 0 ; i<5 ble ble ble')";
-                //  utils.executeIUDCommand(query);
-                // query = "Insert into tblcodelangs values(2, 3,' for i = 5 ; i<0 bla bla bla')";
-                //  utils.executeIUDCommand(query);
-                //   query = "Insert into tblcodelangs values(2, 1,' for i = 5 ; i<0 ble ble ble')";
-                ///  utils.executeIUDCommand(query);
-                //    String query = "select * from tblquestions join tblinputoutputs on tblquestions.id=tblinputoutputs.question";
-                //   String query = "select * from  tblcodelangs";
-                //String result = utils.executeSelectCommand(query).toString();
-                //  System.out.println(result);
             }
+
         });
+        //----------------------------------------------------------------------------------------
+        //---------------------- Se o email/username ja esta registado ----------------------------
+        //-----------------------------------------------------------------------------------------
+        post("/isUserValid", (request, response) -> {
+            try {
+                //Obtem o email/username mandado pela view
+                String data = new String(request.body().getBytes(), "UTF-8");
+                System.out.println(data);
+                if (data != null) {
+                    //Transforma os dados recebidos na class e obtem os dados do utilizador
+                    Users resgistedUser = gson.fromJson(Users.exist(data, response), Users.class);
+                    //se não encontrar, o email/username nao esta a ser utilizado
+                    if (resgistedUser == null) {
+                        response.status(200);
+                        return true;
+                    }
+                }
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            response.status(200);
+            return false;
+        });
+
         //----------------------------------------------------------------------------------------
         //----------------------------------- Os meus dados --------------------------------------
         //----------------------------------------------------------------------------------------
         get("/api/me", (request, response) -> {
-            //Listar os dados do admin
-            if (actualUser.getType() == 2) {
-                return actualUser.getMyAdminData();
-                //Listar os dados do teacher
-            } else if (actualUser.getType() == 3) {
-                return actualUser.getMyTeacherData();
-                //Listar os dados do alino
+            System.out.println(actualUser);
+            //se estiver loggado
+            if (actualUser == (null)) {
+                System.out.println("You shall not pass!");
+                //Senao devolve um Forbidden
+                response.status(401);
+                return "{\"text\":\"Login inválido. Por favor, efectue login para continuar!\"}";
+
             } else {
-                return actualUser;
+                System.out.println("You shall pass" + actualUser.getUsername());
+                //Listar os dados do admin
+                if (actualUser.getType() == 2) {
+                    return actualUser.getMyAdminData();
+                    //Listar os dados do teacher
+                } else if (actualUser.getType() == 3) {
+                    return actualUser.getMyTeacherData();
+                    //Listar os dados do alino
+                } else {
+                    return actualUser;
+                }
             }
         });
 
@@ -286,28 +323,36 @@ public class Main {
         //------------------------------------ Institutions---------------------------------------
         //----------------------------------------------------------------------------------------
         get("/institutions", (request, response) -> {
-
             //Lista e devolve as instituicoes
-            return Institutions.getAll();
+            return Institutions.getAll(response);
+        });
+        get("/api/institutions/:id", (request, response) -> {
+            //Se tiver permissões
+            if (isAllowed(2)) {
+                //Obtem o id mandado pela view
+                String id = request.params(":id");
+                //Obtem os dados dessa instituicao e devolve-o à view
+                return Institutions.getInstitutionData(response, id);
+            }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
 
         });
 
         post("/api/institutions", (request, response) -> {
-            //Se tiver permissões
+            //Se tiver permissões de admin
             if (isAllowed(2)) {
                 try {
                     //Converte o body recebido da view
                     String data = new String(request.body().getBytes(), "UTF-8");
                     //Transforma os dados recebidos na class
                     Institutions newInstitutions = gson.fromJson(data, Institutions.class);
-                    //guarda-a na BD
-                    response.status(newInstitutions.insert());
-                    // E uma mensagem
-                    return "{\"text\":\"Instituição inserida com sucesso!\"}";
-
+                    //Guarda-a na BD devolve o estado
+                    return newInstitutions.insert(response);
                 } catch (Exception ex) {
+                    System.out.println("Institutions error:");
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                    System.out.println(" institutions error_ " + ex);
                     //Devolve 'NOK'
                     response.status(400);
                     return "{\"text\":\"Instituição não inserida!\"}";
@@ -324,35 +369,18 @@ public class Main {
             if (isAllowed(2)) {
                 try {
                     //Obtem o id mandado pela view
-                    String id = request.params(":id");
                     String data = new String(request.body().getBytes(), "UTF-8");
                     //Transforma os dados recebidos na class
                     Institutions institution = gson.fromJson(data, Institutions.class);
-                    //Actualiza os dados
-                    //Devolve estado
-                    response.status(institution.updateInstitution());
-                    // E uma mensagem
-                    return "{\"text\":\"Instituição alterada com sucesso!\"}";
+                    //Actualiza os dados e devolve estado e a msg
+                    return institution.updateInstitution(response);
                 } catch (Exception ex) {
+                    System.out.println("Institutions error:");
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                    System.out.println(" institutions error_ " + ex);
                     //Devolve 'NOK'
                     response.status(400);
-                    return response;
+                    return "{\"text\":\"Instituição não alterada!\"}";
                 }
-            }
-            //Senao devolve um Forbidden
-            response.status(401);
-            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
-
-        });
-        get("/api/institutions/:id", (request, response) -> {
-            //Se tiver permissões
-            if (isAllowed(2)) {
-                //Obtem o id mandado pela view
-                String id = request.params(":id");
-                //Obtem os dados dessa instituicao e devolve-o à view
-                return Institutions.getInstitutionData(id);
             }
             //Senao devolve um Forbidden
             response.status(401);
@@ -366,14 +394,13 @@ public class Main {
                 //Obtem o id enviado pela view
                 int id = Integer.parseInt(request.params(":id"));
                 try {
-                    response.status(Institutions.delete(id));
-                    return "{\"text\":\"Instituição benfica ole!\"}";
+                    return Institutions.delete(response, id);
 
                 } catch (Exception ex) {
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                     //Devolve 'NOK'
                     response.status(400);
-                    return "{\"text\":\"Instituicao não apagado\"}";
+                    return "{\"text\":\"Ocorreu um erro ao apagar a instituição.\"}";
                 }
             }
             //Senao devolve um Forbidden
@@ -381,6 +408,10 @@ public class Main {
             return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
 
         });
+
+        //----------------------------------------------------------------------------------------
+        //------------------------------------ Questions---------------------------------------
+        //----------------------------------------------------------------------------------------
         get("/api/questions", (request, response) -> {
             //Se tiver permissões
             if (isAllowed(3)) {
@@ -412,34 +443,51 @@ public class Main {
                 return response;
             }
         });
-//----------------------------------------------------------------------------------------
-//------------------------------------ Institutions---------------------------------------
-//----------------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------------
+        //-------------------------------------- Escolas -----------------------------------------
+        //----------------------------------------------------------------------------------------
         get("/schools", (request, response) -> {
-            //Listar Instituições
-            return Schools.getAll();
+            //Lista e devolve as escolas
+            return Schools.getAll(response);
 
         });
+
+        get("/api/schools/:id", (request, response) -> {
+            //Se tiver permissões
+            if (isAllowed(2)) {
+                //Obtem o id mandado pela view
+                String id = request.params(":id");
+                //Obtem os dados dessa instituicao e devolve-o à view
+                return Schools.getSchoolData(response, id);
+            }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
+
+        });
+
         post("/api/schools", (request, response) -> {
 
-            try {
-                //Converte o body recebido da view
-                String data = new String(request.body().getBytes(), "UTF-8");
-                //Cria uma nova instituicao
-                Schools newSchool = new Schools(data);
-                System.out.println(newSchool);
-                //guarda-a na BD
-                response.status(newSchool.insert());
-                // E uma mensagem
-                return "{\"text\":\"Escola inserida com sucesso!\"}";
-
-            } catch (Exception ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println(" institutions error_ " + ex);
-                //Devolve 'NOK'
-                response.status(400);
-                return response;
+            //Se tiver permissões de admin
+            if (isAllowed(2)) {
+                try {
+                    //Converte o body recebido da view
+                    String data = new String(request.body().getBytes(), "UTF-8");
+                    //Transforma os dados recebidos na class
+                    Schools newSchool = gson.fromJson(data, Schools.class);
+                    //Guarda-a na BD devolve o estado
+                    return newSchool.insert(response);
+                } catch (Exception ex) {
+                    System.out.println("Schools error:");
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    //Devolve 'NOK'
+                    response.status(400);
+                    return "{\"text\":\"Escola não inserida!\"}";
+                }
             }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
         });
         delete("/api/schools/:id", (request, response) -> {
             //Obtem o id enviado pela view
@@ -536,9 +584,9 @@ public class Main {
                 //Se as permissoes do user que vou alterar, forem menores do que as minhas
                 if (user.getType() > actualUser.getType()) {
                     //Devolve estado
-                    response.status(user.changeState(state));
+                    response.status(200);
                     // E uma mensagem
-                    return "{\"text\":\"Estado alterado com sucesso!\"}";
+                    return user.changeState(state, response);
                 } else {
                     response.status(400);
                     return "{\"text\":\"Não tem permissões para alterar o estado deste user!\"}";

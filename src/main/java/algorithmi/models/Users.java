@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import spark.Response;
 
 /**
  *
@@ -41,6 +42,11 @@ public class Users {
     private String password;
     private String properties;
     private String image;
+    private boolean state;
+
+    public boolean getState() {
+        return state;
+    }
 
     /**
      * Insere novos registos na tabela INSERT INTO tabela Values(?,..) o campo
@@ -84,22 +90,22 @@ public class Users {
         return status;
     }
 
-    //Procura o utilizador cuja password e username ou email correspondam
-    public static String exist(String username, String password) {
+    //Procura o utilizador cujo username ou email correspondam
+    public static String exist(String username, Response response) {
         try {
-            String query = "select * from tblUsers where password ='" + password + "' and (username='" + username + "' or email='" + username + "')";
+            String query = "select * from tblUsers where (username='" + username + "' or email='" + username + "')";
             JsonArray ja = utils.executeSelectCommand(query);
+            //Se os dados de autenticacao estao correctos
             if (ja.size() > 0) {
+                System.out.println("1");
                 return ja.get(0).getAsJsonObject().toString();
             }
 
         } catch (Exception ex) {
             Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("user not found :" + ex);
-            //Se nao encontrar o utilizador, devolte 5=sem privilegios
-
         }
-        return new JsonArray().toString();
+        response.status(400);
+        return null;
     }
 
     public JsonArray getMyData(int id) {
@@ -312,44 +318,65 @@ public class Users {
     }
 
     public String getMyAdminData() {
-        JsonParser jsonParser = new JsonParser();
-        JsonObject myData = (JsonObject) jsonParser.parse(this.toString());
-        //Recolhe a lista de professores pendentes
-        String querySch = "select * from tblUsers where state=false and type=3";
-        JsonArray pendingTeachers = utils.executeSelectCommand(querySch);
-        myData.add("pendingUsers", pendingTeachers);
+        try {
+            JsonParser jsonParser = new JsonParser();
+            JsonObject myData = (JsonObject) jsonParser.parse(this.toString());
+            //Recolhe a lista de professores pendentes
+            String querySch = "select * from tblUsers where state=false and type=3";
+            JsonArray pendingTeachers = utils.executeSelectCommand(querySch);
+            myData.add("pendingUsers", pendingTeachers);
 
-        return myData.toString();
+            return myData.toString();
+        } catch (Exception ex) {
+            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "";
     }
 
     public String getMyTeacherData() {
-        /*
-         Refazer o select para que apenas os alunos dos cursos a que o prof da aulas sejam listadaos
-         No momento recolhe todos
-         */
-        JsonParser jsonParser = new JsonParser();
-        JsonObject myData = (JsonObject) jsonParser.parse(this.toString());
-        //Recolhe a lista de alunos pendentes dos cursos a quem dá aulas
-        String querySch = "select a.* from tblusers a, tblusercourses b "
-                + "where b.userID = a.id and a.type = 4 and state=0 "
-                + "and b.courseID = any(select b.courseID from tblusers a, tblusercourses b where b.userID =" + id + ")";
-        JsonArray pendingUsers = utils.executeSelectCommand(querySch);
-        myData.add("pendingUsers", pendingUsers);
+        try {
+            /*
+             Refazer o select para que apenas os alunos dos cursos a que o prof da aulas sejam listadaos
+             No momento recolhe todos
+             */
+            JsonParser jsonParser = new JsonParser();
+            JsonObject myData = (JsonObject) jsonParser.parse(this.toString());
+            //Recolhe a lista de alunos pendentes dos cursos a quem dá aulas
+            String querySch = "select a.* from tblusers a, tblusercourses b "
+                    + "where b.userID = a.id and a.type = 4 and state=0 "
+                    + "and b.courseID = any(select b.courseID from tblusers a, tblusercourses b where b.userID =" + id + ")";
+            JsonArray pendingUsers = utils.executeSelectCommand(querySch);
+            myData.add("pendingUsers", pendingUsers);
 
-        return myData.toString();
+            return myData.toString();
+        } catch (Exception ex) {
+            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "";
     }
 
     //Altera o estado de um user (activo/inactivo)
-    public int changeState(String state) {
-        String query = "";
-        System.out.println("");
-        if (state.equals("true")) {
-            query = "UPDATE tblUsers SET state=1 where id=" + id;
-        } else {
-            query = "UPDATE tblUsers SET state=0 where id=" + id;
+    public String changeState(String state, Response response) {
+        try {
+            String query = "";
+            System.out.println("");
+            if (state.equals("true")) {
+                query = "UPDATE tblUsers SET state=1 where id=" + id;
+            } else {
+                query = "UPDATE tblUsers SET state=0 where id=" + id;
 
+            }
+            response.status(utils.executeIUDCommand(query));
+            return "{\"text\":\"Estado alterado com sucesso.\"}";
+        } catch (Exception ex) {
+            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println(query);
-        return utils.executeIUDCommand(query);
+        response.status(400);
+        return "{\"text\":\"Não foi possível alterar o estado do user " + id + ".\"}";
     }
+
+    public String getPassword() {
+        return password;
+    }
+
 }

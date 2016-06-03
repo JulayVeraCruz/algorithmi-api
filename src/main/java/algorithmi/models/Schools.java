@@ -6,9 +6,14 @@
 package algorithmi.models;
 
 import Utils.utils;
+import algorithmi.Main;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import spark.Response;
 
 /**
  *
@@ -42,19 +47,72 @@ public class Schools {
     //--------------------------------------------------------------------------------------
     //------------------------------- Listar Escolas ----------------------------------
     //--------------------------------------------------------------------------------------
-    public static String getAll() {
+    public static String getAll(Response response) {
         try {
             String query = "SELECT tblSchools.id,  tblSchools.name, tblInstitutions.id as institutionID, tblInstitutions.name as institutionName FROM tblSchools, tblInstitutions WHERE tblSchools.institution=tblInstitutions.id";
-            String result = utils.executeSelectCommand(query).toString();
-            return result;
+            //Devolve 'Ok'
+            response.status(200);
+            //E a lista de instituicoes
+            return utils.executeSelectCommand(query).toString();
         } catch (Exception ex) {
-            System.out.println(ex);
-            return "{\"resposta\":\"Erro ao obter escolas.\"}";
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            response.status(400);
+            return "{\"text\":\"Não foi possível obter as Escolas.\"}";
         }
     }
 
-    public void setInstitution(int institution) {
-        this.institution = institution;
+    //--------------------------------------------------------------------------------------
+    //-------------------------- Obter  dados de uma Instituição ---------------------------
+    //--------------------------------------------------------------------------------------   
+    public static String getSchoolData(Response response, String id) {
+
+        try {
+            //Obtem a escola
+            String queryIns = "SELECT tblSchools.id,  tblSchools.name, tblInstitutions.id as institutionID, tblInstitutions.name as institutionName FROM tblSchools, tblInstitutions WHERE tblSchools.institution=tblInstitutions.id and tblSchools.id=" + id;
+            JsonObject school = utils.executeSelectCommand(queryIns).get(0).getAsJsonObject();
+            //Adiciona o array de cursos dessa escola
+            JsonArray coursesList = utils.executeSelectCommand("select * from tblCourses where school=" + id);
+            school.getAsJsonObject().add("courses", coursesList);
+            //Devolve 'OK'
+            response.status(200);
+            //E uma mensagem
+            return school.toString();
+        } catch (Exception ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            response.status(400);
+            return "{\"text\":\"Não foi possível obter a Escola com o id:" + id + ".\"}";
+        }
+    }
+
+    //--------------------------------------------------------------------------------------
+    //------------------------------- Registar Escola --------------------------------------
+    //--------------------------------------------------------------------------------------  
+    public String insert(Response response) {
+        try {
+            //Obtém o ultimo ID
+            this.id = utils.getLastID("tblSchools") + 1;
+
+            boolean existErro = false;
+            String[] erros = validateData();
+            for (int i = 0; i < erros.length; i++) {
+                if (erros[i] == null);
+                {
+                    existErro = existErro || false;
+                }
+            }
+            if (!existErro) {
+                String insert = "INSERT INTO tblSchools values(" + id + "," + '"' + name + '"' + "," + '"' + institution + '"' + ")";
+                //Insere, devolve o estado
+                response.status(utils.executeIUDCommand(insert));
+                // E uma mensagem
+                return "{\"text\":\"Escola inserida com sucesso!\"}";
+            }
+
+        } catch (Exception ex) {
+            Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        response.status(400);
+        return "{\"text\":\"Não foi possível inserir a Escola.\"}";
     }
 
     //--------------------------------------------------------------------------
@@ -72,29 +130,6 @@ public class Schools {
     public static int getLastID() throws Exception {
         utils getid = new utils();
         return getid.getLastID("tblSchools");
-    }
-
-//--------------------------------------------------------------------------------------
-//------------------------------- Registar Escola --------------------------------------
-//--------------------------------------------------------------------------------------  
-    public int insert() throws Exception {
-        boolean existErro = false;
-        String[] erros = validateData();
-        for (int i = 0; i < erros.length; i++) {
-            if (erros[i] == null);
-            {
-                existErro = existErro || false;
-            }
-        }
-        int status = 400;
-        if (!existErro) {
-
-            String insert = "INSERT INTO tblSchools values(" + id + "," + '"' + name + '"' + "," + '"' + institution + '"' + ")";
-            System.out.println(" Registo Escola nº " + id);
-            return utils.executeIUDCommand(insert);
-
-        }
-        return status;
     }
 
 //--------------------------------------------------------------------------------------
