@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import spark.Response;
@@ -120,6 +121,9 @@ public class Institutions {
             String update = "UPDATE tblInstitutions SET name='" + name + "',address='" + address + "',image='" + image + "' where id=" + id;
             response.status(utils.executeIUDCommand(update));
             return "{\"text\":\"Instituição alterada com sucesso!\"}";
+        } catch (MySQLIntegrityConstraintViolationException ex) {
+            response.status(400);
+            return "{\"text\":\"Não é possível editar a Instituição  (" + id + ") porque existem escolas associadas.\"}";
         } catch (Exception ex) {
             Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
             response.status(400);
@@ -135,16 +139,14 @@ public class Institutions {
             //Verifica se a instituição tem escolas associadas, se tiver devolve um erro e não a apaga
             String query = "SELECT * from tblSchools WHERE institution=" + id;
             System.out.println(query);
-            JsonArray schoolsList = utils.executeSelectCommand(query);
-            if (schoolsList.size() == 0) {
-                String deleted = utils.deleteRegist(id, "tblInstitutions");
-                response.status(utils.executeIUDCommand(deleted));
-                return "{\"text\":\"Instituição apagada com sucesso.\"}";
 
-            } else {
-                response.status(400);
-                return "{\"text\":\"Não foi possível apagar a instituiçao. \n Motivo: Existem escolas associadas.\"}";
-            }
+            String deleted = utils.deleteRegist(id, "tblInstitutions");
+            response.status(utils.executeIUDCommand(deleted));
+            return "{\"text\":\"Instituição apagada com sucesso.\"}";
+
+        } catch (MySQLIntegrityConstraintViolationException ex) {
+            response.status(400);
+            return "{\"text\":\"Não é possível apagar a Instituição  (" + id + ") porque existem escolas associadas.\"}";
         } catch (Exception ex) {
             Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
         }

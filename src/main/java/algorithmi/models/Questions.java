@@ -15,14 +15,17 @@
  */
 package algorithmi.Models;
 
+import Utils.SQL;
 import Utils.utils;
+import algorithmi.Main;
 import algorithmi.models.InputOutput;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import spark.Response;
 
 /**
  *
@@ -39,32 +42,96 @@ public class Questions {
     private int difficulty;
     private JsonArray ios;
 
-    // EXEMPLO DE STRING RECEBIDA [title="olol", category="1", description="olololo", difficulty="1", image="", in="9", out="9"]
-    public Questions(String data) throws Exception {
-        System.out.println("Quest " + data);
-        //Transforma a string recebida pelo pedido http para json
-        JsonParser jsonParser = new JsonParser();
-        JsonObject question = (JsonObject) jsonParser.parse(data);
-        //Exibe os dados, em formato json
-        System.out.println(question.entrySet());
+    //--------------------------------------------------------------------------------------
+    //------------------------------- Listar Perguntas ----------------------------------
+    //--------------------------------------------------------------------------------------
+    public static String getAll(Response response) {
+        try {
+            String queryQuestions = "select tblquestions.*,tblcategories.description as categoryName  from tblquestions join tblcategories on tblquestions.category=tblcategories.id ";
 
-        //Associa os dados ao objecto Question
-        //Se o id for nulo (é uma institution nova)
-        if (question.get("id") == null) {
-            this.id = getLastID() + 1; //ir buscar o max id da bd + 1
-        } else {
-            this.id = question.get("id").getAsInt();
+            JsonArray questionsList = utils.executeSelectCommand(queryQuestions);
+
+            //Por cada pergunta recolhe a lista de IO e as resolucoes nas devidas linguagens
+            for (JsonElement o : questionsList) {
+                //Obtem o id da question
+                int questionID = o.getAsJsonObject().get("id").getAsInt();
+                //Adiciona o array de io dessa pergunta
+                JsonArray IOList = utils.executeSelectCommand("select * from tblinputoutputs where question=" + questionID);
+                o.getAsJsonObject().add("IOs", IOList);
+                //Adiciona o array de resolucoes nas devidas linguagens
+                JsonArray languagesList = utils.executeSelectCommand("select * from tblcodelangs where questionID=" + questionID);
+                o.getAsJsonObject().add("languages", languagesList);
+            }
+
+            //Devolve 'Ok'
+            response.status(200);
+            //E a lista de instituicoes
+            return questionsList.toString();
+        } catch (Exception ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            response.status(400);
+            return "{\"text\":\"Não foi possível obter as Perguntas.\"}";
         }
-        this.title = question.get("title").getAsString();
-        this.category = question.get("category").getAsInt();
-        this.description = question.get("description").getAsString();
-        this.image = utils.b64ToImage(question.get("image").getAsString(), "inst" + id);
-        this.algorithm = question.get("algorithm").getAsString();
-        this.difficulty = question.get("difficulty").getAsInt();
-        this.ios = (JsonArray) jsonParser.parse(question.get("ios").getAsString());
-        //http://stackoverflow.com/questions/34120882/gson-jelement-getasstring-vs-jelement-tostring
+    }
 
-        //regist(id, title, category, description, image, algorithm, difficulty);
+    //--------------------------------------------------------------------------------------
+    //-------------------------- Obter  dados de uma Instituição ---------------------------
+    //--------------------------------------------------------------------------------------   
+    public static String getQuestionData(Response response, String id) {
+
+        try {
+            //Obtem a instituicao
+            String queryIns = "select tblquestions.*,tblcategories.description as categoryName  from tblquestions join tblcategories on tblquestions.category=tblcategories.id where tblquestions.id=" + id;
+            JsonObject question = utils.executeSelectCommand(queryIns).get(0).getAsJsonObject();
+            //Obtem os ios da pergunta
+            //Adiciona o array de io dessa pergunta
+            JsonArray IOList = utils.executeSelectCommand("select * from tblinputoutputs where question=" + id);
+            question.getAsJsonObject().add("IOs", IOList);
+            //Devolve 'OK'
+            response.status(200);
+            //E uma mensagem
+            return question.toString();
+        } catch (Exception ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            response.status(400);
+            return "{\"text\":\"Não foi possível obter a Pergunta com o id:" + id + ".\"}";
+        }
+    }
+
+    //--------------------------------------------------------------------------------------
+    //------------------------------- Inserir Pergunta ---------------------------------
+    //--------------------------------------------------------------------------------------  
+    public String insert(Response response) {
+
+        System.out.println(ios);
+
+        try {
+            //Obtém o ultimo ID
+            this.id = utils.getLastID("tblquestions") + 1;
+
+            //converte a imagem em b64 para ficheiro e guarda o nome
+            this.image = utils.b64ToImage(image, "quest" + id);
+
+            boolean existErro = false;
+
+            String insert = "Insert into tblquestions values(" + id + ", '" + title + "'," + category + ",'" + description + "','" + image + "','" + algorithm + "'," + difficulty + ")";
+            response.status(utils.executeIUDCommand(insert));
+            //Por cada io enviado da view
+            for (JsonElement o : ios) {
+                //Atribui o id da question
+                o.getAsJsonObject().addProperty("questionID", id);
+                //Cria uma nova entrada na tabela de IOS
+                InputOutput newIO = new InputOutput(o.getAsJsonObject().toString());
+                newIO.insert(response);
+            }
+            // E uma mensagem
+            return "{\"text\":\"Pergunta inserida com sucesso!\"}";
+
+        } catch (Exception ex) {
+            Logger.getLogger(algorithmi.models.Institutions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        response.status(400);
+        return "{\"text\":\"Não foi possível inserir a Pergunta.\"}";
     }
 
     // converts a java object to JSON format,
@@ -78,15 +145,11 @@ public class Questions {
         return json;
     }
 
-    private void validateData() {
+    private String[] validateData() {
         /**
          * Se estiver tudo OK, inserer na BD,
          */
-    }
-
-    public static int getLastID() throws Exception {
-        utils getid = new utils();
-        return getid.getLastID("tblquestions");
+        return null;
     }
 
     /**
@@ -121,58 +184,13 @@ public class Questions {
                 + "algorithm=" + '"' + algorithm + '"' + " "
                 + "difficulty=" + '"' + difficulty + '"' + " "
                 + "where id=" + id;
-        Statement stmtt = utils.connectDatabase();
+        SQL sql = utils.connectDatabase();
 
-        stmtt.execute(update);
+        sql.st.execute(update);
 
         //ResultSet res = stmtt.getResultSet();
 //        System.out.println("result update Course " + res.rowUpdated());
-        stmtt.close();
-        return status;
-    }
-
-    public static String getAll() {
-        try {
-            String queryQuestions = "select tblquestions.*,tblcategories.description as categoryName  from tblquestions join tblcategories on tblquestions.category=tblcategories.id ";
-
-            JsonArray questionsList = utils.executeSelectCommand(queryQuestions);
-            //Por cada pergunta recolhe a lista de IO e as resolucoes nas devidas linguagens
-            for (JsonElement o : questionsList) {
-                //Obtem o id da question
-                int questionID = o.getAsJsonObject().get("id").getAsInt();
-                //Adiciona o array de io dessa pergunta
-                JsonArray IOList = utils.executeSelectCommand("select * from tblinputoutputs where question=" + questionID);
-                o.getAsJsonObject().add("IOs", IOList);
-                //Adiciona o array de resolucoes nas devidas linguagens
-                JsonArray languagesList = utils.executeSelectCommand("select * from tblcodelangs where questionID=" + questionID);
-                o.getAsJsonObject().add("languages", languagesList);
-            }
-
-            return questionsList.toString();
-        } catch (Exception ex) {
-            System.out.println(ex);
-            return "{\"resposta\":\"Erro ao obter Instituições.\"}";
-        }
-    }
-
-    public int insert(String data) throws Exception {
-        int status = 0;
-        //Transforma a string recebida pelo pedido http para json
-        JsonParser jsonParser = new JsonParser();
-        JsonObject question = (JsonObject) jsonParser.parse(data);
-        //Exibe os dados, em formato json
-        System.out.println(question.entrySet());
-
-        String insert = "Insert into tblquestions values(" + id + ", '" + title + "'," + category + ",'" + description + "','" + image + "','" + algorithm + "'," + difficulty + ")";
-        status = utils.executeIUDCommand(insert);
-        //Por cada io enviado da view
-        for (JsonElement o : ios) {
-            //Atribui o id da question
-            o.getAsJsonObject().addProperty("questionID", id);
-            //Cria uma nova entrada na tabela de IOS
-            InputOutput newIO = new InputOutput(o.getAsJsonObject().toString());
-            newIO.insert();
-        }
+        sql.close();
         return status;
     }
 

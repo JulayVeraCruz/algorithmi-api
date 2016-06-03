@@ -97,7 +97,6 @@ public class Users {
             JsonArray ja = utils.executeSelectCommand(query);
             //Se os dados de autenticacao estao correctos
             if (ja.size() > 0) {
-                System.out.println("1");
                 return ja.get(0).getAsJsonObject().toString();
             }
 
@@ -148,9 +147,7 @@ public class Users {
     @Override
     public String toString() {
         Gson gson = new Gson();
-
         String json = gson.toJson(this);
-        System.out.println("json \n" + json);
         return json;
     }
 

@@ -10,7 +10,7 @@ import algorithmi.Main;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import spark.Response;
@@ -24,25 +24,6 @@ public class Schools {
     private int id;
     private String name;
     private int institution;
-
-    public Schools(String data) throws Exception {
-
-        //Transforma a string recebida pelo pedido http para json
-        JsonParser jsonParser = new JsonParser();
-        JsonObject school = (JsonObject) jsonParser.parse(data);
-        //Exibe os dados, em formato json
-        System.out.println(school.entrySet());
-        //Revalidar TUDO, formatos, campos vazios, TUDO!!
-
-        //Se o id for nulo (é uma escola nova)
-        if (school.get("id") == null) {
-            this.id = getLastID() + 1; //ir buscar o max id da bd + 1
-        } else {
-            this.id = school.get("id").getAsInt();
-        }
-        this.name = school.get("name").getAsString();
-        this.institution = school.get("institution").getAsInt();
-    }
 
     //--------------------------------------------------------------------------------------
     //------------------------------- Listar Escolas ----------------------------------
@@ -62,7 +43,7 @@ public class Schools {
     }
 
     //--------------------------------------------------------------------------------------
-    //-------------------------- Obter  dados de uma Instituição ---------------------------
+    //-------------------------- Obter  dados de uma Escola ---------------------------
     //--------------------------------------------------------------------------------------   
     public static String getSchoolData(Response response, String id) {
 
@@ -85,9 +66,10 @@ public class Schools {
     }
 
     //--------------------------------------------------------------------------------------
-    //------------------------------- Registar Escola --------------------------------------
+    //------------------------------- Inserir Escola ---------------------------------
     //--------------------------------------------------------------------------------------  
     public String insert(Response response) {
+
         try {
             //Obtém o ultimo ID
             this.id = utils.getLastID("tblSchools") + 1;
@@ -115,6 +97,46 @@ public class Schools {
         return "{\"text\":\"Não foi possível inserir a Escola.\"}";
     }
 
+    //--------------------------------------------------------------------------------------
+    //------------------------------- Update a Escola ---------------------------------
+    //--------------------------------------------------------------------------------------   
+    public String updateSchool(Response response) {
+        System.out.println(institution);
+        try {
+
+            String update = "UPDATE tblSchools SET name='" + name + "' ,institution=" + institution + " where id=" + id;
+            response.status(utils.executeIUDCommand(update));
+            return "{\"text\":\"Escola alterada com sucesso!\"}";
+        } catch (MySQLIntegrityConstraintViolationException ex) {
+            response.status(400);
+            return "{\"text\":\"Não é possível alterar a Escola (" + id + ") porque existem cursos associados.\"}";
+        } catch (Exception ex) {
+            Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
+            response.status(400);
+            return "{\"text\":\"Não foi possível alterar a Escola.\"}";
+        }
+    }
+
+    //--------------------------------------------------------------------------------------
+    //------------------------------- Apagar Escola -----------------------------------
+    //--------------------------------------------------------------------------------------
+    public static String delete(Response response, int id) {
+        try {
+            String deleted = utils.deleteRegist(id, "tblSchools");
+            response.status(utils.executeIUDCommand(deleted));
+            return "{\"text\":\"Escola apagada com sucesso.\"}";
+
+        } catch (MySQLIntegrityConstraintViolationException ex) {
+            response.status(400);
+            return "{\"text\":\"Não é possível apagar a Escola (" + id + ")  porque existem cursos associados.\"}";
+        } catch (Exception ex) {
+            Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        response.status(400);
+        return "{\"text\":\"Não foi possível apagar a Escola.\"}";
+
+    }
+
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
     @Override
@@ -124,31 +146,6 @@ public class Schools {
         String json = gson.toJson(this);
         System.out.println("json \n" + json);
         return json;
-    }
-
-    //Maximo ID da tabela Escolas
-    public static int getLastID() throws Exception {
-        utils getid = new utils();
-        return getid.getLastID("tblSchools");
-    }
-
-//--------------------------------------------------------------------------------------
-//------------------------------- Update Escola ----------------------------------------
-//--------------------------------------------------------------------------------------  
-    public int updateSchools(int id) throws Exception {
-        int status = 0;
-
-        String update = "UPDATE tblSchools SET name=" + name + ",institution=" + institution + " where id=" + id;
-        String updated = utils.executeSelectCommand(update).toString();;
-        return status;
-    }
-
-//--------------------------------------------------------------------------------------
-//------------------------------- Apagar Escola ----------------------------------------
-//--------------------------------------------------------------------------------------  
-    public static int delete(int id) throws Exception {
-        String deleted = utils.deleteRegist(id, "tblSchools");
-        return utils.executeIUDCommand(deleted);
     }
 
 //--------------------------------------------------------------------------------------

@@ -16,10 +16,13 @@
 package algorithmi.models;
 
 import Utils.utils;
+import algorithmi.Main;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import spark.Response;
 
 /**
  *
@@ -32,109 +35,116 @@ public class Courses {
     private int school;
     private String image;
 
-    public Courses(String data) throws Exception {
-
-        //Transforma a string recebida pelo pedido http para json
-        JsonParser jsonParser = new JsonParser();
-        JsonObject course = (JsonObject) jsonParser.parse(data);
-        //Exibe os dados, em formato json
-        System.out.println(course.entrySet());
-        //Associa os dados ao objecto Course
-        //Se o id for nulo (é uma institution nova)
-        if (course.get("id") == null) {
-            this.id = getLastID() + 1; //ir buscar o max id da bd + 1
-        } else {
-            this.id = course.get("id").getAsInt();
+    //--------------------------------------------------------------------------------------
+    //------------------------------- Listar Cursos ----------------------------------
+    //--------------------------------------------------------------------------------------
+    public static String getAll(Response response) {
+        try {
+            String query = "SELECT * FROM tblCourses";
+            //Devolve 'Ok'
+            response.status(200);
+            //E a lista de instituicoes
+            return utils.executeSelectCommand(query).toString();
+        } catch (Exception ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            response.status(400);
+            return "{\"text\":\"Não foi possível obter os cursos.\"}";
         }
-        this.name = course.get("name").getAsString();
-        this.image = utils.b64ToImage(course.get("image").getAsString(), "inst" + id);
-        //tenho de ir buscar o id da escola
-        this.school = course.get("school").getAsInt();
-
     }
 
-    //obtem os dados do curso prontos para o update
-    public static String getCourseData(String id) {
+    //--------------------------------------------------------------------------------------
+    //-------------------------- Obter  dados de uma Instituição ---------------------------
+    //--------------------------------------------------------------------------------------   
+    public static String getCourseData(Response response, String id) {
 
         try {
-            String query = "select tblCourses.*,tblSchools.institution from tblCourses join tblSchools on tblSchools.id=tblCourses.school where tblCourses.id=" + id;
-            JsonArray user = utils.executeSelectCommand(query);
-            return user.get(0).getAsJsonObject().toString();
+            //Obtem a instituicao
+            String queryCourse = "select tblCourses.*,tblSchools.institution from tblCourses join tblSchools on tblSchools.id=tblCourses.school where tblCourses.id=" + id;
+            JsonObject institution = utils.executeSelectCommand(queryCourse).get(0).getAsJsonObject();
+            //Devolve 'OK'
+            response.status(200);
+            //E uma mensagem
+            return institution.toString();
         } catch (Exception ex) {
-            return "";
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            response.status(400);
+            return "{\"text\":\"Não foi possível obter o curso com o id:" + id + ".\"}";
         }
-
     }
 
     //--------------------------------------------------------------------------------------
-    //------------------------------- Apagar Instituição -----------------------------------
-    //--------------------------------------------------------------------------------------
-    public static int deleteCourse(int id) throws Exception {
+    //------------------------------- Inserir Curso ---------------------------------
+    //--------------------------------------------------------------------------------------  
+    public String insert(Response response) {
 
-        String deleted = utils.deleteRegist(id, "tblcourses");
-        return utils.executeIUDCommand(deleted);
-    }
+        try {
+            //Obtém o ultimo ID
+            this.id = utils.getLastID("tblcourses") + 1;
 
-    /**
-     * para actualizar/alterar os dados de um registo na tabela cursos
-     *
-     * @param id
-     * @return
-     */
-    public int updateCourse() throws Exception {
-        String update = "UPDATE tblCourses SET name=" + '"' + name + '"' + ",school=" + school + ",image=" + '"' + image + '"' + " where id=" + id;
-        return utils.executeIUDCommand(update);
-    }
+            //converte a imagem em b64 para ficheiro e guarda o nome
+            this.image = utils.b64ToImage(image, "course" + id);
 
-    /**
-     * Insere novos registos na tabela
-     *
-     * @return status
-     * @throws Exception
-     */
-    public int regist() throws Exception {
-
-        boolean existErro = false;
-        String[] erros = validateData();
-        for (int i = 0; i < erros.length; i++) {
-            if (erros[i] == null);
-            {
-                existErro = existErro || false;
+            boolean existErro = false;
+            String[] erros = validateData();
+            for (int i = 0; i < erros.length; i++) {
+                if (erros[i] == null);
+                {
+                    existErro = existErro || false;
+                }
             }
-        }
-        int status = 400;
-        if (!existErro) {
-            String insert = "INSERT INTO tblcourses values(" + id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")";
-            return utils.executeIUDCommand(insert);
-        }
-        return status;
-    }
+            if (!existErro) {
+                String insert = "INSERT INTO tblcourses values(" + id + "," + '"' + name + '"' + "," + school + "," + '"' + image + '"' + ")";
+                //Insere, devolve o estado
+                response.status(utils.executeIUDCommand(insert));
+                // E uma mensagem
+                return "{\"text\":\"Curso inserido com sucesso!\"}";
+            }
 
-    /**
-     * lista os cursos existentes e as escolas a que pertencem
-     *
-     * @return []json
-     * @throws java.lang.Exception
-     */
-    public static String getAll() {
-        try {
-            String query = "SELECT tblCourses.id,  tblCourses.image, tblCourses.name, tblCourses.school as schoolID, tblSchools.name as schoolName FROM tblSchools, tblCourses WHERE tblSchools.id=tblCourses.school";
-            String result = utils.executeSelectCommand(query).toString();
-            return result;
         } catch (Exception ex) {
-            System.out.println(ex);
-            return "{\"resposta\":\"Erro ao obter Escolas.\"}";
+            Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        response.status(400);
+        return "{\"text\":\"Não foi possível inserir o Curso.\"}";
+    }
+
+    //--------------------------------------------------------------------------------------
+    //------------------------------------ Update Curso ------------------------------------
+    //--------------------------------------------------------------------------------------   
+    public String updateCourse(Response response) {
+        try {
+            //converte a imagem em b64 para ficheiro e guarda o nome
+            this.image = utils.b64ToImage(image, "course" + id);
+            String update = "UPDATE tblCourses SET name=" + '"' + name + '"' + ",school=" + school + ",image=" + '"' + image + '"' + " where id=" + id;
+            response.status(utils.executeIUDCommand(update));
+            return "{\"text\":\"Curso alterado com sucesso!\"}";
+        } catch (MySQLIntegrityConstraintViolationException ex) {
+            Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
+            response.status(400);
+            return "{\"text\":\"Não é possível alterar o Curso porque possuí alunos/professores associados.\"}";
+        } catch (Exception ex) {
+            Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
+            response.status(400);
+            return "{\"text\":\"Não foi possível alterar o Curso.\"}";
         }
     }
 
-    /**
-     * obtem o maximo id utilizado na tabela tblCourses
-     *
-     * @return int
-     */
-    public static int getLastID() throws Exception {
-        utils getid = new utils();
-        return getid.getLastID("tblcourses");
+    //--------------------------------------------------------------------------------------
+    //---------------------------------- Apagar Curso --------------------------------------
+    //--------------------------------------------------------------------------------------
+    public static String delete(Response response, int id) {
+        try {
+            String deleted = utils.deleteRegist(id, "tblcourses");
+            response.status(utils.executeIUDCommand(deleted));
+            return "{\"text\":\"Curso apagado com sucesso.\"}";
+        } catch (MySQLIntegrityConstraintViolationException ex) {
+            response.status(400);
+            return "{\"text\":\"Não é possível apagar o Curso porque possuí alunos/professores associados.\"}";
+        } catch (Exception ex) {
+            Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        response.status(400);
+        return "{\"text\":\"Não foi possível apagar o Curso.\"}";
+
     }
 
     @Override

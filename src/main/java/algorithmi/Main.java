@@ -3,8 +3,8 @@ package algorithmi;
 import algorithmi.Models.Questions;
 import algorithmi.models.Categories;
 import algorithmi.models.Courses;
-import algorithmi.models.HighLevelLangs;
 import algorithmi.models.Institutions;
+import algorithmi.models.Languages;
 import algorithmi.models.Schools;
 import algorithmi.models.TypeUser;
 import algorithmi.models.UserCourse;
@@ -102,16 +102,14 @@ public class Main {
         //----------------------------------- Os meus dados --------------------------------------
         //----------------------------------------------------------------------------------------
         get("/api/me", (request, response) -> {
-            System.out.println(actualUser);
             //se estiver loggado
             if (actualUser == (null)) {
                 System.out.println("You shall not pass!");
                 //Senao devolve um Forbidden
                 response.status(401);
                 return "{\"text\":\"Login inválido. Por favor, efectue login para continuar!\"}";
-
             } else {
-                System.out.println("You shall pass" + actualUser.getUsername());
+                System.out.println("You shall pass : " + actualUser.getUsername());
                 //Listar os dados do admin
                 if (actualUser.getType() == 2) {
                     return actualUser.getMyAdminData();
@@ -131,12 +129,26 @@ public class Main {
         get("/api/categories", (request, response) -> {
             //Se tiver permissões
             if (isAllowed(3)) {
-                //Lista e devolve os Cursos
-                return Categories.getAll();
+                //Lista e devolve as categorias
+                return Categories.getAll(response);
             }
             //Senao devolve um Forbidden
             response.status(401);
             return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
+        });
+
+        get("/api/categories/:id", (request, response) -> {
+            //Se tiver permissões
+            if (isAllowed(2)) {
+                //Obtem o id mandado pela view
+                String id = request.params(":id");
+                //Obtem os dados dessa instituicao e devolve-o à view
+                return Categories.getCategoryData(response, id);
+            }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
+
         });
 
         post("/api/categories", (request, response) -> {
@@ -146,15 +158,12 @@ public class Main {
                     //Converte o body recebido da view
                     String data = new String(request.body().getBytes(), "UTF-8");
                     //Cria uma nova instituicao
-                    Categories newCategory = new Categories(data);
-                    //guarda-a na BD
-                    response.status(newCategory.regist());
-                    // E uma mensagem
-                    return "{\"text\":\"Categoria inserida com sucesso!\"}";
-
+                    Categories newCategory = gson.fromJson(data, Categories.class);
+                    //Guarda-a na BD devolve o estado
+                    return newCategory.insert(response);
                 } catch (Exception ex) {
+                    System.out.println("Categories error: ");
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                    System.out.println("Categories error_ " + ex);
                     //Devolve 'NOK'
                     response.status(400);
                     return "{\"text\":\"Categoria não inserida!\"}";
@@ -165,20 +174,23 @@ public class Main {
             return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
 
         });
-        delete("/api/categories/:id", (request, response) -> {
+
+        put("/api/categories/:id", (request, response) -> {
             //Se tiver permissões
             if (isAllowed(2)) {
-                //Obtem o id enviado pela view
-                int id = Integer.parseInt(request.params(":id"));
                 try {
-                    response.status(Categories.delete(id));
-                    return "{\"text\":\"Categoria  apagada com sucesso!\"}";
-
+                    //Obtem o id mandado pela view
+                    String data = new String(request.body().getBytes(), "UTF-8");
+                    //Transforma os dados recebidos na class
+                    Categories category = gson.fromJson(data, Categories.class);
+                    //Actualiza os dados e devolve estado e a msg
+                    return category.updateCategory(response);
                 } catch (Exception ex) {
+                    System.out.println("Categories error:");
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                     //Devolve 'NOK'
                     response.status(400);
-                    return "{\"text\":\"Categoria não apagada.\"}";
+                    return "{\"text\":\"Categoria não alterada!\"}";
                 }
             }
             //Senao devolve um Forbidden
@@ -186,77 +198,116 @@ public class Main {
             return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
 
         });
+
+        delete("/api/categories/:id", (request, response) -> {
+            //Se tiver permissões
+            if (isAllowed(2)) {
+                //Obtem o id enviado pela view
+                int id = Integer.parseInt(request.params(":id"));
+                try {
+                    return Categories.delete(response, id);
+
+                } catch (Exception ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    //Devolve 'NOK'
+                    response.status(400);
+                    return "{\"text\":\"Ocorreu um erro ao apagar a Categoria.\"}";
+                }
+            }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
+
+        });
+
         //----------------------------------------------------------------------------------------
         //-------------------------------------- Courses -----------------------------------------
         //----------------------------------------------------------------------------------------
         get("/courses", (request, response) -> {
-
             //Lista e devolve os Cursos
-            return Courses.getAll();
+            return Courses.getAll(response);
 
         });
-        post("/api/courses", (request, response) -> {
 
-            try {
-                //Converte o body recebido da view
-                String data = new String(request.body().getBytes(), "UTF-8");
-                //Cria uma nova instituicao
-                Courses newCourse = new Courses(data);
-                //guarda-a na BD
-                response.status(newCourse.regist());
-                // E uma mensagem
-                return "{\"text\":\"Curso inserido com sucesso!\"}";
-
-            } catch (Exception ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println(" Curso error_ " + ex);
-                //Devolve 'NOK'
-                response.status(400);
-                return response;
-            }
-        });
-        put("/api/courses/:id", (request, response) -> {
-            try {
-                String data = new String(request.body().getBytes(), "UTF-8");
-                //Obtem os dados da instituição
-                Courses course = new Courses(data);
-                System.out.println(course.toString());
-                //Actualiza os dados
-                //Devolve estado
-                response.status(course.updateCourse());
-                // E uma mensagem
-                return "{\"text\":\"Curso alteradao com sucesso!\"}";
-            } catch (Exception ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println(" Curso error_ " + ex);
-                //Devolve 'NOK'
-                response.status(400);
-                return response;
-            }
-
-        });
         get("/api/courses/:id", (request, response) -> {
-            //Obtem o id mandado pela view
-            String id = request.params(":id");
-            //Obtem os dados dessa instituicao e devolve-o à view
-            return Courses.getCourseData(id);
+            //Se tiver permissões
+            if (isAllowed(2)) {
+                //Obtem o id mandado pela view
+                String id = request.params(":id");
+                //Obtem os dados dessa instituicao e devolve-o à view
+                return Courses.getCourseData(response, id);
+            }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
 
         });
-        delete("/api/courses/:id", (request, response) -> {
-            //Obtem o id enviado pela view
 
-            int id = Integer.parseInt(request.params(":id"));
-            try {
-                response.status(Courses.deleteCourse(id));
-                return "{\"text\":\"Curso apagado com sucesso!\"}";
-
-            } catch (Exception ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                //Devolve 'NOK'
-                response.status(400);
-                return "{\"text\":\"Curso não apagado\"}";
+        post("/api/courses", (request, response) -> {
+            //Se tiver permissões de admin
+            if (isAllowed(2)) {
+                try {
+                    //Converte o body recebido da view
+                    String data = new String(request.body().getBytes(), "UTF-8");
+                    //Transforma os dados recebidos na class
+                    Courses newCourse = gson.fromJson(data, Courses.class);
+                    //Guarda-a na BD devolve o estado
+                    return newCourse.insert(response);
+                } catch (Exception ex) {
+                    System.out.println("Courses error:");
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    //Devolve 'NOK'
+                    response.status(400);
+                    return "{\"text\":\"Curso não inserido!\"}";
+                }
             }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
 
+        });
+
+        put("/api/courses/:id", (request, response) -> {
+            //Se tiver permissões
+            if (isAllowed(2)) {
+                try {
+                    //Obtem o id mandado pela view
+                    String data = new String(request.body().getBytes(), "UTF-8");
+                    //Transforma os dados recebidos na class
+                    Courses course = gson.fromJson(data, Courses.class);
+                    //Actualiza os dados e devolve estado e a msg
+                    return course.updateCourse(response);
+                } catch (Exception ex) {
+                    System.out.println("Courses error:");
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    //Devolve 'NOK'
+                    response.status(400);
+                    return "{\"text\":\"Curso não alterado!\"}";
+                }
+            }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
+
+        });
+
+        delete("/api/courses/:id", (request, response) -> {
+            //Se tiver permissões
+            if (isAllowed(2)) {
+                //Obtem o id enviado pela view
+                int id = Integer.parseInt(request.params(":id"));
+                try {
+                    return Courses.delete(response, id);
+                } catch (Exception ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    //Devolve 'NOK'
+                    response.status(400);
+                    return "{\"text\":\"Ocorreu um erro ao apagar o Curso.\"}";
+                }
+            }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
         });
 
         //----------------------------------------------------------------------------------------
@@ -266,28 +317,40 @@ public class Main {
             //Se tiver permissões
             if (isAllowed(3)) {
                 //Lista e devolve as instituicoes
-                return HighLevelLangs.getAll();
+                return Languages.getAll(response);
             }
             //Senao devolve um Forbidden
             response.status(401);
             return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
         });
+
+        get("/api/highlevellangs/:id", (request, response) -> {
+            //Se tiver permissões
+            if (isAllowed(2)) {
+                //Obtem o id mandado pela view
+                String id = request.params(":id");
+                //Obtem os dados dessa instituicao e devolve-o à view
+                return Languages.getLanguageData(response, id);
+            }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
+
+        });
+
         post("/api/highlevellangs", (request, response) -> {
             //Se tiver permissões
             if (isAllowed(2)) {
                 try {
                     //Converte o body recebido da view
                     String data = new String(request.body().getBytes(), "UTF-8");
-                    //Cria uma nova instituicao
-                    HighLevelLangs newLanguage = new HighLevelLangs(data);
-                    //guarda-a na BD
-                    response.status(newLanguage.regist());
-                    // E uma mensagem
-                    return "{\"text\":\"Linguagem inserida com sucesso!\"}";
-
+                    //Transforma os dados recebidos na class
+                    Languages newLanguage = gson.fromJson(data, Languages.class);
+                    //Guarda-a na BD devolve o estado
+                    return newLanguage.insert(response);
                 } catch (Exception ex) {
+                    System.out.println("Languages error:");
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                    System.out.println("Language error_ " + ex);
                     //Devolve 'NOK'
                     response.status(400);
                     return "{\"text\":\"Linguagem não inserida!\"}";
@@ -298,20 +361,23 @@ public class Main {
             return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
 
         });
-        delete("/api/highlevellangs/:id", (request, response) -> {
+
+        put("/api/highlevellangs/:id", (request, response) -> {
             //Se tiver permissões
             if (isAllowed(2)) {
-                //Obtem o id enviado pela view
-                int id = Integer.parseInt(request.params(":id"));
                 try {
-                    response.status(HighLevelLangs.delete(id));
-                    return "{\"text\":\"Linguagem  apagada com sucesso!\"}";
-
+                    //Obtem o id mandado pela view
+                    String data = new String(request.body().getBytes(), "UTF-8");
+                    //Transforma os dados recebidos na class
+                    Languages language = gson.fromJson(data, Languages.class);
+                    //Actualiza os dados e devolve estado e a msg
+                    return language.updateInstitution(response);
                 } catch (Exception ex) {
+                    System.out.println("Languages error:");
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                     //Devolve 'NOK'
                     response.status(400);
-                    return "{\"text\":\"Linguagem não apagada.\"}";
+                    return "{\"text\":\"Linguagem não alterada!\"}";
                 }
             }
             //Senao devolve um Forbidden
@@ -319,6 +385,28 @@ public class Main {
             return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
 
         });
+
+        delete("/api/highlevellangs/:id", (request, response) -> {
+            //Se tiver permissões
+            if (isAllowed(2)) {
+                //Obtem o id enviado pela view
+                int id = Integer.parseInt(request.params(":id"));
+                try {
+                    return Languages.delete(response, id);
+
+                } catch (Exception ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    //Devolve 'NOK'
+                    response.status(400);
+                    return "{\"text\":\"Ocorreu um erro ao apagar a Linguagem.\"}";
+                }
+            }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
+
+        });
+
         //----------------------------------------------------------------------------------------
         //------------------------------------ Institutions---------------------------------------
         //----------------------------------------------------------------------------------------
@@ -416,32 +504,49 @@ public class Main {
             //Se tiver permissões
             if (isAllowed(3)) {
                 //Lista e devolve os Cursos
-                return Questions.getAll();
+                return Questions.getAll(response);
             }
             //Senao devolve um Forbidden
             response.status(401);
             return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
         });
-        post("/api/questions", (request, response) -> {
 
-            try {
-                //Converte o body recebido da view
-                String data = new String(request.body().getBytes(), "UTF-8");
-                //Cria uma nova instituicao
-                Questions newQuestion = new Questions(data);
-                // System.out.println(newQuestion);
-                //guarda-a na BD
-                response.status(newQuestion.insert(data));
-                // E uma mensagem
-                return "{\"text\":\"Pergunta inserida com sucesso!\"}";
-
-            } catch (Exception ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println(" Questions error_ " + ex);
-                //Devolve 'NOK'
-                response.status(400);
-                return response;
+        get("/api/questions/:id", (request, response) -> {
+            //Se tiver permissões
+            if (isAllowed(3)) {
+                //Obtem o id mandado pela view
+                String id = request.params(":id");
+                //Obtem os dados dessa instituicao e devolve-o à view
+                return Questions.getQuestionData(response, id);
             }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
+
+        });
+
+        post("/api/questions", (request, response) -> {
+            //Se tiver permissões de professor
+            if (isAllowed(3)) {
+                try {
+                    //Converte o body recebido da view
+                    String data = new String(request.body().getBytes(), "UTF-8");
+                    System.out.println("d " + data);
+                    //Transforma os dados recebidos na class
+                    Questions newQuestion = gson.fromJson(data, Questions.class);
+                    //Guarda-a na BD devolve o estado
+                    return newQuestion.insert(response);
+                } catch (Exception ex) {
+                    System.out.println("Questions error:");
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    //Devolve 'NOK'
+                    response.status(400);
+                    return "{\"text\":\"Pergunta não inserida!\"}";
+                }
+            }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
         });
         //----------------------------------------------------------------------------------------
         //-------------------------------------- Escolas -----------------------------------------
@@ -489,19 +594,41 @@ public class Main {
             response.status(401);
             return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
         });
+
+        put("/api/schools/:id", (request, response) -> {
+            //Se tiver permissões
+            if (isAllowed(2)) {
+                try {
+                    //Obtem o id mandado pela view
+                    String data = new String(request.body().getBytes(), "UTF-8");
+                    //Transforma os dados recebidos na class
+                    Schools school = gson.fromJson(data, Schools.class);
+                    //Actualiza os dados e devolve estado e a msg
+                    return school.updateSchool(response);
+                } catch (Exception ex) {
+                    System.out.println("Schools error:");
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    //Devolve 'NOK'
+                    response.status(400);
+                    return "{\"text\":\"Escola não alterada!\"}";
+                }
+            }
+            //Senao devolve um Forbidden
+            response.status(401);
+            return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
+
+        });
+
         delete("/api/schools/:id", (request, response) -> {
             //Obtem o id enviado pela view
-
             int id = Integer.parseInt(request.params(":id"));
             try {
-                response.status(Schools.delete(id));
-                return "{\"text\":\"Instituição apagada com sucesso!\"}";
-
+                return Schools.delete(response, id);
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 //Devolve 'NOK'
                 response.status(400);
-                return "{\"text\":\"Instituicao não apagado\"}";
+                return "{\"text\":\"Escola não apagada\"}";
             }
 
         });
@@ -601,9 +728,9 @@ public class Main {
 
         });
 
-//----------------------------------------------------------------------------------------
-//------------------------------------ UserType ------------------------------------------
-//----------------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------------
+        //------------------------------------ UserType ------------------------------------------
+        //----------------------------------------------------------------------------------------
         get("/api/userType", (request, response) -> {
             return TypeUser.listTypesOfUser();//lista dos cursos existentes
 

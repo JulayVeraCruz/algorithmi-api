@@ -9,6 +9,9 @@ import Utils.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import spark.Response;
 
 /**
  *
@@ -36,8 +39,8 @@ public class InputOutput {
             this.id = questionIO.get("id").getAsInt();
         }
         this.question = questionIO.get("questionID").getAsInt();
-        this.input = questionIO.get("I").getAsString();
-        this.output = questionIO.get("O").getAsString();
+        this.input = questionIO.get("input").getAsString();
+        this.output = questionIO.get("output").getAsString();
 
     }
 
@@ -63,10 +66,22 @@ public class InputOutput {
         return getid.getLastID("tblinputoutputs");
     }
 
-    public int insert() {
-        String insert = "INSERT INTO tblinputoutputs values(" + id + "," + '"' + question + '"' + "," + '"' + input + '"' + "," + '"' + output + '"' + ")";
+    public String insert(Response response) {
+        try {
+            //Obtém o ultimo ID
+            this.id = utils.getLastID("tblinputoutputs") + 1;
 
-        return utils.executeIUDCommand(insert);
+            String insert = "INSERT INTO tblinputoutputs values(" + id + "," + '"' + question + '"' + "," + '"' + input + '"' + "," + '"' + output + '"' + ")";
+            //Insere, devolve o estado
+            response.status(utils.executeIUDCommand(insert));
+            // E uma mensagem
+            return "{\"text\":\"IO inserido com sucesso!\"}";
+
+        } catch (Exception ex) {
+            Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        response.status(400);
+        return "{\"text\":\"Não foi possível inserir o IO.\"}";
     }
 
 }
