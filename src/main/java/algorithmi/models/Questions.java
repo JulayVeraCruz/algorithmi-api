@@ -23,6 +23,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import spark.Response;
@@ -87,6 +88,9 @@ public class Questions {
             //Adiciona o array de io dessa pergunta
             JsonArray IOList = utils.executeSelectCommand("select * from tblinputoutputs where question=" + id);
             question.getAsJsonObject().add("IOs", IOList);
+            //Adiciona o array de codigos dessa pergunta
+            JsonArray codeList = utils.executeSelectCommand("select * from tblcodelangs where questionID=" + id);
+            question.getAsJsonObject().add("Codes", codeList);
             //Devolve 'OK'
             response.status(200);
             //E uma mensagem
@@ -111,8 +115,6 @@ public class Questions {
 
             //converte a imagem em b64 para ficheiro e guarda o nome
             this.image = utils.b64ToImage(image, "quest" + id);
-
-            boolean existErro = false;
 
             String insert = "Insert into tblquestions values(" + id + ", '" + title + "'," + category + ",'" + description + "','" + image + "','" + algorithm + "'," + difficulty + ")";
             response.status(utils.executeIUDCommand(insert));
@@ -157,14 +159,21 @@ public class Questions {
      *
      * @param id
      */
-    public int deleteCourse(int id) throws Exception {
-        int status = 400;
-        utils utils = new utils();
-        /*        boolean deleted = utils.deleteRegist(id, "tblQuestions");
-         if (deleted) {
-         status = 200;
-         }*/
-        return status;
+    public static String delete(Response response, int id) {
+        try {
+            String deleted = utils.deleteRegist(id, "tblquestions");
+            String deleteIO = "Delete from tblinputoutputs where question=" + id;
+            utils.executeIUDCommand(deleteIO);
+            response.status(utils.executeIUDCommand(deleted));
+            return "{\"text\":\"Curso apagado com sucesso.\"}";
+        } catch (MySQLIntegrityConstraintViolationException ex) {
+            response.status(400);
+            return "{\"text\":\"Não é possível apagar o Curso porque possuí alunos/professores associados.\"}";
+        } catch (Exception ex) {
+            Logger.getLogger(algorithmi.models.Institutions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        response.status(400);
+        return "{\"text\":\"Não foi possível apagar o Curso.\"}";
     }
 
     /**

@@ -40,7 +40,7 @@ public class Courses {
     //--------------------------------------------------------------------------------------
     public static String getAll(Response response) {
         try {
-            String query = "SELECT * FROM tblCourses";
+            String query = "select tblCourses.*,tblSchools.name as schoolName,tblSchools.institution from tblCourses join tblSchools on tblSchools.id=tblCourses.school";
             //Devolve 'Ok'
             response.status(200);
             //E a lista de instituicoes

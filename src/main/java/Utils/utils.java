@@ -382,7 +382,7 @@ public class utils {
         }
     }
 
-    private static String getRandomHexString(int numchars) {
+    public static String getRandomHexString(int numchars) {
         Random r = new Random();
         StringBuffer sb = new StringBuffer();
         while (sb.length() < numchars) {
@@ -391,6 +391,7 @@ public class utils {
 
         return sb.toString().substring(0, numchars);
     }
+
 }
 
 //ajuda sobre regex

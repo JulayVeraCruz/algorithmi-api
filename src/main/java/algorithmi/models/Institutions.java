@@ -28,15 +28,32 @@ public class Institutions {
     private String image;
 
     //--------------------------------------------------------------------------------------
-    //------------------------------- Listar Instituições ----------------------------------
+    //------------------------------- Listar Instituicoes ----------------------------------
     //--------------------------------------------------------------------------------------
     public static String getAll(Response response) {
         try {
-            String query = "SELECT * FROM tblInstitutions";
+            String queryInst = "SELECT * FROM tblInstitutions";
+            JsonArray institutions = utils.executeSelectCommand(queryInst);
+            //Por cada instituicao obtem as escolas
+            for (JsonElement institution : institutions) {
+                //Obtem o id da escola
+                int institutionID = institution.getAsJsonObject().get("id").getAsInt();
+                //Adiciona o array de cursos dessa escola
+                JsonArray schoolsList = utils.executeSelectCommand("select * from tblSchools where institution=" + institutionID);
+                //Por cada escola obtem os cursos
+                for (JsonElement school : schoolsList) {
+                    //Obtem o id da escola
+                    int schoolID = school.getAsJsonObject().get("id").getAsInt();
+                    //Adiciona o array de cursos dessa escola
+                    JsonArray coursesList = utils.executeSelectCommand("select * from tblCourses where school=" + schoolID);
+                    school.getAsJsonObject().add("courses", coursesList);
+                }
+                institution.getAsJsonObject().add("schools", schoolsList);
+            }
             //Devolve 'Ok'
             response.status(200);
             //E a lista de instituicoes
-            return utils.executeSelectCommand(query).toString();
+            return institutions.toString();
         } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             response.status(400);
@@ -45,7 +62,7 @@ public class Institutions {
     }
 
     //--------------------------------------------------------------------------------------
-    //-------------------------- Obter  dados de uma Instituição ---------------------------
+    //-------------------------- Obter  dados de uma Instituicao ---------------------------
     //--------------------------------------------------------------------------------------   
     public static String getInstitutionData(Response response, String id) {
 

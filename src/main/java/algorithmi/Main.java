@@ -5,16 +5,27 @@ import algorithmi.models.Categories;
 import algorithmi.models.Courses;
 import algorithmi.models.Institutions;
 import algorithmi.models.Languages;
+import algorithmi.models.QuestionsCode;
 import algorithmi.models.Schools;
 import algorithmi.models.TypeUser;
 import algorithmi.models.UserCourse;
 import algorithmi.models.Users;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Base64;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import spark.Request;
+import spark.Response;
 import static spark.Spark.before;
 import static spark.Spark.delete;
 import static spark.Spark.get;
@@ -74,6 +85,20 @@ public class Main {
             }
 
         });
+
+        post("/upload", (request, response) -> {
+
+            try {
+                uploadFiles(request, response);
+                response.status(200);
+                return "{\"text\":\"Done!\"}";
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            response.status(200);
+            return "{\"text\":\"UPS!\"}";
+        });
+
         //----------------------------------------------------------------------------------------
         //---------------------- Se o email/username ja esta registado ----------------------------
         //-----------------------------------------------------------------------------------------
@@ -527,10 +552,11 @@ public class Main {
 
         post("/api/questions", (request, response) -> {
             //Se tiver permissões de professor
-            if (isAllowed(3)) {
+            if (isAllowed(2)) {
                 try {
                     //Converte o body recebido da view
                     String data = new String(request.body().getBytes(), "UTF-8");
+                    System.out.println(request.params());
                     System.out.println("d " + data);
                     //Transforma os dados recebidos na class
                     Questions newQuestion = gson.fromJson(data, Questions.class);
@@ -548,6 +574,60 @@ public class Main {
             response.status(401);
             return "{\"text\":\"Não tem permissões para executar esta tarefa!\"}";
         });
+
+        post("/api/questions/:questionID/:languageID/code", (request, res) -> {
+            try {
+                int questionID = (Integer.parseInt(request.params(":questionID")));
+                int languageID = (Integer.parseInt(request.params(":languageID")));
+                JsonArray respostas = new JsonArray();
+                final File upload = new File("upload");
+                if (!upload.exists() && !upload.mkdirs()) {
+                    throw new RuntimeException("Failed to create directory " + upload.getAbsolutePath());
+                }
+
+                // apache commons-fileupload to handle file upload
+                DiskFileItemFactory factory = new DiskFileItemFactory();
+                factory.setRepository(upload);
+                ServletFileUpload fileUpload = new ServletFileUpload(factory);
+
+                List<FileItem> items = fileUpload.parseRequest(request.raw());
+
+                Iterator<FileItem> iter = items.iterator();
+                while (iter.hasNext()) {
+                    FileItem item = iter.next();
+                    if (item.isFormField()) {
+                        System.out.println("dsadas");
+                    } else {
+                        String fileName = item.getName();
+                        String dir = URLDecoder.decode(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(), "UTF-8") + "/../../../algorithmi-web/files";
+                        item.write(new File(dir, fileName));
+                        QuestionsCode questioCode = new QuestionsCode(questionID, languageID, fileName);
+                        //Recolhe as respostas do insert
+                        return questioCode.insert(res);
+                    }
+                    res.status(200);
+                    return respostas;
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            res.status(401);
+            return "{\"text\":\"form inválido.!\"}";
+        });
+        delete("/api/questions/:id", (request, response) -> {
+            //Obtem o id enviado pela view
+            int id = Integer.parseInt(request.params(":id"));
+            try {
+                return Questions.delete(response, id);
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                //Devolve 'NOK'
+                response.status(400);
+                return "{\"text\":\"Escola não apagada\"}";
+            }
+
+        });
+
         //----------------------------------------------------------------------------------------
         //-------------------------------------- Escolas -----------------------------------------
         //----------------------------------------------------------------------------------------
@@ -735,6 +815,40 @@ public class Main {
             return TypeUser.listTypesOfUser();//lista dos cursos existentes
 
         });
+    }
+
+    private static JsonArray uploadFiles(Request req, Response res) throws Exception {
+
+        JsonArray listOfCodeFiles = new JsonArray();
+        final File upload = new File("upload");
+        if (!upload.exists() && !upload.mkdirs()) {
+            throw new RuntimeException("Failed to create directory " + upload.getAbsolutePath());
+        }
+
+        // apache commons-fileupload to handle file upload
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        factory.setRepository(upload);
+        ServletFileUpload fileUpload = new ServletFileUpload(factory);
+        List<FileItem> items = fileUpload.parseRequest(req.raw());
+
+        Iterator<FileItem> iter = items.iterator();
+        while (iter.hasNext()) {
+            FileItem item = iter.next();
+
+            if (item.isFormField()) {
+                System.out.println("dsadas");
+            } else {
+                //Cria um nome aleatorio para o ficheiro
+                String fileName = Utils.utils.getRandomHexString(item.getName().length());
+                String dir = URLDecoder.decode(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(), "UTF-8") + "/../../../algorithmi-web/files";
+                item.write(new File(dir, fileName));
+                //Adiciona o nome do ficheiro a lista
+                JsonObject file = new JsonObject();
+                file.addProperty("fileName", fileName);
+                listOfCodeFiles.add(file);
+            }
+        }
+        return listOfCodeFiles;
     }
 
     private static boolean isAllowed(int role) {
