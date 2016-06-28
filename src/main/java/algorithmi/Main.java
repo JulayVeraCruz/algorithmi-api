@@ -815,7 +815,53 @@ public class Main {
             return TypeUser.listTypesOfUser();//lista dos cursos existentes
 
         });
+        
+        post("/api/versao", (request, response) -> {
+             
+             try {
+                 //JSon Puro (Raw)
+                String data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+                 //System.out.println(data+"");
+             } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                response.status(400);
+                return "{\"text\":\"Não foi devolver a versao!\"}";
+
+            }
+          
+              return "Hello World";
+          });
+        
+        
+        
+        post("/api/userLog", (request, response) -> {
+             
+             try {
+                 //JSon Puro (Raw)
+                String data = ""+request.ip();
+                // ou
+                // String data = ""+request.session();
+                
+                //data = java.net.URLDecoder.decode(request.body(), "UTF-8");
+                 //System.out.println(data+"");
+             } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                response.status(400);
+                return "{\"text\":\"Não foi possível devolver os registos!\"}";
+
+            }
+          
+              return "Hello World";
+          });
+        
+        
+        
+        
     }
+    
+    
+    
+    
 
     private static JsonArray uploadFiles(Request req, Response res) throws Exception {
 
