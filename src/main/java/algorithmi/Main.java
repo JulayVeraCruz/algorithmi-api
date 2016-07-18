@@ -1,5 +1,6 @@
 package algorithmi;
 
+import Utils.utils;
 import algorithmi.Models.Questions;
 import algorithmi.models.Categories;
 import algorithmi.models.Courses;
@@ -10,6 +11,7 @@ import algorithmi.models.Schools;
 import algorithmi.models.TypeUser;
 import algorithmi.models.UserCourse;
 import algorithmi.models.Users;
+import algorithmi.models.Version;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -17,6 +19,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -52,6 +55,8 @@ public class Main {
         }
 
         before("/api/*", (request, response) -> {
+            String query = "select * From tblversion";
+            System.out.println(utils.executeSelectCommand(query).toString());
             System.out.println(request.requestMethod() + "----" + request.url());
 
             String auth = request.headers("Authorization");
@@ -65,6 +70,9 @@ public class Main {
                 if (data != null) {
                     //Transforma os dados recebidos na class e obtem os dados do utilizador loggado
                     actualUser = gson.fromJson(data, Users.class);
+
+                    System.out.println(actualUser.getPassword());
+                    System.out.println(credentials[1]);
                     //Se a password estiver correcta
                     if (actualUser.getPassword() == null ? credentials[1] != null : !actualUser.getPassword().equals(credentials[1])) {
                         actualUser = null;
@@ -86,17 +94,50 @@ public class Main {
 
         });
 
-        post("/upload", (request, response) -> {
+        get("/api/downloads", (request, response) -> {
+            //Se tiver permissões
+            //Lista e devolve as instituicoes
+            return Version.getAll();
+
+        });
+
+        post("/api/downloads/:hash", (request, response) -> {
 
             try {
-                uploadFiles(request, response);
-                response.status(200);
-                return "{\"text\":\"Done!\"}";
+                String hash = (request.params(":hash"));
+                Date date = new Date();
+                JsonArray respostas = new JsonArray();
+                final File upload = new File("upload");
+                if (!upload.exists() && !upload.mkdirs()) {
+                    throw new RuntimeException("Failed to create directory " + upload.getAbsolutePath());
+                }
+
+                // apache commons-fileupload to handle file upload
+                DiskFileItemFactory factory = new DiskFileItemFactory();
+                factory.setRepository(upload);
+                ServletFileUpload fileUpload = new ServletFileUpload(factory);
+
+                List<FileItem> items = fileUpload.parseRequest(request.raw());
+
+                Iterator<FileItem> iter = items.iterator();
+                while (iter.hasNext()) {
+                    FileItem item = iter.next();
+                    if (!item.isFormField()) {
+                        String fileName = item.getName();
+                        String dir = URLDecoder.decode(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(), "UTF-8") + "/../../../algorithmi-web/downloads";
+                        item.write(new File(dir, fileName));
+                        Version questioCode = new Version(hash, date, fileName);
+                        //Recolhe as respostas do insert
+                        return questioCode.insert(response);
+                    }
+                    response.status(200);
+                    return respostas;
+                }
             } catch (Exception ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-            response.status(200);
-            return "{\"text\":\"UPS!\"}";
+            response.status(401);
+            return "{\"text\":\"form inválido.!\"}";
         });
 
         //----------------------------------------------------------------------------------------

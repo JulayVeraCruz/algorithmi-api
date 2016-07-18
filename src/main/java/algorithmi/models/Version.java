@@ -5,9 +5,12 @@
  */
 package algorithmi.models;
 
-import Utils.SQL;
-import static Utils.utils.connectDatabase;
-import java.sql.ResultSet;
+import Utils.utils;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import spark.Response;
 
 /**
  *
@@ -15,23 +18,50 @@ import java.sql.ResultSet;
  */
 public class Version {
 
-    int ver;
+    private int id;
+    private String hash;
+    private Date date;
+    private String fileName;
 
-    public String getVersion() throws Exception {
+    public Version(String hash, Date date, String fileName) {
+        this.hash = hash;
+        this.date = date;
+        this.fileName = fileName;
+    }
 
-        String name = null;
-        SQL sql = connectDatabase();
+    public String insert(Response response) {
 
-        sql.st.execute("SELECT ver FROM tblVersion");
-//        ResultSet res = connectDatabase(mySQL);//se for apenas um insert o res=null
-        ResultSet res = sql.st.getResultSet();
+        try {
+            //Obtém o ultimo ID
+            this.id = utils.getLastID("tblversion") + 1;
+            //Obtem a data actual
+            Date date = new Date();
+            String modifiedDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
+            //insere na bd
+            String insert = "INSERT INTO tblversion values(" + id + "," + '"' + hash + '"' + "," + '"' + fileName + '"' + ",CAST('" + modifiedDate + "' AS DATETIME))";
+            //Insere, devolve o estado
+            response.status(utils.executeIUDCommand(insert));
+            // E uma mensagem
+            return "{\"text\":\"Versão inserida com sucesso!\"}";
 
-        while (res.next()) {
-            name = res.getString("ver");
+        } catch (Exception ex) {
+            Logger.getLogger(Institutions.class.getName()).log(Level.SEVERE, null, ex);
         }
+        response.status(400);
+        return "{\"text\":\"Não foi possível inserir a Versão.\"}";
+    }
 
-        sql.close();
-        return name;
+    public static String getAll() {
+
+        try {
+
+            String query = "select * From tblversion";
+            System.out.println(utils.executeSelectCommand(query).toString());
+            return utils.executeSelectCommand(query).toString();
+        } catch (Exception ex) {
+            System.out.println(ex);
+            return "{\"resposta\":\"Erro ao obter Versões.\"}";
+        }
     }
 
 }
